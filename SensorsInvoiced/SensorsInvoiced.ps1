@@ -44,6 +44,7 @@ function getNameOfFile($cId) {
 function getVisibleCustomers() {
     $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
 
+
     $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
 
     return $jsonResponse;
@@ -74,6 +75,24 @@ function getUsageOfCustomer($cId) {
 ############################################
 
 
+############################################
+#Get Customer Phone Number
+############################################
+function getCustomerPhoneNumber($cId) {
+    $url = "https://api.server-eye.de/2/customer/$cId\?apiKey=$apiKey";
+
+    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
+
+    return $jsonResponse.phone;
+
+
+}
+
+############################################
+#END Get Usage Of Customer
+############################################
+
+
 
 
 $global:isFirstSheet = $true;
@@ -92,10 +111,11 @@ $Objworkbook=$ObjExcel.Workbooks.Add()
 #$Objworkbook.Worksheets(1).Delete > $null;
 #$Objworkbook.ActiveSheet.Name = $containerName;
 $Objworkbook.ActiveSheet.Cells.Item(1,1) = "Kunde";
-$Objworkbook.ActiveSheet.Cells.Item(1,2) = "Monitoring";
-$Objworkbook.ActiveSheet.Cells.Item(1,3) = "Antivir";
-$Objworkbook.ActiveSheet.Cells.Item(1,4) = "Patch";
-$Objworkbook.ActiveSheet.Cells.Item(1,5) = "PCvisit";
+$Objworkbook.ActiveSheet.Cells.Item(1,2) = "Tel. Kunde";
+$Objworkbook.ActiveSheet.Cells.Item(1,3) = "Monitoring";
+$Objworkbook.ActiveSheet.Cells.Item(1,4) = "Antivir";
+$Objworkbook.ActiveSheet.Cells.Item(1,5) = "Patch";
+$Objworkbook.ActiveSheet.Cells.Item(1,6) = "PCvisit";
 
 
 
@@ -107,7 +127,7 @@ $arrayCustomers = getVisibleCustomers;
 :outer foreach($customer in $arrayCustomers)
 {
 
-    #Write-Host "customer name: " $customer.name;
+    #Write-Host "customer name: " $customer;
 
     $customerId = $customer.id;
 
@@ -148,11 +168,15 @@ $arrayCustomers = getVisibleCustomers;
         
     }
 
+    $tel = getCustomerPhoneNumber $customerId;
+
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
-    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $maxSensors;
-    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $maxAntivir;
-    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $maxPatch;
-    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = $maxPCvisit;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2).NumberFormat = "@";
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = ""+$tel;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $maxSensors;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $maxAntivir;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = $maxPatch;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,6) = $maxPCvisit;
 
     Write-Host $customer.name;
  
