@@ -150,7 +150,7 @@ $arrayCustomers = getVisibleCustomers;
 
                 
                 
-                if ( $sensorhub.subtype -eq "2" ) {
+                if ( $sensorhub.subtype -eq "2" -and $sensorhub.parentId -eq $container.id) {
 
                     Write-Host "   Sensorhub: " $sensorhub.name;
 
