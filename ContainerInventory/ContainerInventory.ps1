@@ -1,8 +1,8 @@
 ﻿<# Sensors Of Customers
 AUTOR: Mike Semlitsch
-DATE: 03.06.2016
+DATE: 13.06.2016
 VERSION: V1.0
-DESC: Creates an excel file with a report of all OCC-Connectors, SensorHubs and Sensors for all customers
+DESC: Creates an excel file with a report of the inventory of each sensorhub of each customer.
 #>
 
 param(
