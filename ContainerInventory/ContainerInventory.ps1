@@ -6,7 +6,8 @@ DESC: Creates an excel file with a report of the inventory of each sensorhub of 
 #>
 
 param(
-    [string]$apiKey
+    [string]$apiKey,
+    [string]$custID
 )
 
 
@@ -110,9 +111,9 @@ function getInventoryOfContainer($cId) {
 #END Get Inventory Of Container
 
 
+#Write-Host $custID;
 
-
-
+#exit;
 
 
 $global:isFirstSheet = $true;
@@ -138,10 +139,11 @@ $Objworkbook.ActiveSheet.Cells.Item(1,5) = "RAM";
 $Objworkbook.ActiveSheet.Cells.Item(1,6) = "HDD Name";
 $Objworkbook.ActiveSheet.Cells.Item(1,7) = "HDD Kap.";
 $Objworkbook.ActiveSheet.Cells.Item(1,8) = "HDD Free";
-$Objworkbook.ActiveSheet.Cells.Item(1,9) = "Betriebssystem";
-$Objworkbook.ActiveSheet.Cells.Item(1,10) = "Betriebssystem-Key";
-$Objworkbook.ActiveSheet.Cells.Item(1,11) = "Office";
-$Objworkbook.ActiveSheet.Cells.Item(1,12) = "Office-Key";
+$Objworkbook.ActiveSheet.Cells.Item(1,9) = "System";
+$Objworkbook.ActiveSheet.Cells.Item(1,10) = "Betriebssystem";
+$Objworkbook.ActiveSheet.Cells.Item(1,11) = "Betriebssystem-Key";
+$Objworkbook.ActiveSheet.Cells.Item(1,12) = "Office";
+$Objworkbook.ActiveSheet.Cells.Item(1,13) = "Office-Key";
 
 
 
@@ -149,10 +151,16 @@ $arrayCustomers = getVisibleCustomers;
 
 :outer foreach($customer in $arrayCustomers)
 {
-
-    Write-Host "customer name: " $customer.name;
-
+    
     $customerId = $customer.id;
+
+    if ($custID -ne "" -and $custID -ne $customerId) {
+        continue;
+    }
+
+
+    Write-Host "customer name: " $customer.name " customerId: " $customerId;
+
 
     $arrayContainers = getContainersOfCustomer($customerId);
 
@@ -258,8 +266,18 @@ $arrayCustomers = getVisibleCustomers;
                         Write-Host "      Betriebssystem: " $os.OSNAME;
                         Write-Host "      Betr.Syst.-Key: " $os.PRODUCTKEY;
 
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,9) = $os.OSNAME;
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,10) = $os.PRODUCTKEY;
+                        $system = "PC";
+
+                        if ($os.OSNAME.IndexOf("Server") -gt -1) {
+                            $system = "Server";
+                        }
+
+
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,9) = $system;
+
+
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,10) = $os.OSNAME;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,11) = $os.PRODUCTKEY;
 
                         $rows++;
 
@@ -280,8 +298,8 @@ $arrayCustomers = getVisibleCustomers;
                             Write-Host "      Office: " $program.PRODUKT;
                             Write-Host "      Office-Key: " $program.LIZENZKEY;
 
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,11) = $program.PRODUKT;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,12) = $program.LIZENZKEY;
+                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,12) = $program.PRODUKT;
+                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow+$rows,13) = $program.LIZENZKEY;
 
                             $rows++;
                          }
@@ -298,32 +316,7 @@ $arrayCustomers = getVisibleCustomers;
 
                     $global:actRow = $global:actRow + $maxRowsOfSensorhub;
  
-                    #$arrayAgents = getAgentsOfContainer($sensorhub.id);
-                    
-
-                    #break outer;
-
-
-                    if ($false) {
-                        :inner3 foreach($agent in $arrayAgents)
-                        {
-
-                            #break inner3;
-                
-                            #Write-Host "agent subtype: " $agent.subtype;
-                             Write-Host "      SensorName: " $agent.name;
-                            #showAgentState $agent.id $container.name;
-
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $container.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
-
-                            $global:actRow++;
-
-                        #    break outer;
-                        }
-                    }
+                   
                 }
             }
 
