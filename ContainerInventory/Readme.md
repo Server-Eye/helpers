@@ -4,7 +4,7 @@ Creates an excel file with a report of the inventory of each sensorhub of each c
 
 ## Call
 ```
-ContainerInventory.ps1 apiKey [custID]
+ContainerInventory.ps1 -apiKey yourApiKey [-custID specificCustomerID]
 ```
 
 ## Parameters

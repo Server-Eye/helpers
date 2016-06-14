@@ -2,7 +2,7 @@
 
 ## Call
 ```
-SensorsOfCustomers.ps1 apiKey 
+SensorsOfCustomers.ps1 -apiKey yourApiKey 
 ```
 
 ## Parameters

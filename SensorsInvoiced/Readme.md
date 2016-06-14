@@ -2,7 +2,7 @@
 
 ## Call
 ```
-SensorsInvoiced.ps1 apiKey year month
+SensorsInvoiced.ps1 -apiKey yourApiKey -year theYearForTheReport -month theMonthForTheReport
 ```
 
 ## Parameters

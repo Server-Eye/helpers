@@ -4,7 +4,7 @@ Creates an excel file with a report of all Sensors without notifications for all
 
 ## Call
 ```
-SensorsOfCustomersWithoutNotifications.ps1 apiKey 
+SensorsOfCustomersWithoutNotifications.ps1 -apiKey yourApiKey 
 ```
 
 ## Parameters

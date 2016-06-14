@@ -4,7 +4,7 @@ Creates an excel file with a report of all Avira Sensors with status "Still not 
 
 ## Call
 ```
-AviraNotInitializedOfCustomers.ps1 apiKey 
+AviraNotInitializedOfCustomers.ps1 -apiKey yourApiKey 
 ```
 
 ## Parameters
