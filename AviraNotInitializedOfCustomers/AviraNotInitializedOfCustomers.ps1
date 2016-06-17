@@ -210,8 +210,19 @@ $Objworkbook.ActiveSheet.Cells.Item(1,1).Select() > $null;
 
 #CLOSE/SAVE Excel File
 $Objexcel.DisplayAlerts = $false
-$Objworkbook.SaveAs($excelFileName)
-$Objexcel.DisplayAlerts = $true
+if ($global:actRow -gt 2) {
+    $Objworkbook.SaveAs($excelFileName)
+    $Objexcel.DisplayAlerts = $true
+
+    
+} else {
+    
+    Write-Host "##########################################################"
+    Write-Host "No unitialized Avira-Sensor found. No Excel-File created."
+    Write-Host "##########################################################"
+
+}
+
 $Objworkbook.Close()
 $Objexcel.Quit()
 [void][System.Runtime.Interopservices.Marshal]::FinalReleaseComObject($Objexcel)
