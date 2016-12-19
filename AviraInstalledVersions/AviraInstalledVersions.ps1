@@ -9,7 +9,6 @@ param(
     [string]$apiKey
 )
 
-$subtypeOfAgent = "72AC0BFD-0B0C-450C-92EB-354334B4DAAB";
 
 
 ############################################
@@ -219,22 +218,6 @@ $arrayCustomers = getVisibleCustomers;
                         }
 
 
-
-                        if ($false -and $agent.subtype -like $subtypeOfAgent -and ( $agent.message.IndexOf("initial") -gt -1 -or $agent.message.IndexOf("Unhandled exception") -gt -1 ) ) {
-
-                            Write-Host "      SensorName: " $agent.name;
-
-                            Write-Host $agent.message;
-
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $container.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = $agent.message;
-
-                            $global:actRow++;
-
-                        }
 
                     #    break outer;
                     }
