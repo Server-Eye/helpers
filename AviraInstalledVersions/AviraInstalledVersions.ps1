@@ -2,7 +2,7 @@
 AUTOR: Mike Semlitsch
 DATE: 07.06.2016
 VERSION: V1.0
-DESC: Creates an excel file with a report of all Avira Sensors with status "Still not initialized" for all customers
+DESC: Creates an excel file with a report of all Avira Sensors for all customers and displays the installed version
 #>
 
 param(
@@ -22,7 +22,7 @@ function getNameOfFile($cId) {
 
     $date = Get-Date -format d;
 
-    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " AviraNotInitializedOfCustomers " + $date + ".xlsx";
+    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " AviraInstalledVersions " + $date + ".xlsx";
 
     $retval = $PSScriptRoot + "\" + $retval -replace '\s','_'
     
