@@ -8,7 +8,7 @@ DESC: Creates an excel file with a report of all Avira Sensors for all customers
 param(
     [string]$apiKey
 )
-
+$subtypeOfAgent = "72AC0BFD-0B0C-450C-92EB-354334B4DAAB";
 
 
 ############################################
@@ -103,7 +103,7 @@ function getAgentsOfContainer($cId) {
 function getStateOfAgent($aId) {
     $url = "https://api.server-eye.de/2/agent/$aId/state?apiKey=$apiKey&includeRawData=true";
 
-    Write-Host $url;
+    #Write-Host $url;
 
 
     #(Invoke-RestMethod -Uri $url -Method Get);
@@ -191,7 +191,7 @@ $arrayCustomers = getVisibleCustomers;
 
                         #break inner3;
                 
-                        #Write-Host "agent subtype: " $agent.subtype;
+                        #Write-Host "IN INNER3 XXXXXXXXXXXXXXXXXXXXXXXXXXXX " ;
                          
                         #showAgentState $agent.id $container.name;
 
@@ -250,7 +250,7 @@ if ($global:actRow -gt 2) {
 } else {
     
     Write-Host "##########################################################"
-    Write-Host "No unitialized Avira-Sensor found. No Excel-File created."
+    Write-Host "No Avira-Sensors found. No Excel-File created."
     Write-Host "##########################################################"
 
 }
