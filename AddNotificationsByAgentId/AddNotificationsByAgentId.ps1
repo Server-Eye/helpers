@@ -1,14 +1,14 @@
-﻿<# Sensors Of Customers
+﻿<# AddNotificationsByAgentId
 AUTOR: Mike Semlitsch
-DATE: 19.07.2016
+DATE: 24.02.2017
 VERSION: V1.0
-DESC: Adds a notification to all agents of the specified customer. ATTENTION: Multiple executions of this script add multiple notifications to each agent.
+DESC: Adds a notification to all agents of the specified agent type. ATTENTION: Multiple executions of this script will add multiple notifications to each agent.
 #>
 
 param(
     [string]$apiKey,
-    [string]$customerId,
-    [string]$userId    
+    [string]$userId,
+    [string]$subtypeOfAgent
 )
 
 
@@ -106,7 +106,7 @@ $arrayCustomers = getVisibleCustomers;
 
     $custId = $customer.id;
     
-    if ($customerId -eq $custId) {
+    #if ($customerId -eq $custId) {
 
         $customerFound = $true;
 
@@ -144,14 +144,15 @@ $arrayCustomers = getVisibleCustomers;
                         :inner3 foreach($agent in $arrayAgents)
                         {
 
-                            #break inner3;
-                
-                            #Write-Host "agent subtype: " $agent.subtype;
-                             Write-Host "      SensorName: " $agent.name;
+
+                            if ($agent.subtype -like $subtypeOfAgent) {
+
+                            
+                                Write-Host "      SensorName: " $agent.name;
                             #showAgentState $agent.id $container.name;
 
-                            addNotification $agent.id $userId
-                        
+                                addNotification $agent.id $userId
+                            }
 
                         #    break outer;
                         }
@@ -168,7 +169,7 @@ $arrayCustomers = getVisibleCustomers;
         }
 
 
-    }
+    #}
 }
 
 if (!$customerFound) {

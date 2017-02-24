@@ -35,7 +35,7 @@ Try
     Write-Host -ForegroundColor Green "API Key was created successfully!"
     Write-Host "API Key: "  $response.apiKey
 }catch{
-    Write-Host "I am sorry, but i could not get that api key for you :(. I tried my best. Would you please give this message to the guys who created me? Thanks!" -ForegroundColor Red
+    Write-Host "I am sorry, but i could not get that api key for you. Would you please give this message to the guys who created me? Thanks!" -ForegroundColor Red
     $exData = $Error
 
     Write-Host "Message: $exData"
