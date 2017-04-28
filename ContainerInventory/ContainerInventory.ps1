@@ -144,7 +144,7 @@ $Objworkbook.ActiveSheet.Cells.Item(1,10) = "Betriebssystem";
 $Objworkbook.ActiveSheet.Cells.Item(1,11) = "Betriebssystem-Key";
 $Objworkbook.ActiveSheet.Cells.Item(1,12) = "Office";
 $Objworkbook.ActiveSheet.Cells.Item(1,13) = "Office-Key";
-
+$Objworkbook.ActiveSheet.Cells.Item(1,14) = "tags";
 
 
 $arrayCustomers = getVisibleCustomers;
@@ -162,19 +162,22 @@ $arrayCustomers = getVisibleCustomers;
     Write-Host "customer name: " $customer.name " customerId: " $customerId;
 
 
+    #getContainersOfCustomer($customerId)
+     
+
     $arrayContainers = getContainersOfCustomer($customerId);
 
     :inner1 foreach($container in $arrayContainers)
     {
         
         #Write-Host "Name: " $container.name ;
-
+        #Write-Host "tags: " $container.tags.id ";" $container.tags.name;
         
         
         #$inventory = getInventoryOfContainer($container.id);
 
 
-
+        #continue;
 
         
 
@@ -203,6 +206,7 @@ $arrayCustomers = getVisibleCustomers;
                     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
                     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $container.name;
                     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
+                    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,14) = $container.tags.id + ";" + $container.tags.name;
                     
                     Write-Host "   Sensorhub: " $sensorhub.name;
 

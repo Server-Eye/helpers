@@ -2,6 +2,23 @@
 
 Creates an excel file with a report of the inventory of each sensorhub of each customer or a specific customer.
 
+Displayed Values:
+Kunde	
+OCC-Connector	
+Sensorhub	
+CPU	
+RAM	
+HDD Name	
+HDD Kap.	
+HDD Free	
+System	
+Betriebssystem	
+Betriebssystem-Key	
+Office Version
+Office-Key
+
+
+
 ## Call
 ```
 ContainerInventory.ps1 -apiKey yourApiKey [-custID specificCustomerID]

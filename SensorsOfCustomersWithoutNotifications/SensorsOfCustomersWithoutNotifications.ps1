@@ -134,6 +134,7 @@ $Objworkbook.ActiveSheet.Cells.Item(1,2) = "OCC-Connector";
 $Objworkbook.ActiveSheet.Cells.Item(1,3) = "Sensorhub";
 $Objworkbook.ActiveSheet.Cells.Item(1,4) = "SensorName";
 $Objworkbook.ActiveSheet.Cells.Item(1,5) = "Alarmierungen";
+$Objworkbook.ActiveSheet.Cells.Item(1,6) = "tags";
 
 
 $arrayCustomers = getVisibleCustomers;
@@ -201,6 +202,7 @@ $arrayCustomers = getVisibleCustomers;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = 0;
+                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,6) = $container.tags.id + ";" + $container.tags.name;
 
                             $global:actRow++;
 

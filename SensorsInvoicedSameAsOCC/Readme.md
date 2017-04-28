@@ -1,5 +1,7 @@
 # SensorsInvoicedSameAsOCC.ps1
 
+Creates an excel file with a report of all invoiced sensors of all customers.
+
 ## Call
 ```
 SensorsInvoicedSameAsOCC.ps1 -apiKey yourApiKey -year theYearForTheReport -month theMonthForTheReport

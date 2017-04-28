@@ -1,6 +1,6 @@
-﻿<# Sensors Invoiced
+﻿<# SensorsInvoicedSameAsOCC_WithMachines
 AUTOR: Mike Semlitsch
-DATE: 03.06.2016
+DATE: 28.04.2017
 VERSION: V1.0
 DESC: Creates an excel file with a report for invoiced sensors for a specified month
 #>
@@ -24,7 +24,7 @@ function getNameOfFile($cId) {
 
     $date = Get-Date -format d;
 
-    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " SensorsInvoicedSameAsOCC " + $year + " " + $month + ".xlsx";
+    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " SensorsInvoicedSameAsOCC_WithMachines " + $year + " " + $month + ".xlsx";
 
     $retval = $PSScriptRoot + "\" + $retval -replace '\s','_'
     
@@ -42,7 +42,8 @@ function getNameOfFile($cId) {
 #Get Visible Customers
 ############################################
 function getVisibleCustomers() {
-    $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
+    #$url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
+    $url = "https://api.server-eye.de/2/customer?apiKey=$apiKey";
 
 
     $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
@@ -51,6 +52,7 @@ function getVisibleCustomers() {
 
 
 }
+
 
 ############################################
 #END Get Visible Customers
@@ -61,6 +63,7 @@ function getVisibleCustomers() {
 #Get Usage Of Customer
 ############################################
 function getUsageOfCustomer() {
+   
     $url = "https://api.server-eye.de/2/customer/usage?year=$year&month=$month&apiKey=$apiKey";
 
     $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
@@ -69,6 +72,7 @@ function getUsageOfCustomer() {
 
 
 }
+
 
 ############################################
 #END Get Usage Of Customer
@@ -90,6 +94,26 @@ function getCustomerPhoneNumber($cId) {
 
 ############################################
 #END Get Usage Of Customer
+############################################
+
+
+
+
+############################################
+#Get Containers Of Customer
+############################################
+function getContainersOfCustomer($cId) {
+    $url = "https://api.server-eye.de/2/customer/$cId/containers?apiKey=$apiKey";
+
+    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
+
+    return $jsonResponse;
+
+
+}
+
+############################################
+#END Get Containers Of Customer
 ############################################
 
 
@@ -118,11 +142,12 @@ $Objworkbook.ActiveSheet.Cells.Item(1,5) = "Zwischensumme";
 $Objworkbook.ActiveSheet.Cells.Item(1,6) = "Third party";
 $Objworkbook.ActiveSheet.Cells.Item(1,7) = "Summe";
 $Objworkbook.ActiveSheet.Cells.Item(1,8) = "Kostenlose Sensoren";
+$Objworkbook.ActiveSheet.Cells.Item(1,9) = "Server";
+$Objworkbook.ActiveSheet.Cells.Item(1,10) = "Workstations";
 
+$arrayCustomers = getVisibleCustomers;
 
-
-
-getUsageOfCustomer;
+#getUsageOfCustomer;
 
 $usages = getUsageOfCustomer;
 
@@ -134,7 +159,79 @@ $maxPCvisit = 0;
 foreach($usage in $usages)
 {
         
+    $serverCounter=0;
+    $workstationCounter=0;
+    
+    foreach($customer in $arrayCustomers)
+    {
+        if ($usage.customerNumberExtern -eq $customer.customerNumberExtern) {
+
+            
+            
+
+
+
+
+
+            $customerId = $customer.cId;
+
+            $arrayContainers = getContainersOfCustomer($customerId);
+
+            :inner1 foreach($container in $arrayContainers)
+            {
+
+                #Write-Host "container ID: " $container.id " " $container.subtype;
+
+                if ($container.subtype -eq "0") {
+                #if ($false) {
+            
+                    #Write-Host "OCC-Connector: " $container.name ;
+
+                    #Write-Host "container ID: " $container.id; 
+                    #Write-Host "container Name: " $container.name;
+
+
+                    :inner2 foreach($sensorhub in $arrayContainers)
+                    {
+
+                
+                
+                        if ( $sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
+
+                            #Write-Host "   Sensorhub: " $sensorhub.name $container.tags.id;
+
+
+                            if ($container.tags.id -eq "server") {
+                                $serverCounter++;
+                            } else {
+                                $workstationCounter++;
+                            }
+                            
+
+
+                        }
+                    }
+
+
+
         
+                }
+
+
+            }
+
+
+
+
+
+            Write-Host "customer name: " $customer.companyName " server: " $serverCounter " workstations: " $workstationCounter ;
+
+
+        }
+
+    }
+    
+
 
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $usage.companyName;
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2).NumberFormat = "@";
@@ -151,13 +248,17 @@ foreach($usage in $usages)
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,7) = "-"+$usage.total;
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,8).NumberFormat = "@";
     $Objworkbook.ActiveSheet.Cells.Item($global:actRow,8) = "-"+$usage.free;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,9) = $serverCounter;
+    $Objworkbook.ActiveSheet.Cells.Item($global:actRow,10) = $workstationCounter;
 
- 
 
     $global:actRow++;
 
         
 }
+
+
+
 
     
 

@@ -2,7 +2,7 @@
 AUTOR: Mike Semlitsch
 DATE: 03.06.2016
 VERSION: V1.0
-DESC: Creates an excel file with a report for invoiced sensors for a month
+DESC: Creates an excel file with a report for invoiced sensors for a specified month
 #>
 param(
     [string]$apiKey,

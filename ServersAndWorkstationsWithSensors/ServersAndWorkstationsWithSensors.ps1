@@ -143,6 +143,7 @@ $Objworkbook.ActiveSheet.Cells.Item(1,3) = "Sensorhub";
 $Objworkbook.ActiveSheet.Cells.Item(1,4) = "Sensorhub-typ";
 $Objworkbook.ActiveSheet.Cells.Item(1,5) = "SensorName";
 $Objworkbook.ActiveSheet.Cells.Item(1,6) = "Version";
+$Objworkbook.ActiveSheet.Cells.Item(1,7) = "tags";
 
 
 $arrayCustomers = getVisibleCustomers;
@@ -215,6 +216,7 @@ $arrayCustomers = getVisibleCustomers;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $sensorhub.tags.id
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = $agent.name;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,6) = $version;
+                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,7) = $container.tags.id + ";" + $container.tags.name;
 
                             $global:actRow++;
 
@@ -255,7 +257,7 @@ if ($global:actRow -gt 2) {
 } else {
     
     Write-Host "##########################################################"
-    Write-Host "No Avira-Sensors found. No Excel-File created."
+    Write-Host "NoSensors found. No Excel-File created."
     Write-Host "##########################################################"
 
 }

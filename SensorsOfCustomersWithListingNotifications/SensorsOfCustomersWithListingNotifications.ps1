@@ -137,6 +137,7 @@ $Objworkbook.ActiveSheet.Cells.Item(1,5) = "Alarmierung";
 $Objworkbook.ActiveSheet.Cells.Item(1,6) = "ViaEmail";
 $Objworkbook.ActiveSheet.Cells.Item(1,7) = "ViaPhone";
 $Objworkbook.ActiveSheet.Cells.Item(1,8) = "ViaTicket";
+$Objworkbook.ActiveSheet.Cells.Item(1,9) = "tags";
 
 
 $arrayCustomers = getVisibleCustomers;
@@ -204,6 +205,7 @@ $arrayCustomers = getVisibleCustomers;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
                             $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = "Keine Alarmierung!";
+                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,9) = $container.tags.id + ";" + $container.tags.name;
 
                             $global:actRow++;
 
@@ -221,6 +223,7 @@ $arrayCustomers = getVisibleCustomers;
                                 $Objworkbook.ActiveSheet.Cells.Item($global:actRow,6) = $notification.email;
                                 $Objworkbook.ActiveSheet.Cells.Item($global:actRow,7) = $notification.phone;
                                 $Objworkbook.ActiveSheet.Cells.Item($global:actRow,8) = $notification.ticket;
+                                $Objworkbook.ActiveSheet.Cells.Item($global:actRow,9) = $container.tags.id + ";" + $container.tags.name;
                                 $global:actRow++;
 
                             }
