@@ -201,7 +201,7 @@ foreach($usage in $usages)
                             #Write-Host "   Sensorhub: " $sensorhub.name $container.tags.id;
 
 
-                            if ($container.tags.id -eq "server") {
+                            if ($sensorhub.tags.id -eq "server") {
                                 $serverCounter++;
                             } else {
                                 $workstationCounter++;
