@@ -3,7 +3,6 @@
 This module provides easy access to the Server-Eye API. Right now, not all features of the API are present but we plan to have a complete coverage as soon as possible.
 
 ## How to install
-
 The module should be installed directly from the Microsoft Powershell Gallery (https://www.powershellgallery.com/).
 
 If you are running PowerShell 5 or higer you can use the ```Install-Module``` command without further setup.  
@@ -17,6 +16,12 @@ Install-Module -Name ServerEye.Powershell.Helper -Scope CurrentUser
 
 ## How to use the module
 The module provides functions to interact with the Server-Eye API. Authentication can be done via login or api key. 
+
+### Load the Module
+Before you can use the module in your scripts it has to be loaded. Either manually by you or automaticly in your script.
+```powershell
+Import-Module -Name ServerEye.Powershell.Helper
+```
 
 ### API Key
 You can call the Get functions directly with an API key. A login is not needed.

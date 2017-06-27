@@ -1,7 +1,7 @@
 <#
 AUTOR: Andreas Behr <andreas.behr@server-eye.de>
 DATE: 23.06.2017
-VERSION: V1.0
+VERSION: V1.2
 DESC: Modules enables easier access to the PowerShell API
 #>
 
@@ -32,8 +32,6 @@ function Connect-ServerEyeSession($cred, $code) {
 
 function Disconnect-ServerEyeSession ($Session) {
     Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/logout -WebSession $Session | Out-Null
-
-
 }
 
 function Intern-GetJson($url, $session, $apiKey) {
