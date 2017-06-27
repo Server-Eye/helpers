@@ -101,7 +101,7 @@ PrivateData = @{
         # Tags = @()
 
         # A URL to the license for this module.
-        # LicenseUri = ''
+        LicenseUri = 'https://github.com/Server-Eye/helpers/blob/master/ServerEye.Powershell.Helper/LICENCE.md'
 
         # A URL to the main website for this project.
         ProjectUri = 'https://github.com/Server-Eye/helpers/tree/master/ServerEye.Powershell.Helper'
