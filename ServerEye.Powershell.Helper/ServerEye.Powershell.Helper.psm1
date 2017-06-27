@@ -1,4 +1,4 @@
-<# 
+<#
 AUTOR: Andreas Behr <andreas.behr@server-eye.de>
 DATE: 23.06.2017
 VERSION: V1.0
@@ -16,14 +16,14 @@ function Connect-ServerEyeSession($cred, $code) {
     } | ConvertTo-Json
     try {
          $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-         -ContentType "application/json" -Method Post -SessionVariable session 
+         -ContentType "application/json" -Method Post -SessionVariable session
 
     } catch {
         if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
             $secondFactor = Read-Host -Prompt "Second Factor"
             return Connect-ServerEyeSession -cred $cred -code $secondFactor
         } else {
-            throw "Could not login. Please check username and password." 
+            throw "Could not login. Please check username and password."
             return
         }
     }
@@ -33,7 +33,7 @@ function Connect-ServerEyeSession($cred, $code) {
 function Disconnect-ServerEyeSession ($Session) {
     Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/logout -WebSession $Session | Out-Null
 
-    
+
 }
 
 function Intern-GetJson($url, $session, $apiKey) {
@@ -87,8 +87,3 @@ function Get-AllVisibleAgents($Session, $ApiKey) {
     }
     return $result
 }
-
-
-Export-ModuleMember -Function 'Get-*'
-Export-ModuleMember -Function 'Connect-*'
-Export-ModuleMember -Function 'Disconnect-*'
