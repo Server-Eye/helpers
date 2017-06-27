@@ -107,7 +107,7 @@ PrivateData = @{
         ProjectUri = 'https://github.com/Server-Eye/helpers/tree/master/ServerEye.Powershell.Helper'
 
         # A URL to an icon representing this module.
-        # IconUri = ''
+        IconUri = 'https://github.com/Server-Eye/helpers/raw/master/ServerEye.Powershell.Helper/icon.png'
 
         # ReleaseNotes of this module
         ReleaseNotes = 'Minor fixes'
