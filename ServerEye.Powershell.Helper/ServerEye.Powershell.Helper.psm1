@@ -5,62 +5,117 @@ VERSION: V1.2
 DESC: Modules enables easier access to the PowerShell API
 #>
 
-function Connect-ServerEyeSession($cred, $code) {
-    if (-not $cred) {
-        $cred = Get-Credential
-    }
-    $reqBody = @{
-        'email' = $cred.UserName
-        'password' = $cred.GetNetworkCredential().Password
-        'code' = $code
-    } | ConvertTo-Json
-    try {
-         $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-         -ContentType "application/json" -Method Post -SessionVariable session
 
-    } catch {
-        if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
-            $secondFactor = Read-Host -Prompt "Second Factor"
-            return Connect-ServerEyeSession -cred $cred -code $secondFactor
-        } else {
-            throw "Could not login. Please check username and password."
-            return
+
+<# 
+.SYNOPSIS
+Connect to a new Server-Eye API session.
+
+.PARAMETER Credentials 
+If passed the cmdlet will use this credential object instead of asking for username and password.
+
+.PARAMETER Code
+This is the second factor authentication code.
+
+
+.EXAMPLE 
+$session = Connect-ServerEyeSession
+
+.LINK 
+https://api.server-eye.de/docs/2/
+
+#>
+function Connect-ServerEyeSession {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false)] 
+        $Credentials,
+
+        [Parameter(Mandatory=$false)] 
+        [string] $Code
+
+    )
+
+    Process {
+        if (-not $Credentials) {
+            $Credentials = Get-Credential -Message 'Server-Eye Login'
         }
+        $reqBody = @{
+            'email' = $Credentials.UserName
+            'password' = $Credentials.GetNetworkCredential().Password
+            'code' = $Code
+        } | ConvertTo-Json
+        try {
+            $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
+            -ContentType "application/json" -Method Post -SessionVariable session
+
+        } catch {
+            if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
+                $secondFactor = Read-Host -Prompt "Second Factor"
+                return Connect-ServerEyeSession -Credentials $Credentialscred -Code $secondFactor
+            } else {
+                throw "Could not login. Please check username and password."
+                return
+            }
+        }
+        return $session
     }
-    return $session
 }
 
 function Disconnect-ServerEyeSession ($Session) {
     Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/logout -WebSession $Session | Out-Null
 }
 
-function Intern-GetJson($url, $session, $apiKey) {
-    if ($apiKey) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$apiKey} );
+function Intern-DeleteJson($url, $session, $apiKey) {
+    if ($authtoken -is [string]) {
+        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
     } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $session );
+        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
+    }
+}
+function Intern-GetJson($url, $authtoken) {
+    if ($authtoken -is [string]) {
+        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
+    } else {
+        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
     }
 }
 
-
-function Get-VisibleCustomers($Session, $ApiKey) {
-    return Intern-GetJson -url "https://api.server-eye.de/2/me/nodes?filter=customer" -session $Session -apiKey $ApiKey;
+function Intern-PostJson($url, $authtoken, $body) {
+    $body = $body | Remove-Null | ConvertTo-Json
+    if ($authtoken -is [string]) {
+        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
+    } else {
+        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
+    }
 }
 
-function Get-ContainerForCustomer($CustomerId, $Session, $ApiKey) {
-    return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CustomerId/containers" -session $Session -apiKey $ApiKey;
+function Intern-PutJson ($url, $authtoken, $body) {
+    $body = $body | Remove-Null | ConvertTo-Json
+    if ($authtoken -is [string]) {
+        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
+    } else {
+        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
+    }
 }
 
-function Get-AgentsForContainer($ContainerId, $Session, $ApiKey) {
-    return Intern-GetJson -url "https://api.server-eye.de/2/container/$ContainerId/agents" -session $Session -apiKey $ApiKey;
-}
+function Remove-Null {
 
-function Get-NotificationForAgent($AgentId, $Session, $ApiKey) {
-    return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AgentId/notification" -session $Session -apiKey $ApiKey;
-}
+    [cmdletbinding()]
+    Param (
+        [parameter(ValueFromPipeline)]
+        $obj
+  )
 
-function Get-UsageForCustomer ($CustomerId, $year, $month, $Session, $ApiKey) {
-    return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CustomerId/usage?year=$year&month=$month" -session $Session -apiKey $ApiKey;
+  Process  {
+    $result = @{}
+    foreach ($key in $_.Keys) {
+        if ($_[$key]) {
+            $result.Add($key, $_[$key])
+        }
+    }
+    $result
+  }
 }
 
 function Get-AllVisibleAgents($Session, $ApiKey) {
@@ -85,3 +140,10 @@ function Get-AllVisibleAgents($Session, $ApiKey) {
     }
     return $result
 }
+
+$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
+$global:DirectorySeparatorChar = [io.path]::DirectorySeparatorChar
+
+"$moduleRoot/functions/*.ps1" | Resolve-Path | Write-Host
+
+"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }

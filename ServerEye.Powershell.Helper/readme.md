@@ -1,6 +1,6 @@
 # Server-Eye PowerShell Helper
 
-This module provides easy access to the Server-Eye API. Right now, not all features of the API are present but we plan to have a complete coverage as soon as possible.
+This module provides easy access to the Server-Eye API. All API calls are supported. See https://api.server-eye.de/docs/2 for the corresponding cmdlet for each API function. 
 
 ## How to install
 The module should be installed directly from the Microsoft Powershell Gallery (https://www.powershellgallery.com/).
@@ -26,7 +26,7 @@ Import-Module -Name ServerEye.Powershell.Helper
 ### API Key
 You can call the Get functions directly with an API key. A login is not needed.
 ```powershell
-Get-VisibleCustomer -ApiKey "123-456-ABC-DEF"
+Get-MyNodesList -ApiKey "123-456-ABC-DEF"
 ```
 
 ### Login with Username and Password
@@ -36,6 +36,14 @@ In those situations you can use a Server-Eye session to authenticate yourself.
 ```powershell
 $session = Connect-ServerEyeSession
 # This will ask you for username and password
-Get-VisibleCustomer -Session $session
+Get-MyNodesList -Session $session
+Get-Me -Session $session
+
+```
+
+### Logout
+If the session was saved in a variable, you should destroy the session when you are done.
+```powershell
+Disconnect-ServerEyeSession -Session $session
 ```
 
