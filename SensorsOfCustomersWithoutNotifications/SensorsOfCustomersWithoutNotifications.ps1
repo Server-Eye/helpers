@@ -1,239 +1,39 @@
-﻿<# Sensors Of Customers Without Notifications
-AUTOR: Mike Semlitsch
-DATE: 07.06.2016
-VERSION: V1.0
-DESC: Creates an excel file with a report of all Sensors without notifications for all customers
-#>
-
-param(
-    [string]$apiKey
+[CmdletBinding()]
+Param(
+    [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+    [alias("ApiKey","Session")]
+    $AuthToken
 )
 
+$result = @()
 
-############################################
-#Get Name Of File
-############################################
-function getNameOfFile($cId) {
-    #$url = "https://api.server-eye.de/2/customer/$cId\?apiKey=$apiKey";
-    $url = "https://api.server-eye.de/2/me?apiKey=$apiKey";
+$customers = Get-MyNodesList -Filter customer -AuthToken $AuthToken
+foreach ($customer in $customers) {
+    $containers = Get-CustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    $date = Get-Date -format d;
-
-    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " SensorsWithoutNotificationsOfAllCustomers " + $date + ".xlsx";
-
-    $retval = $PSScriptRoot + "\" + $retval -replace '\s','_'
-    
-    return $retval;
-
-
-}
-
-############################################
-#END Name Of File
-############################################
-
-
-############################################
-#Get Visible Customers
-############################################
-function getVisibleCustomers() {
-    $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Visible Customers
-############################################
-
-
-
-
-
-
-############################################
-#Get Containers Of Customer
-############################################
-function getContainersOfCustomer($cId) {
-    $url = "https://api.server-eye.de/2/customer/$cId/containers?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Containers Of Customer
-############################################
-
-
-############################################
-#Get Agents Of Container
-############################################
-function getAgentsOfContainer($cId) {
-    $url = "https://api.server-eye.de/2/container/$cId/agents?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Agents Of Container
-############################################
-
-############################################
-#Get Notification of Agent
-############################################
-function getNotificatonOfAgent($aId) {
-    $url = "https://api.server-eye.de/2/agent/$aId/notification?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Notification of Agent
-############################################
-
-
-
-
-
-
-$global:isFirstSheet = $true;
-$global:actRow = 2;
-
-
-
-$excelFileName = getNameOfFile($customerId);
-
-
-#OPEN Excel File
-$SheetName1 = "Employee Accounts"
-$ObjExcel = New-Object -ComObject Excel.Application
-$Objexcel.Visible = $false
-$Objworkbook=$ObjExcel.Workbooks.Add()
-#$Objworkbook.Worksheets(1).Delete > $null;
-#$Objworkbook.ActiveSheet.Name = $containerName;
-$Objworkbook.ActiveSheet.Cells.Item(1,1) = "Kunde";
-$Objworkbook.ActiveSheet.Cells.Item(1,2) = "OCC-Connector";
-$Objworkbook.ActiveSheet.Cells.Item(1,3) = "Sensorhub";
-$Objworkbook.ActiveSheet.Cells.Item(1,4) = "SensorName";
-$Objworkbook.ActiveSheet.Cells.Item(1,5) = "Alarmierungen";
-$Objworkbook.ActiveSheet.Cells.Item(1,6) = "tags";
-
-
-$arrayCustomers = getVisibleCustomers;
-
-:outer foreach($customer in $arrayCustomers)
-{
-
-    Write-Host "customer name: " $customer.name;
-
-    $customerId = $customer.id;
-
-    $arrayContainers = getContainersOfCustomer($customerId);
-
-    :inner1 foreach($container in $arrayContainers)
-    {
-
-        #Write-Host "container ID: " $container.id " " $container.subtype;
+    foreach ($container in $containers) {
 
         if ($container.subtype -eq "0") {
-        #if ($false) {
-            
-            Write-Host "OCC-Connector: " $container.name ;
 
-            #Write-Host "container ID: " $container.id; 
-            #Write-Host "container Name: " $container.name;
+            foreach ($sensorhub in $containers) {
+                if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
+                    $agents = Get-ContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
 
+                    foreach ($agent in $agents) {
+                        $notifications = Get-AgentNotificationList -AuthToken $AuthToken -AId $agent.id
 
-            :inner2 foreach($sensorhub in $arrayContainers)
-            {
-
-                
-                
-                if ( $sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
-
-                    Write-Host "   Sensorhub: " $sensorhub.name;
-
-                    #getAgentsOfContainer($sensorhub.id);
-
-
-
-                    $arrayAgents = getAgentsOfContainer($sensorhub.id);
-                    #getAgentsOfContainer($container.id);
-
-            
-                    :inner3 foreach($agent in $arrayAgents)
-                    {
-
-                        #break inner3;
-                
-                        #Write-Host "agent subtype: " $agent.subtype;
-                         
-                         #Write-Host "      Data: " $agent;
-                        #showAgentState $agent.id $container.name;
-
-                        $notifications = getNotificatonOfAgent($agent.id);
-
-                        if ( @($notifications).length -lt 1) {
-
-                            Write-Host "      SensorName: " $agent.name " without notification "  ;
-                            
-                            
-
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $container.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = 0;
-                            $Objworkbook.ActiveSheet.Cells.Item($global:actRow,6) = $container.tags.id + ";" + $container.tags.name;
-
-                            $global:actRow++;
-
+                        if (!$notificationss) {
+                            $out = New-Object psobject
+                            $out | Add-Member NoteProperty Kunde ($customer.name)
+                            $out | Add-Member NoteProperty Netzwerk ($customer.name)
+                            $out | Add-Member NoteProperty Server ($sensorhub.name)
+                            $out | Add-Member NoteProperty Sensor ($agent.name)
+                            $result += $out
                         }
-
-                    #    break outer;
                     }
-
                 }
             }
-
-
-
-        
         }
-
-
     }
-
 }
-
-$Objworkbook.ActiveSheet.Cells.Select() > $null;
-$Objworkbook.ActiveSheet.Cells.EntireColumn.AutoFit() > $null;
-$Objworkbook.ActiveSheet.Cells.Item(1,1).Select() > $null;
-
-
-#CLOSE/SAVE Excel File
-$Objexcel.DisplayAlerts = $false
-$Objworkbook.SaveAs($excelFileName)
-$Objexcel.DisplayAlerts = $true
-$Objworkbook.Close()
-$Objexcel.Quit()
-[void][System.Runtime.Interopservices.Marshal]::FinalReleaseComObject($Objexcel)
-
+$result
