@@ -5,121 +5,38 @@ VERSION: V1.0
 DESC: Creates an excel file with a report of all Servers/Workstations of all customers and displays the installed sensors
 #>
 
-param(
+Param(
     [string]$apiKey
 )
 
+Import-Module ServerEye.Powershell.Helper;
 
-
-############################################
-#Get Name Of File
-############################################
 function getNameOfFile($cId) {
-    #$url = "https://api.server-eye.de/2/customer/$cId\?apiKey=$apiKey";
-    $url = "https://api.server-eye.de/2/me?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
+    $me = Get-Me -AuthToken $apiKey;
     $date = Get-Date -format d;
 
-    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " ServersAndWorkstationsWithSensors " + $date + ".xlsx";
+    $retval = $me.surname + " " + $me.prename + " ServersAndWorkstationsWithSensors " + $date + ".xlsx";
 
-    $retval = $PSScriptRoot + "\" + $retval -replace '\s','_'
+    $retval = $PSScriptRoot + "\" + $retval -replace '\s', '_'
     
     return $retval;
-
-
 }
 
-############################################
-#END Name Of File
-############################################
-
-
-############################################
-#Get Visible Customers
-############################################
 function getVisibleCustomers() {
-    $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-MyNodesList -AuthToken $apiKey -Filter "customer";
 }
 
-############################################
-#END Get Visible Customers
-############################################
-
-
-
-
-
-
-############################################
-#Get Containers Of Customer
-############################################
 function getContainersOfCustomer($cId) {
-    $url = "https://api.server-eye.de/2/customer/$cId/containers?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-CustomerContainerList -AuthToken $apiKey -CId $cId;
 }
 
-############################################
-#END Get Containers Of Customer
-############################################
-
-
-############################################
-#Get Agents Of Container
-############################################
 function getAgentsOfContainer($cId) {
-    $url = "https://api.server-eye.de/2/container/$cId/agents?apiKey=$apiKey";
-
-    #(Invoke-RestMethod -Uri $url -Method Get);
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-ContainerAgentList -AuthToken $apiKey -CId $cId;
 }
 
-############################################
-#END Get Agents Of Container
-############################################
-
-
-
-############################################
-#Get State of Agent
-############################################
 function getStateOfAgent($aId) {
-    $url = "https://api.server-eye.de/2/agent/$aId/state?apiKey=$apiKey&includeRawData=true";
-
-    #Write-Host $url;
-
-
-    #(Invoke-RestMethod -Uri $url -Method Get);
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-AgentStateList -AuthToken $apiKey -AId $aId -IncludeRawData "true";
 }
-
-############################################
-#END Get State of Agent
-############################################
-
-
 
 
 $global:isFirstSheet = $true;
@@ -131,7 +48,7 @@ $excelFileName = getNameOfFile($customerId);
 
 
 #OPEN Excel File
-$SheetName1 = "Employee Accounts"
+$SheetName1 = "Excel Sheet"
 $ObjExcel = New-Object -ComObject Excel.Application
 $Objexcel.Visible = $false
 $Objworkbook=$ObjExcel.Workbooks.Add()

@@ -5,120 +5,57 @@ VERSION: V1.0
 DESC: Creates an excel file with a report of all OCC-Connectors, SensorHubs and Sensors for all customers
 #>
 
-param(
+Param(
     [string]$apiKey
 )
 
+Import-Module ServerEye.Powershell.Helper;
 
-############################################
-#Get Name Of File
-############################################
 function getNameOfFile($cId) {
-    #$url = "https://api.server-eye.de/2/customer/$cId\?apiKey=$apiKey";
-    $url = "https://api.server-eye.de/2/me?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
+    $me = Get-Me -AuthToken $apiKey;
     $date = Get-Date -format d;
 
-    $retval = $jsonResponse.surname + " " + $jsonResponse.prename + " AllSensorsOfAllCustomers " + $date + ".xlsx";
+    $retval = $me.surname + " " + $me.prename + " AllSensorsOfAllCustomers " + $date + ".xlsx";
 
-    $retval = $PSScriptRoot + "\" + $retval -replace '\s','_'
+    $retval = $PSScriptRoot + "\" + $retval -replace '\s', '_'
     
     return $retval;
-
-
 }
 
-############################################
-#END Name Of File
-############################################
-
-
-############################################
-#Get Visible Customers
-############################################
 function getVisibleCustomers() {
-    $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-MyNodesList -AuthToken $apiKey -Filter "customer";
 }
 
-############################################
-#END Get Visible Customers
-############################################
-
-
-
-
-
-
-############################################
-#Get Containers Of Customer
-############################################
 function getContainersOfCustomer($cId) {
-    $url = "https://api.server-eye.de/2/customer/$cId/containers?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-CustomerContainerList -AuthToken $apiKey -CId $cId;
 }
 
-############################################
-#END Get Containers Of Customer
-############################################
-
-
-############################################
-#Get Agents Of Container
-############################################
 function getAgentsOfContainer($cId) {
-    $url = "https://api.server-eye.de/2/container/$cId/agents?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
+    return Get-ContainerAgentList -AuthToken $apiKey -CId $cId;
 }
-
-############################################
-#END Get Agents Of Container
-############################################
-
 
 $global:isFirstSheet = $true;
 $global:actRow = 2;
 
-
-
 $excelFileName = getNameOfFile($customerId);
 
-
 #OPEN Excel File
-$SheetName1 = "Employee Accounts"
+$SheetName1 = "Excel Sheet"
 $ObjExcel = New-Object -ComObject Excel.Application
 $Objexcel.Visible = $false
-$Objworkbook=$ObjExcel.Workbooks.Add()
+$Objworkbook = $ObjExcel.Workbooks.Add()
 #$Objworkbook.Worksheets(1).Delete > $null;
 #$Objworkbook.ActiveSheet.Name = $containerName;
-$Objworkbook.ActiveSheet.Cells.Item(1,1) = "Kunde";
-$Objworkbook.ActiveSheet.Cells.Item(1,2) = "OCC-Connector";
-$Objworkbook.ActiveSheet.Cells.Item(1,3) = "Sensorhub";
-$Objworkbook.ActiveSheet.Cells.Item(1,4) = "SensorName";
-$Objworkbook.ActiveSheet.Cells.Item(1,5) = "tags";
+$Objworkbook.ActiveSheet.Cells.Item(1, 1) = "Kunde";
+$Objworkbook.ActiveSheet.Cells.Item(1, 2) = "OCC-Connector";
+$Objworkbook.ActiveSheet.Cells.Item(1, 3) = "Sensorhub";
+$Objworkbook.ActiveSheet.Cells.Item(1, 4) = "SensorName";
+$Objworkbook.ActiveSheet.Cells.Item(1, 5) = "tags";
 
 
 $arrayCustomers = getVisibleCustomers;
 
-:outer foreach($customer in $arrayCustomers)
-{
+:outer foreach ($customer in $arrayCustomers) {
 
     Write-Host "customer name: " $customer.name;
 
@@ -126,13 +63,12 @@ $arrayCustomers = getVisibleCustomers;
 
     $arrayContainers = getContainersOfCustomer($customerId);
 
-    :inner1 foreach($container in $arrayContainers)
-    {
+    :inner1 foreach ($container in $arrayContainers) {
 
         #Write-Host "container ID: " $container.id " " $container.subtype;
 
         if ($container.subtype -eq "0") {
-        #if ($false) {
+            #if ($false) {
             
             Write-Host "OCC-Connector: " $container.name ;
 
@@ -140,8 +76,7 @@ $arrayCustomers = getVisibleCustomers;
             #Write-Host "container Name: " $container.name;
 
 
-            :inner2 foreach($sensorhub in $arrayContainers)
-            {
+            :inner2 foreach ($sensorhub in $arrayContainers) {
 
                 
                 
@@ -157,24 +92,23 @@ $arrayCustomers = getVisibleCustomers;
                     #getAgentsOfContainer($container.id);
 
             
-                    :inner3 foreach($agent in $arrayAgents)
-                    {
+                    :inner3 foreach ($agent in $arrayAgents) {
 
                         #break inner3;
                 
                         #Write-Host "agent subtype: " $agent.subtype;
-                         Write-Host "      SensorName: " $agent.name;
+                        Write-Host "      SensorName: " $agent.name;
                         #showAgentState $agent.id $container.name;
 
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow,1) = $customer.name;
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow,2) = $container.name;
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow,3) = $sensorhub.name;
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow,4) = $agent.name;
-                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow,5) = $container.tags.id + ";" + $container.tags.name;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow, 1) = $customer.name;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow, 2) = $container.name;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow, 3) = $sensorhub.name;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow, 4) = $agent.name;
+                        $Objworkbook.ActiveSheet.Cells.Item($global:actRow, 5) = $container.tags.id + ";" + $container.tags.name;
 
                         $global:actRow++;
 
-                    #    break outer;
+                        #    break outer;
                     }
 
                 }
@@ -192,7 +126,7 @@ $arrayCustomers = getVisibleCustomers;
 
 $Objworkbook.ActiveSheet.Cells.Select() > $null;
 $Objworkbook.ActiveSheet.Cells.EntireColumn.AutoFit() > $null;
-$Objworkbook.ActiveSheet.Cells.Item(1,1).Select() > $null;
+$Objworkbook.ActiveSheet.Cells.Item(1, 1).Select() > $null;
 
 
 #CLOSE/SAVE Excel File
