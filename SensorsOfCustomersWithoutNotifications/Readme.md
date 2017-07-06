@@ -17,12 +17,12 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/SensorsOfCustom
 ## Execute
 There are several ways to run this script. 
 
-### API Key
+### With an API Key
 ```powershell
 SensorsOfCustomersWithoutNotifications.ps1 -ApiKey yourApiKey 
 ```
 
-### Login
+### Via Login
 ```powershell
 Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1
 ```
