@@ -1,62 +1,3 @@
-<# 
-.SYNOPSIS
-Connect to a new Server-Eye API session.
-
-.PARAMETER Credentials 
-If passed the cmdlet will use this credential object instead of asking for username and password.
-
-.PARAMETER Code
-This is the second factor authentication code.
-
-
-.EXAMPLE 
-$session = Connect-Session
-
-.LINK 
-https://api.server-eye.de/docs/2/
-
-#>
-function Connect-Session {
-    [CmdletBinding()]
-    Param(
-        [Parameter(Mandatory=$false)] 
-        $Credentials,
-
-        [Parameter(Mandatory=$false)] 
-        [string] $Code
-
-    )
-
-    Process {
-        if (-not $Credentials) {
-            $Credentials = Get-Credential -Message 'Server-Eye Login'
-        }
-        $reqBody = @{
-            'email' = $Credentials.UserName
-            'password' = $Credentials.GetNetworkCredential().Password
-            'code' = $Code
-        } | ConvertTo-Json
-        try {
-            $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-            -ContentType "application/json" -Method Post -SessionVariable session
-
-        } catch {
-            if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
-                $secondFactor = Read-Host -Prompt "Second Factor"
-                return Connect-Session -Credentials $Credentials -Code $secondFactor
-            } else {
-                throw "Could not login. Please check username and password."
-                return
-            }
-        }
-        return $session
-    }
-}
-
-function Disconnect-Session ($Session) {
-    Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/logout -WebSession $Session | Out-Null
-}
-
 function Intern-DeleteJson($url, $session, $apiKey) {
     if ($authtoken -is [string]) {
         return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
@@ -116,8 +57,8 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUxNnw8RzeFG6xhD2vHUrPUR/V
-# dKCgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
+# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -238,24 +179,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSX5PWyCZgDKEcO
-# J9FvrrWulglkZjANBgkqhkiG9w0BAQEFAASCAQA5xk7d9hwj0GNeezRVreIJ5J7p
-# 1ZU0pU4/xpEOFaCXoMgUFkG2yWZ9f/3oxt7doaXwe/tOnVTBAMjEIcIy/xNG8o2L
-# /Ax1ksxnpaM50CUoJ/+r7LAJ2VZarF2SvTY1nTfhBsM+9ctzXICElnHnRU8z46cS
-# LoJUJOjdfIBJxstnT6vUee/oncP7FBBTlcPEgrleioHjunpOIeULtwTab4wSTs7P
-# 0Umn73tZpssrsWgJAzEw7uNbFRrEqbF2jfbwXbKT+NbWIBmvSthlIi3VG9Iv3nbo
-# GITYpARdeV+fBdCKkqcNFEh4qDzPsdo1UpZMTwS6lTcdcDmLGkXR5i3PoMIwoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
+# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
+# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
+# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
+# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
+# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
+# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODIxMTI1MjQ0WjAjBgkqhkiG9w0BCQQxFgQUdqYQ
-# qDw4k+eLd5d5Y3UD8psfzFwwDQYJKoZIhvcNAQEBBQAEggEAWfLsTGyv6iikvlja
-# Mb43bRRdFz7t4rIVD+wgkxy10RQ8nH0L0DSekvkYzU0zgafxV6E/CoClvsK5UGPZ
-# tcBGpLSDQd9CJ1tzDlBbTGTVLPWT3yCgBapIODC3V2cRFNdUaX6R+gJQLC2yZX6c
-# 5GEaJcrQ9bPJbmbwDwl6HsVTfHvYfoQBthuxu9+QIOXhlR06Q/Xhy/u82m4/Gimp
-# dXuCFjIi8T13StDN9PmeTjgkLrnb7rHHCcBz2RsSKyEnuNDpE9C6uR5q1/kDLtia
-# V9kYcZX5GsCXCQtRQ6FMJkdjbiScZTr7gJt3KV0lW3wB6c3A93BqpETMOwHeil90
-# NUEy9w==
+# BgkqhkiG9w0BCQUxDxcNMTcwODIxMTI1MjMxWjAjBgkqhkiG9w0BCQQxFgQUinRX
+# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEADKnNYwKE38+Ljthr
+# ABs/fl+nE00XXLpOHCJh/+4Z+lzlBlLVt2GNuvImDQv0vM9+Doo/9mHSXkV4BIEp
+# Tq0ussEahn1tBlZEfx+M23RnOiQVBBuv3PAZRiJUnIkLi7L3LbgBIuKRSIKQFyGe
+# 91hhQYZ7U4UmuuTyRwEfr54/sGGkqKd6RrUt/sR4jSzi5h+braUprZKcgZDdh6vv
+# +DmLQqGHk6Hx3oojBJOFVh5ZEoFZMXYjaX76TxNBU3bD1useoGEFzt7c3bW16p0k
+# mCPks9ih2AMnS//NNCuHcuTErXYN5yeKiz8ZflCq2AsJU1IM/zmxiSXwvhSwmX1n
+# 8JfC4g==
 # SIG # End signature block

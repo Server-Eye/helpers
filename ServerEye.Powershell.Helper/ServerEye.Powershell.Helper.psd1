@@ -12,7 +12,7 @@
 RootModule = 'ServerEye.Powershell.Helper.psm1'
 
 # Version number of this module.
-ModuleVersion = '1.5.3'
+ModuleVersion = '2.0.1'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -21,7 +21,7 @@ ModuleVersion = '1.5.3'
 GUID = 'cb03da1f-dd3e-4fa5-812d-1cc9fa5c1180'
 
 # Author of this module
-Author = 'Andres Behr (Server-Eye)'
+Author = 'Andreas Behr (Server-Eye)'
 
 # Company or vendor of this module
 CompanyName = 'Kraemer IT Solutions GmbH'
@@ -51,7 +51,7 @@ CLRVersion = '4.0'
 # ProcessorArchitecture = ''
 
 # Modules that must be imported into the global environment prior to importing this module
-# RequiredModules = @()
+RequiredModules = "ServerEye.Powershell.Api"
 
 # Assemblies that must be loaded prior to importing this module
 # RequiredAssemblies = @()
@@ -69,169 +69,7 @@ CLRVersion = '4.0'
 # NestedModules = @()
 
 # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-FunctionsToExport = 'Connect-ServerEyeSession', 'Disconnect-ServerEyeSession',
-        'Get-ActionlogList',
-        'Get-Agent',
-        'Get-AgentActionlogList',
-        'Get-AgentCategoryList',
-        'Get-AgentChart',
-        'Get-AgentNoteList',
-        'Get-AgentNotificationList',
-        'Get-AgentRemoteSetting',
-        'Get-AgentSettingList',
-        'Get-AgentStateList',
-        'Get-AgentStateListbulk',
-        'Get-AgentTagList',
-        'Get-AgentTypeList',
-        'Get-AgentTypeSettingList',
-        'Get-Container',
-        'Get-ContainerActionlogList',
-        'Get-ContainerAgentList',
-        'Get-ContainerInventory',
-        'Get-ContainerNoteList',
-        'Get-ContainerNotificationList',
-        'Get-ContainerProposalList',
-        'Get-ContainerProposalSettingList',
-        'Get-ContainerStateList',
-        'Get-ContainerStateListbulk',
-        'Get-ContainerTagList',
-        'Get-Customer',
-        'Get-CustomerList',
-        'Get-CustomerApikey',
-        'Get-CustomerApikeyList',
-        'Get-CustomerBucketList',
-        'Get-CustomerBucketUserList',
-        'Get-CustomerContainerList',
-        'Get-CustomerDispatchtimeList',
-        'Get-CustomerLocation',
-        'Get-CustomerManagerList',
-        'Get-CustomerSettingList',
-        'Get-CustomerTagList',
-        'Get-CustomerTemplateAgentList',
-        'Get-CustomerTemplateList',
-        'Get-CustomerUsage',
-        'Get-CustomerUsageList',
-        'Get-CustomerViewfilterList',
-        'Get-Group',
-        'Get-GroupList',
-        'Get-GroupUserList',
-        'Get-Key',
-        'Get-Me',
-        'Get-MyCustomer',
-        'Get-MyFeedList',
-        'Get-MyLocation',
-        'Get-MyMobilepush',
-        'Get-MyMobilepushList',
-        'Get-MyNodesList',
-        'Get-MyNotificationList',
-        'Get-MySetting',
-        'Get-MyTwofactor',
-        'Get-MyTwofactorSecret',
-        'Get-NetworkSystemInstallstatusList',
-        'Get-NetworkSystemList',
-        'Get-Pcvisit',
-        'Get-PcvisitCheck',
-        'Get-ReportingCustomReport',
-        'Get-ReportingCustomReportList',
-        'Get-ReportingTemplate',
-        'Get-ReportingTemplateList',
-        'Get-RoleList',
-        'Get-User',
-        'Get-UserGroupList',
-        'Get-UserList',
-        'Get-UserLocation',
-        'Get-UserSettingList',
-        'New-Agent',
-        'New-AgentCopy',
-        'New-AgentNote',
-        'New-AgentNotification',
-        'New-AgentRestart',
-        'New-AgentStateHint',
-        'New-AgentTag',
-        'New-ApiKey',
-        'New-ContainerNote',
-        'New-ContainerNotification',
-        'New-ContainerStateHint',
-        'New-ContainerTag',
-        'New-Customer',
-        'New-CustomerBucket',
-        'New-CustomerCoupon',
-        'New-CustomerDispatchtime',
-        'New-CustomerLocation',
-        'New-CustomerTag',
-        'New-CustomerViewfilter',
-        'New-Group',
-        'New-Login',
-        'New-Logout',
-        'New-MyLocation',
-        'New-MyMobilepush',
-        'New-MyTwofactor',
-        'New-NetworkSystem',
-        'New-PcivistStart',
-        'New-ReportingCustomReport',
-        'New-ReportingTemplate',
-        'New-Reset',
-        'New-Template',
-        'New-User',
-        'New-UserLocation',
-        'Read-CustomerBucket',
-        'Remove-Agent',
-        'Remove-AgentNote',
-        'Remove-AgentNotification',
-        'Remove-AgentTag',
-        'Remove-Container',
-        'Remove-ContainerNote',
-        'Remove-ContainerNotification',
-        'Remove-ContainerProposal',
-        'Remove-ContainerTag',
-        'Remove-CustomerApikey',
-        'Remove-CustomerBucket',
-        'Remove-CustomerBucketUser',
-        'Remove-CustomerDispatchtime',
-        'Remove-CustomerManager',
-        'Remove-CustomerTag',
-        'Remove-CustomerTemplate',
-        'Remove-CustomerTemplateAgent',
-        'Remove-CustomerViewfilter',
-        'Remove-Group',
-        'Remove-GroupUser',
-        'Remove-MyMobilepush',
-        'Remove-MyNotification',
-        'Remove-MyTwofactor',
-        'Remove-ReportingCustomReport',
-        'Remove-ReportingTemplate',
-        'Remove-User',
-        'Remove-UserGroup',
-        'Remove-UserSubstitude',
-        'Remove-UserTwofactor',
-        'Restart-Container',
-        'Set-Agent',
-        'Set-AgentNotification',
-        'Set-AgentSetting',
-        'Set-Container',
-        'Set-ContainerNotification',
-        'Set-ContainerProposal',
-        'Set-Customer',
-        'Set-CustomerBucket',
-        'Set-CustomerBucketUser',
-        'Set-CustomerDispatchtime',
-        'Set-CustomerManager',
-        'Set-CustomerSetting',
-        'Set-CustomerTag',
-        'Set-CustomerViewfilter',
-        'Set-Group',
-        'Set-GroupUser',
-        'Set-MyNotification',
-        'Set-MySetting',
-        'Set-ReportingTemplate',
-        'Set-Template',
-        'Set-User',
-        'Set-UserGroup',
-        'Set-UserSetting',
-        'Set-UserSettingKey',
-        'Set-UserSubstitude',
-        'Start-Container',
-        'Stop-Container'
+FunctionsToExport = 'Connect-Session', 'Disconnect-Session'
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
@@ -269,7 +107,7 @@ PrivateData = @{
         IconUri = 'https://github.com/Server-Eye/helpers/raw/master/ServerEye.Powershell.Helper/icon.png'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Fixed error in login.'
+        ReleaseNotes = 'changed prefix.'
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
@@ -282,7 +120,7 @@ PrivateData = @{
 # HelpInfoURI = ''
 
 # Default prefix for commands exported from this module. Override the default prefix using Import-Module -Prefix.
-# DefaultCommandPrefix = ''
+DefaultCommandPrefix = 'SE'
 
 }
 

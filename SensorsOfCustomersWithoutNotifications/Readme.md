@@ -34,5 +34,5 @@ The output is a standard PowerShell table and can be processed with any compatib
 Install-Module -Name ImportExcel -Scope CurrentUser
 
 # Show all sensors without a notification and save the result as Excel sheet
-Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xslx" -Show
+Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xlsx" -Show
 ```

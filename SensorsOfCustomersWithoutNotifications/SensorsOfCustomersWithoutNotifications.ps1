@@ -7,9 +7,9 @@ Param(
 
 $result = @()
 
-$customers = Get-MyNodesList -Filter customer -AuthToken $AuthToken
+$customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 foreach ($customer in $customers) {
-    $containers = Get-CustomerContainerList -AuthToken $AuthToken -CId $customer.id
+    $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
 
@@ -17,15 +17,15 @@ foreach ($customer in $customers) {
 
             foreach ($sensorhub in $containers) {
                 if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
-                    $agents = Get-ContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
+                    $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
 
                     foreach ($agent in $agents) {
-                        $notifications = Get-AgentNotificationList -AuthToken $AuthToken -AId $agent.id
+                        $notifications = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $agent.id
 
-                        if (!$notificationss) {
+                        if (!$notifications) {
                             $out = New-Object psobject
                             $out | Add-Member NoteProperty Kunde ($customer.name)
-                            $out | Add-Member NoteProperty Netzwerk ($customer.name)
+                            $out | Add-Member NoteProperty Netzwerk ($container.name)
                             $out | Add-Member NoteProperty Server ($sensorhub.name)
                             $out | Add-Member NoteProperty Sensor ($agent.name)
                             $result += $out
