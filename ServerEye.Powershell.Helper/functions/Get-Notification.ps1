@@ -1,64 +1,99 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
+ <#
+    .SYNOPSIS
+    Get notifications for a sensor. 
+    
+    .DESCRIPTION
+    This will list all notifications for a sensor.
+    
+    .PARAMETER SensorId
+    The id of the sensor for which the notifications should be listed.
+    
+    .PARAMETER AuthToken
+    Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+
+    .EXAMPLE
+    Get-SENotification $SensorId=12345-6789-ABCDE
+
+    Name           : Andreas Behr
+    Email          : andy@server-eye.de
+    byEmail        : True
+    byTextmessage  : False
+    byTicket       : False
+    Delay          : 0
+    NotificationId : 01234-5678-ABCDE
+    Sensor         : Ping
+    Sensorhub      : SERV2012R2
+    OCC-Connector  : lab.server-eye.local
+    Customer       : Systemmanager IT
+
+    .EXAMPLE
+    Get-SECustomer "Systemmanager*" | Get-SESensorhub | Get-SESensor | Get-SENotification | Format-Table
+
+    Name            Email                 byEmail byTextmessage byTicket Delay NotificationId   Sensor Sensorhub  OCC-Connector        Customer
+    ----            -----                 ------- ------------- -------- ----- --------------   ------ ---------  -------------        --------
+    Andreas Behr    andy@server-eye.de    False   False         False    0     1234-56789-ABCDE Ping   SERV2012R2 lab.server-eye.local Systemmanger IT
+    Patrick Schmidt patrick@server-eye.de False   False         False    0     1234-56789-ABCDE Ping   SERV2012R2 lab.server-eye.local Systemanager IT
+    
+#>
+function Get-Notification {
+    [CmdletBinding()]
+    Param(
+        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        $SensorId,
+        [Parameter(Mandatory=$false)]
+        $AuthToken
+    )
+
+    Begin{
+        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $result = @()
+    }
+    
+    Process {
+        $result += getNotificationBySensor -sensorId $SensorId -auth $AuthToken
+    }
+
+    End{
+        $result
     }
 }
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
 
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
 
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+function getNotificationBySensor ($sensorId, $auth) {
+    $notifies = Get-SeApiAgentNotificationList -AuthToken $auth -AId $sensorId
 
-function Remove-Null {
+    $result = @()
 
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
+    foreach ($notify in $notifies) {
+        $displayName = "$($notify.prename) $($notify.surname)".Trim() 
 
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
+        $sensor = get-SeSensor -SensorId $notify.aId -AuthToken $auth
+        
+        $out = New-Object psobject
+        $out | Add-Member NoteProperty Name ($displayName)
+        $out | Add-Member NoteProperty Email ($notify.useremail)
+        $out | Add-Member NoteProperty byEmail ($notify.email)
+        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
+        $out | Add-Member NoteProperty byTicket ($notify.ticket)
+        if ($notify.deferTime) {
+            $out | Add-Member NoteProperty Delay ($notify.deferTime)
+        } else {
+            $out | Add-Member NoteProperty Delay (0)
         }
+        $out | Add-Member NoteProperty NotificationId ($notify.nId)
+        $out | Add-Member NoteProperty Sensor ($sensor.name)
+        $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
+        $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
+        $out | Add-Member NoteProperty Customer ($sensor.customer)
+        $result += $out
     }
-    $result
-  }
+    return $result
 }
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
-
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU1gqrD6HgCStB+z0ALIXMhF0a
+# nj6gghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +214,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRsNhFaj03M8iZQ
+# UG8GXpulejZmuzANBgkqhkiG9w0BAQEFAASCAQBmF4zXFDp3p2ijcw+OM3Nz/4QP
+# qRr+l2e6wwQO3GJNMpfoczmAveTW2PO4NM/5wlnYTtV/mtXwVB+uvr8m4hk7PkZV
+# PUwSjI15y3bXTRnYK6w5dfq6JBmkAH8qxNlEcTFGizDsBe4O011zw9RMefN0vnDx
+# agaCwnLK3JOUvH5bi59GCYzWzH7v2YFItVPkRHRMlYp4i7EqPcGP79pDigHnm40t
+# H3pWGFv1dJPBMgrKKPz2meFyJy6KYThAyrYmFyBwF6s/O4PMrXXuekQCh73wOaox
+# 1fzChhFW9416/6izHN/JUEYkhAcQa98YmJJz2DzPovaIVXHvRV/ZWkyNfOytoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMzU4WjAjBgkqhkiG9w0BCQQxFgQUb596
+# N6Umhvl7tNHatfDpzru/XZQwDQYJKoZIhvcNAQEBBQAEggEAVvdE1Mz+qJ0QQeGH
+# wPcG7vht7DAbRY4m4yAfltI01LEuQ1lD1Qs4Z2yJiX8gtsE4D+TGJ9jyrNar2mL0
+# /lZqPVshvVNavBQR7O+ZvxrbA6FIHOYbcbcFs2jpHtq2YTX7mmU5g0IQH5sTWbyW
+# PxBip3HSbo9b5qMN39kVbTYN73If21eE9cHZs+v/81Liu2yFbMtS0XpOcS84bYYI
+# v+fOmvjZt66+DAeYgxFpUUWBwnRu2Upf1a6qDfDQwoJKOCnzwFlCSA+PXSJ4RaN/
+# 8aCXUzl9EuGZZ1cQC+XR8199HyauH4XwgJbz1JxIMMZ9XcLomCleyBKSgI0NUZb2
+# QUqufA==
 # SIG # End signature block

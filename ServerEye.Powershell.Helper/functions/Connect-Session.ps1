@@ -1,64 +1,82 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
-    }
-}
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
+<# 
+.SYNOPSIS
+Connect to a new Server-Eye API session.
 
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+.DESCRIPTION
+Creates a new session for interacting with the Server-Eye cloud. Two-Factor authentication is supported.
 
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+.PARAMETER Credentials 
+If passed the cmdlet will use this credential object instead of asking for username and password.
 
-function Remove-Null {
+.PARAMETER Code
+This is the second factor authentication code.
 
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
+.PARAMETER Persist
+This will store the session in the global variable $ServerEyeGlobalSession. 
+Cmdlets in the namespace SE will try to use the global session if no session or API key is passed to them.
 
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
+.EXAMPLE 
+$session = Connect-Session
+
+.LINK 
+https://api.server-eye.de/docs/2/
+
+#>
+function Connect-Session {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false)] 
+        $Credentials,
+
+        [Parameter(Mandatory=$false)] 
+        [string] $Code,
+
+        [Parameter(Mandatory=$false)] 
+        [switch] $Persist
+        
+
+    )
+
+    Process {
+        if (-not $Credentials) {
+            $Credentials = Get-Credential -Message 'Server-Eye Login'
         }
+        $reqBody = @{
+            'email' = $Credentials.UserName
+            'password' = $Credentials.GetNetworkCredential().Password
+            'code' = $Code
+        } | ConvertTo-Json
+        try {
+            $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
+            -ContentType "application/json" -Method Post -SessionVariable session
+
+        } catch {
+            if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
+                $secondFactor = Read-Host -Prompt "Second Factor"
+                if ($Persist) {
+                    return Connect-Session -Credentials $Credentials -Code $secondFactor -Persist
+                } else {
+                    return Connect-Session -Credentials $Credentials -Code $secondFactor
+                }
+            } else {
+                throw "Could not login. Please check username and password."
+                return
+            }
+        }
+        if ($Persist) {
+            Write-Host "The session has been stored in this Powershell. It will remain active until you close it!"
+            $Global:ServerEyeGlobalSession=$session
+            return
+        }
+        return $session
     }
-    $result
-  }
 }
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUhC/diE5UBl3qrw0xopwfyflC
+# GpGgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +197,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSblXgzONQ26tgn
+# mVck0pEG+uU8/zANBgkqhkiG9w0BAQEFAASCAQBwIEEJGXDupfwr3GadrbGtwTD6
+# wNDo/94fqdm605nQKImiOm4kAvNBtNYdIkpCZYG0YRyOS79BNnaUhe3R7VFyXzuC
+# iKlHWITIPDfDc2lYwV8MY+k/g07lSAaaSxKnk6RJQ0oF6/aRkxExn/Gfya1h+QKl
+# RvvJwlNu/L2wJQ5k7vh4pdAWh+wklFPUYFuxJinOJbDdef04eeDgUvDBda46QNsP
+# Om9l9XWNiOvIhAt5GYL3BhvngygPIKpwHglcdEsZd9nrG+hNjjfiNY7RbSZvhe4E
+# bJebpHBTEKHJkjnV8rfT7TDxzMHKcFYH+QYKsWKm0AUVbRxKuqsXQwg60iYsoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMzQ5WjAjBgkqhkiG9w0BCQQxFgQUN7iC
+# ETehkLEmJxyy/zjCoW7Z1JMwDQYJKoZIhvcNAQEBBQAEggEARik3yJkJOZOTJAfB
+# 4HolZOQLxyLx5zX4NGyyNb45i/tCl+RBu8AkJShSuMngY9cGQNKYtH78c6SrQ5RR
+# veYaS1JZDc/HknQn0XfWwLmOF/YlA4vct92lcX8F3LsDI4WalrbK++jiTfuD6vMt
+# bhMFNpgY/WX1FPqttxgPLmwLM4b94+KTkX3ATvRbYeDf54FRVkup7101hyD4I4hc
+# I+rnxBoqMpb0CU4MlXVvOyc2eOrJzz8TfAU+7QQVDbyjzFIqBWR9OFxRBBtKIu7a
+# Kj9GULP2oz/UgKVJsoz4IPLQT7m6LOeX0OsBVGhgq2q8GXxisW0U6/ocMp1OUkSw
+# VwjndA==
 # SIG # End signature block

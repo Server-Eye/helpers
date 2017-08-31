@@ -1,64 +1,21 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
+function Test-Auth ($AuthToken) {
+    if ($AuthToken) {
+        return $AuthToken
+    } elseif ($Script:ServerEyeLocalSession) {
+        return $Script:ServerEyeLocalSession
+    } elseif ($Global:ServerEyeGlobalSession) {
+        return $Global:ServerEyeGlobalSession
     } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
+        Write-Error "Cannot find a Server-Eye session to use."
+        ThrowError -ExceptionMessage "Cannot find a Server-Eye session to use." -ExceptionName "NoSession" -errorId 1 -errorCategory PermissionDenied
     }
+
 }
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
-
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Remove-Null {
-
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
-
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
-        }
-    }
-    $result
-  }
-}
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
-
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUpCGIxX2+MoAyNrn4zFgZdEjr
+# REygghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +136,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSPm6cIA0DBOBdI
+# +fiQ59gpkxGXwDANBgkqhkiG9w0BAQEFAASCAQAnLSuNWPyabzfSmiBRDv5nvmyi
+# X0dtTipOAtfdWT6aOdJl1ua0k5HwbPBq0WjG/KVBVPk997u6m1C3q/yKJdWQOZYz
+# cHyZNXYB9OVGjPUPSstBA1Iw/vkVKnPgNcgHrOScCzDZRRXgTMBncrQVDt5vtTMo
+# sx6vL/xX1WzDyauyJ2tNCl8oITsnZ0zftVzqsLFsJM08CD0K5TxTjiYhasBDAN9Y
+# /uHvWzWmh9Dhf375q0JJzGFEcHNRsJnuJ0bHf3VwCo290k0IK2krIj3rx5rokWxC
+# H8VFkn0MVkAVHFLq0LGHS4w05xva7JItT8aFAMTSqCCKPkBgdu9EoGFgOdQ+oYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxNDEwWjAjBgkqhkiG9w0BCQQxFgQU3emH
+# +Y+bD8LGvFxP9xsLMF8Mj6YwDQYJKoZIhvcNAQEBBQAEggEAEj05+yndyVT5xOGa
+# /Z2lBzFpxwj/id6Wqs7qGs55KKaW+u1pjsW7AQJ1tQonQ0NBxWLPDCRlrTNiTU6K
+# XBRCVI7TdZIbYV6uteVjNbPIPAn6EowaRXlCEKYDXrtlhfCFjIX/CKoerBKT2M1p
+# 92tEA2bu0o6TpcXAMhPxU83F1TEpjg05z7iA+6EPyI+ASrjYaBsHqdhWkHXNFtwL
+# ZpQSvIB3j5FWUmhm4nEPxE3MJHiMjglFU9Yjqsze+lmIi+bXQqXDJju4NaFPfPdp
+# vHhKDTK9oINoDn5FkVpXbnrnaAleZX31r5TrTss+qo5W0gNS5zL5M5xXGap1l0IV
+# 2YuOBg==
 # SIG # End signature block

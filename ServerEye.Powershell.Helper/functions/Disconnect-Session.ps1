@@ -1,64 +1,27 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
-    }
+<# 
+    .SYNOPSIS
+    Disconnects the Server-Eye session.
+
+    .DESCRIPTION
+    Ends a Server-Eye session. If no session is passed as parameter, the global session will be terminated.
+
+    .PARAMETER Session 
+    If passed the cmdlet will end that session.
+#>
+
+function Disconnect-Session ($Session) {
+    $Session = Test-Auth -AuthToken $Sessions
+    Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/logout -WebSession $Session | Out-Null
+
+    Remove-Variable -Name ServerEyeGlobalSession -Scope Global -ErrorAction SilentlyContinue | Out-Null
+
+    Write-Host "The Server-Eye session has been closed."
 }
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
-
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Remove-Null {
-
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
-
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
-        }
-    }
-    $result
-  }
-}
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
-
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUrZLHR5lFjxyE81bw0jK+0teF
+# PfigghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +142,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTo2aRfnxwHA7IG
+# /Bjs2P1G9r2WNjANBgkqhkiG9w0BAQEFAASCAQCIYrX7eVncGkZYEx+1zMvmkpPs
+# U0jRNk0P8Qv3tR/7Pu1XFRjcO7Ah4ofpkvD4ghsVplz7kfv1iTRbmfOCNJUJdFS6
+# vxuZeZVKG35wfFU4wTUUvMxonR0lca8jWTheNG7wTFS+ZFqUFc5Lzoo7aGIyZgFx
+# IdTM25qHDPGhUyXZ5LF98+hEE9pWLxwgp2D1xLw19jAE++iRgQca2b6wOzCMabCP
+# xRGEphfkXrItCz02PKcmqF/lcQXZENb/PJFcktIdYcofa4snCUcowk3AQVsM2u+n
+# cgiaj16Hve/EgWTwzZoJJ4N6N8Ga+MPx2PYJnYoLWz93JCfQxp5N+60wN4Q9oYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMzUyWjAjBgkqhkiG9w0BCQQxFgQU39nI
+# PiraGufmJUkse82x80f+Lw4wDQYJKoZIhvcNAQEBBQAEggEABi5oBXNNeMZdUrme
+# NlXBcuPpHP+uMV/ZB67UyQuhtl626kML2nKE2yqQLXVtQf0hNlrvwzElUwjR+Dla
+# G/o98fR2Wna0qPID/8hoSj/E0nwzlc9RDxM3bQFKf4bKAWLqgIK0XOUlcINipMlM
+# PRB6UttKFwhv9Re2bVRGzvHxY99pVxBKCPsR8RT3atB/YmFE5c6a1b7dnIgigJd0
+# GMJFo+MWml3v9jiXcYbjRZhafJPV4dxto31jt1a8+l6f4jyy7ngybiTUDqucQpjl
+# JN/avoLmUEz3MQqakdwpfwgi7iBMbpOMB4/qdgylgGXLSZ9B0FlaaRtn3209Q/jO
+# LdBzaA==
 # SIG # End signature block

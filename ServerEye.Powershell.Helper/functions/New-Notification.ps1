@@ -1,64 +1,84 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
+ <#
+    .SYNOPSIS
+    Create a new notification. 
+
+    .PARAMETER SensorId
+    The notification will be added to this sensor.
+
+    .PARAMETER UserId
+    The id of the User to be added.
+
+    .PARAMETER SendEmail
+    Should the alarm be sent via email. If not specified the default for the user will be selected.
+    
+    .PARAMETER SendTextmessage
+    Should the alarm be sent via text message (SMS). If not specified the default for the user will be selected.
+    
+    .PARAMETER SendTicket
+    Should the alarm be sent to the ticket system. If not specified the default for the user will be selected.
+
+    .PARAMETER AuthToken
+    Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+    
+#>
+function New-Notification {
+    [CmdletBinding()]
+    Param(
+        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        $SensorId,
+        [Parameter(Mandatory=$false)]
+        $UserId,
+        [Parameter(Mandatory=$false)]
+        $SendEmail,
+        [Parameter(Mandatory=$false)]
+        $SendTextmessage,
+        [Parameter(Mandatory=$false)]
+        $SendTicket,
+        [Parameter(Mandatory=$false)]
+        $AuthToken
+    )
+
+    Begin {
+        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $result = @()
     }
-}
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
 
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+    Process {
+        $notify = New-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -UserId $UserId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket
 
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Remove-Null {
-
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
-
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
+        $displayName = "$($notify.prename) $($notify.surname)".Trim() 
+        
+        $sensor = get-SeSensor -SensorId $notify.aId -AuthToken $AuthToken
+        
+        $out = New-Object psobject
+        $out | Add-Member NoteProperty Name ($displayName)
+        $out | Add-Member NoteProperty Email ($notify.useremail)
+        $out | Add-Member NoteProperty byEmail ($notify.email)
+        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
+        $out | Add-Member NoteProperty byTicket ($notify.ticket)
+        if ($notify.deferTime) {
+            $out | Add-Member NoteProperty Delay ($notify.deferTime)
+        } else {
+            $out | Add-Member NoteProperty Delay (0)
         }
+        $out | Add-Member NoteProperty NotificationId ($notify.nId)
+        $out | Add-Member NoteProperty Sensor ($sensor.name)
+        $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
+        $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
+        $out | Add-Member NoteProperty Customer ($sensor.customer)
+        $result += $out
     }
-    $result
-  }
+
+    End {
+        $result
+    }
+
 }
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
-
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiRTAtlbAgYAHWyraty7ZO656
+# hW+gghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +199,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSwLOiYRMsJGOv6
+# gv5/yOKQvN5LZjANBgkqhkiG9w0BAQEFAASCAQCZv+hO9EW+GgRxjKApcBBOYrAn
+# 5Jmy/ghblV1tUR9ElirvoWLzkqvz8HNK+jMUfrTM3k4TY4Y/byc44i6oTqlsrvpC
+# MDt7v4yBOyv1FD72Urilk8SdcrALME2WGobfc31qngMqHMSpz+t+MCif+k7z+LA1
+# SWxlLSnFqUsIsQfaHRWMXf8b/33tAbAua0wPEvR0mkoPhPsR38PLrQMIUoxBrYpQ
+# /x4sBbZ468n9MzTbseLbMXEB8HKz6mGSg31/C81cgNEnmmj22dGf39/TrSSIGX9Z
+# 7bvGejO9pAv1ixNQzKCoB53diKdZs71DS6MaBMwZ00+NJ5WlCvYL8Ni6svZGoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxNDA3WjAjBgkqhkiG9w0BCQQxFgQUi1WO
+# XGMaIu4p0Pq5Jrusb+Gn6TowDQYJKoZIhvcNAQEBBQAEggEAPQ/H/JmNYCLourf9
+# O7sdf6pHXud1NWC9ZczM7ftFmKulUf7Es5r5qD2sbfIt9Z5v9HES1RUaWK0FpZiE
+# lP9+rDF79RrtlpwfjTNY5eTLl/DRTLZn/hSCRun/CmsQNbGUvq3/bFsk1xGGxosM
+# zdRL2C1z2k9x8LX2DqQCA4lvmRjyfzJfsq0FV6ZFscFHXM8J47RNaJX8UQf1pmRR
+# 35aAtVOKtaOMusqFTfV5k5sNfMdntzfTe3b2hE4WiApcy0nuxdQhY31lTjo/zAzv
+# XFNbLVYa+DUIr05WkmqQ5fF31DYgH5qHZIgCGoUA+Uhz1IBwY4j5jIih4vLTPNbn
+# FqRtvw==
 # SIG # End signature block

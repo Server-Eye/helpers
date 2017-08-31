@@ -1,64 +1,73 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
-    }
-}
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
+ <#
+    .SYNOPSIS
+    Get a list of all customers. 
+    
+    .DESCRIPTION
+    A list of all customers the user has been assigned to. 
+    To see all customers use Get-SeApiCustomerList.
+    
+    .PARAMETER Filter
+    Filter the list to show only matching customers. Customers are filterd based on the name of the customer.
 
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+    .PARAMETER CustomerId
+    Shows the specific customer with this customer Id.
+    
+    .PARAMETER AuthToken
+    Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+    
+#>
+function Get-Customer {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,ParameterSetName='byFilter',Position=0)]
+        [string]$Filter,
+        [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
+        [string]$CustomerId,
+        [Parameter(Mandatory=$false,ParameterSetName='byFilter')]
+        [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
+        $AuthToken
+    )
 
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
+    
+    Process {
+        $AuthToken = Test-Auth -AuthToken $AuthToken
 
-function Remove-Null {
+        $result = @()
+        
+        if ($CustomerId) {
 
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
+            $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
+            $out = New-Object psobject
+            $out | Add-Member NoteProperty Name ($customer.companyName)
+            $out | Add-Member NoteProperty CustomerId ($customer.cId)
+            $out | Add-Member NoteProperty CustomerNumber ($customer.customerNumberExtern)
+            $result += $out
 
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
+        } else {
+            $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
+            foreach ($customer in $customers) {
+    
+                if ((-not $Filter) -or ($customer.name -like $Filter)) {
+                    $out = New-Object psobject
+                    $out | Add-Member NoteProperty Name ($customer.name)
+                    $out | Add-Member NoteProperty CustomerId ($customer.id)
+                    $out | Add-Member NoteProperty CustomerNumber ($customer.customerNumberExtern)
+                    $result += $out
+                }
+            }
         }
+
+
+
+        $result
     }
-    $result
-  }
 }
-
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
-
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/TmDjo2wMawQOJwl5v581kok
+# mXmgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +188,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSRrx/aGEYKVkmu
+# PH4vKqNIQINuRzANBgkqhkiG9w0BAQEFAASCAQAamDaFiD0U2AmrwZaIYCnaW6xq
+# CASZTE9XdZapZ0nRM6XHV+yNWFIvQtVOBDULfhM8Qa2MkO+NOJZaxkEplE5O4/fC
+# k/EGa47WxzL4V7IcS2t+Dl4A2G/mtH/P1dfg5CUueqOf8HtP0A9l6luo53PNsqFZ
+# bcMuOLwNnCkPsVkQlnpPhxwbzsWMWRtvHchDQQG3MjzDu4EvsDhsMJeNySPt0LzV
+# Zulo6XPgscLIojeCidLtC2Q16X1x05UmyFGoa3hk6TozCNzSmL19JrHCPpvPZCID
+# 4Jt4HU9DYK9TMgv7NWwp3+i7o8qtaMrZBSE7s96a8Oa+Y3XpszmDV9sEbYBroYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMzU1WjAjBgkqhkiG9w0BCQQxFgQUPLWM
+# MdqTCpbQgJsGlf0iBof9+EAwDQYJKoZIhvcNAQEBBQAEggEAOt6TZycxwOEF/mNP
+# ZDgnlOck14EOdUgPFmwC7QnI2yBllVrlH9M2ZNVHpZH9K5JlGBnKRncS39R7dKLC
+# xKr74HjslpbzslnEzWtjkEcrDa821yPCP57rXnLMwvp6rvZNE1mUq6gVztS1m3ej
+# tXMjDcyO8ssLICs5nSJ3Hha5D3qciqDiM4879PXTDzJQ80N2GERXh6IOEjEvY8f+
+# Z2F6w1XQtBzg5V9HJoGuKmyn2O1h6UiEZxMguKUdKvC2gOy77MRcaJZ3PGDFWDqg
+# QLcQcZix6BKHZLv49XevTLzolzh79607nkaAdtyiejeBm6TlJPXz0g0KZoP3E7+v
+# PQlvmw==
 # SIG # End signature block

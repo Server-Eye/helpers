@@ -1,64 +1,100 @@
-function Intern-DeleteJson($url, $session, $apiKey) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Delete -WebSession $authtoken );
+ <#
+    .SYNOPSIS
+    Get a list of all Sensorhubs for the given customer. 
+
+    .PARAMETER Filter
+    Filter the list to show only matching Sensorhubs. Sensorhubs are filterd based on the name of the Sensorhub.
+
+    .PARAMETER CustomerId
+    The customer id for which the Sensorhubs will be displayed.
+
+    .PARAMETER SensorhubID
+    The Sensorhib with this ID will be displayed.
+    
+    .PARAMETER AuthToken
+    Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+    
+#>
+function Get-Sensorhub {
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$false,ParameterSetName="byCustomer",Position=1)]
+        [string]$Filter,
+        [Parameter(Mandatory=$false,ParameterSetName="byCustomer")]
+        [string]$FilterByConnector,
+        [parameter(ValueFromPipelineByPropertyName,ParameterSetName="byCustomer")]
+        $CustomerId,
+        [parameter(ValueFromPipelineByPropertyName,ParameterSetName="bySensorhub")]
+        $SensorhubId,
+        [Parameter(Mandatory=$false,ParameterSetName="byCustomer")]
+        [Parameter(Mandatory=$false,ParameterSetName="bySensorhub")]
+        $AuthToken
+    )
+
+    Begin{
+        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $result = @()
     }
-}
-function Intern-GetJson($url, $authtoken) {
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Get -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Get -WebSession $authtoken );
-    }
-}
-
-function Intern-PostJson($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Post -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Intern-PutJson ($url, $authtoken, $body) {
-    $body = $body | Remove-Null | ConvertTo-Json
-    if ($authtoken -is [string]) {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -Headers @{"x-api-key"=$authtoken} );
-    } else {
-        return (Invoke-RestMethod -Uri $url -Method Put -Body $body -ContentType "application/json" -WebSession $authtoken );
-    }
-}
-
-function Remove-Null {
-
-    [cmdletbinding()]
-    Param (
-        [parameter(ValueFromPipeline)]
-        $obj
-  )
-
-  Process  {
-    $result = @{}
-    foreach ($key in $_.Keys) {
-        if ($_[$key]) {
-            $result.Add($key, $_[$key])
+    
+    Process {
+        if ($CustomerId) {
+            $result += getSensorhubByCustomer -customerId $CustomerId -filter $Filter -filterByConnector $FilterByConnector -auth $AuthToken
+        } elseif ($SensorhubId) {
+            $result += getSensorhubById -sensorhubId $SensorhubId -auth $AuthToken
+        } else {
+            Write-Error "Please provide a SensorhubId or a CustomerId."
         }
     }
-    $result
-  }
+
+    End {
+        $result
+    }
 }
 
-$moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 
-"$moduleRoot/functions/*.ps1" | Resolve-Path | ForEach-Object { . $_.ProviderPath }
+function getSensorhubById($sensorhubId, $auth) {
+    $sensorhub = Get-SeApiContainer -CId $sensorhubId -AuthToken $auth
+    $occConnector = Get-SeApiContainer -CId $sensorhub.parentId -AuthToken $auth
+    $customer = Get-Customer -customerId $sensorhub.customerId
 
+    $out = New-Object psobject
+    $out | Add-Member NoteProperty Name ($sensorhub.name)
+    $out | Add-Member NoteProperty OCC-Connector ($occConnector.name)
+    $out | Add-Member NoteProperty Customer ($customer.name)
+    $out | Add-Member NoteProperty SensorhubId ($sensorhub.cId)
+
+    return $out
+}
+
+function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth) {
+    $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
+    $result = @()
+    foreach ($container in $containers) {
+        
+        if (($container.subtype -eq "0") -and ((-not $filterByConnector) -or ($container.name -like $filterByConnector))  ){ # OCC-Connector
+            $customer = Get-Customer -customerId $container.customerId
+
+            foreach ($sensorhub in $containers) {
+                if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
+                    if ((-not $filter) -or ($sensorhub.name -like $filter)) {
+                        $out = New-Object psobject
+                        $out | Add-Member NoteProperty Name ($sensorhub.name)
+                        $out | Add-Member NoteProperty OCC-Connector ($container.name)
+                        $out | Add-Member NoteProperty Customer ($customer.name)
+                        $out | Add-Member NoteProperty SensorhubId ($sensorhub.id)
+                        $result += $out
+                    }
+                }
+            }
+        }
+    }
+    return $result
+}
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZmhFlM1jWtRZcK9VOVK5DpSC
-# S9SgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUvVzB3XF7JlB7d4/5iiSPtbcd
+# auSgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -179,24 +215,24 @@ $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSUaZRm8U5mhckL
-# nYwy3GarWF9kDTANBgkqhkiG9w0BAQEFAASCAQBfsLSW4qlEOHM8S92bzakqoUd5
-# jhbKZN2eg7tK1eGPM5xBI/zTO6QRVy+YeXGebMgytqW7pnQbnaC2UaiEcqq+MC/n
-# Hbx0UhKuPx96rgHeOqnnhpb42kX/+fOR41L9mryNmnDdwHcFHLdj8HZVdalKAoVU
-# zwQYI6LwRrjeNZCUTgyFRR/dKdmSOb90sL55nf8bdlDtL8ahUl+cdQVpD7cy3qcc
-# Jc9kTnUn3Ej5K7FAydAd284hz4TkVZjCIZ2RM0MJTV+ePNnQ8e1a/39vhIvoTBic
-# 7tWbuJY3NKGpuaQt3iGzFlf0u3cWQQkhRNKUQLO4p5iw4ToC28PT5M4r6t3IoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTjjuovwWiwvchT
+# 1HmsN2Mg68wjtjANBgkqhkiG9w0BAQEFAASCAQAbmid1lHGG9DGfK/8T5fUO35JM
+# z44icpxtN0xJzq4JzgyoankPM/HAqOfViJtlgLhfHJzhKP4U8F0HLbyss/zOzqKX
+# FmUADe/u0Lbk57jcRa/eZxfPvhgWfYFZhlwlmyElI16e+u0oNZsivZ6aMkVrHPJG
+# ydFwkkURhhjq/bREbyrff1Th4tJ0kPq9OHLKOeBZxs0qnUNOGUm8LrEjlbVRod82
+# L1uitciBJvK5iMRt0SFIHQ+EGKe6/oQukyeryPioETegO9cOU9zCUUlSrY/ejLD3
+# b6JeFiKNbnlMsm0Z4QBQI33JiGtNSWtbThd+JIyTlVwZLERvvvhnWPtkR5BkoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxMjQ4WjAjBgkqhkiG9w0BCQQxFgQUinRX
-# fQ5VgJTeTEAcoGoLqJ47py4wDQYJKoZIhvcNAQEBBQAEggEAGtBOcGeNyCTYHKEx
-# 4dCNJFQ9rwKBDE76YZBtdAHsF7zAgGp0whjS+tU9IdY53JuU19qlj6w2QAcf+O1p
-# TmqFAgafGWaOf/g1Q3b/bxRf4chhyVnCdZUecVUswSRR5ZlJ8xo6abqH9diesI/z
-# RfsipfjPyJBGrClJIeTnArNqeIK8soOUZUB27jjCvoCMiiO1wBjmWpDv/ureTHfQ
-# h8KjnKtAFP3X1GKZd6I62HSyJBom2B88O509e+3n53mROlWq9GoVv9kQevxQCcfZ
-# z5+QIVPhKnP/DxsWC46qq1i4W8wKV3sE9nB8xF8lK5R7MCfQtYUP7Qp5OSjKFwgq
-# VhA34Q==
+# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxNDA0WjAjBgkqhkiG9w0BCQQxFgQUDtn9
+# i3/ml0rX+ilpnDRGdZ9YeeYwDQYJKoZIhvcNAQEBBQAEggEAMHU7BrZEhAuyaYFN
+# FKrppGEESvXyzIesDf0UMLtgUCyagXDC4tbSkoA2JTMFcgyJNsUHmL6CJMrc9VGk
+# u7495mMVV8F9L7XZVZLAjJ6Z4diVgIZgcF7cx382L0EdRAqkB0vLo7in0QL2v92L
+# X/g9L7dg0eL/Pf0tn4EdjiYe67edITsy08/WLEV758FhPqAfySlolfFL0J+1iSoG
+# htWgVhah6lW0C25iey4XkrtxsbLkkV70IJERaamQqofkCH+kBlBJ0Loef0evbcnw
+# e73GvuPxdh4JNfbopSo3epxaaXfick3NpOiqUpJ7vPahX8VxKMclZZb/SLdUZu4P
+# Mtkbpw==
 # SIG # End signature block
