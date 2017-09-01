@@ -4,4 +4,4 @@
 
 This script has been deprecated. 
 
-Please use the Helper function ```New-ApiKey``` instead. 
+Please use the Helper function ```New-SeApiApiKey``` instead. 

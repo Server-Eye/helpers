@@ -35,7 +35,7 @@ Previous version of our scripts created Excel sheets as output. Our new scripts 
 Install-Module -Name ImportExcel -Scope CurrentUser
 
 # Show all sensors without a notification and save the result as Excel sheet
-Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xslx" -Show
+Connect-SESession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xslx" -Show
 ```
 
 ## Support

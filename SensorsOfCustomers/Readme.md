@@ -24,7 +24,7 @@ SensorsOfCustomersWithoutNotifications.ps1 -ApiKey yourApiKey
 
 ### Via Login
 ```powershell
-Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1
+Connect-SESession | SensorsOfCustomersWithoutNotifications.ps1
 ```
 
 ## Output
@@ -34,7 +34,7 @@ The output is a standard PowerShell table and can be processed with any compatib
 Install-Module -Name ImportExcel -Scope CurrentUser
 
 # Show all sensors without a notification and save the result as Excel sheet
-Connect-ServerEyeSession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xlsx" -Show
+Connect-SESession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -Path "noNotification.xlsx" -Show
 ```
 
 
@@ -61,7 +61,7 @@ SensorsOfCustomersWithNotifications.ps1 -ApiKey yourApiKey
 
 ### Via Login
 ```powershell
-Connect-ServerEyeSession | SensorsOfCustomersWithNotifications.ps1
+Connect-SESession | SensorsOfCustomersWithNotifications.ps1
 ```
 
 ## Output
@@ -71,5 +71,5 @@ The output is a standard PowerShell table and can be processed with any compatib
 Install-Module -Name ImportExcel -Scope CurrentUser
 
 # Show all sensors with a notification and save the result as Excel sheet
-Connect-ServerEyeSession | SensorsOfCustomersWithNotifications.ps1 | Export-Excel -Path "withNotification.xlsx" -Show
+Connect-SESession | SensorsOfCustomersWithNotifications.ps1 | Export-Excel -Path "withNotification.xlsx" -Show
 ```
