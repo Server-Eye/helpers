@@ -16,9 +16,9 @@
     
 #>
 function Get-Sensorhub {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="byCustomer")]
     Param(
-        [Parameter(Mandatory=$false,ParameterSetName="byCustomer",Position=1)]
+        [Parameter(Mandatory=$false,ParameterSetName="byCustomer",Position=0)]
         [string]$Filter,
         [Parameter(Mandatory=$false,ParameterSetName="byCustomer")]
         [string]$FilterByConnector,
@@ -90,11 +90,12 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
     }
     return $result
 }
+
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUvVzB3XF7JlB7d4/5iiSPtbcd
-# auSgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUnRjgodUjE3HuWZcl/LCEDeon
+# uECgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -215,24 +216,24 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTjjuovwWiwvchT
-# 1HmsN2Mg68wjtjANBgkqhkiG9w0BAQEFAASCAQAbmid1lHGG9DGfK/8T5fUO35JM
-# z44icpxtN0xJzq4JzgyoankPM/HAqOfViJtlgLhfHJzhKP4U8F0HLbyss/zOzqKX
-# FmUADe/u0Lbk57jcRa/eZxfPvhgWfYFZhlwlmyElI16e+u0oNZsivZ6aMkVrHPJG
-# ydFwkkURhhjq/bREbyrff1Th4tJ0kPq9OHLKOeBZxs0qnUNOGUm8LrEjlbVRod82
-# L1uitciBJvK5iMRt0SFIHQ+EGKe6/oQukyeryPioETegO9cOU9zCUUlSrY/ejLD3
-# b6JeFiKNbnlMsm0Z4QBQI33JiGtNSWtbThd+JIyTlVwZLERvvvhnWPtkR5BkoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQv5wRkWhSkUf5O
+# tAdgVE6PScGm3jANBgkqhkiG9w0BAQEFAASCAQCHuVx8TEARqXXyKmERtB2rM8iq
+# AEY2PhuhhHY7B9HdGzcjfmvnHv9UkNdUSoAFhAoXgTwGRkRZ78IjvwvzOJ3FrDuF
+# GfsQrS9kgxypqJwj1RGMq0pMNVqGBVSXTEzslWCubZVX+fpII9we/rumRLJFlsNj
+# hhH+XlbOJYx87ZPVga3IrecuDgdHLqYF67eagCTYQYRiMJ1ITnfgtPfcTxW56iUE
+# UW8YqLU5s6Y0YIo+S2da5iSsZcwp3aH741HsN9Ih/lBL9b8obk4fJ6tremZNxqLY
+# bq/BhQhy/nt16bjDnyW/1o/gRKkqn1K+4+gw7CAOP1uEy+XcO7A+HPoKox0JoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwODMxMTIxNDA0WjAjBgkqhkiG9w0BCQQxFgQUDtn9
-# i3/ml0rX+ilpnDRGdZ9YeeYwDQYJKoZIhvcNAQEBBQAEggEAMHU7BrZEhAuyaYFN
-# FKrppGEESvXyzIesDf0UMLtgUCyagXDC4tbSkoA2JTMFcgyJNsUHmL6CJMrc9VGk
-# u7495mMVV8F9L7XZVZLAjJ6Z4diVgIZgcF7cx382L0EdRAqkB0vLo7in0QL2v92L
-# X/g9L7dg0eL/Pf0tn4EdjiYe67edITsy08/WLEV758FhPqAfySlolfFL0J+1iSoG
-# htWgVhah6lW0C25iey4XkrtxsbLkkV70IJERaamQqofkCH+kBlBJ0Loef0evbcnw
-# e73GvuPxdh4JNfbopSo3epxaaXfick3NpOiqUpJ7vPahX8VxKMclZZb/SLdUZu4P
-# Mtkbpw==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTAxMTMwMzQwWjAjBgkqhkiG9w0BCQQxFgQUnhZX
+# wjuCkeW5jsGfWo1rbJsGAIowDQYJKoZIhvcNAQEBBQAEggEA04CyVWrSAdDGzfPD
+# o8DIybR5b1Eu8p2v3ZQe0nf+aXt3aW25t60Ez/jsdzQy7vtPKZtNC9uvhFXNgrOE
+# N46AhGNZym49deQVlUGq/jCfuaa8i2gkqzPPtb+QZFl49L9S4HrtqROF3U0u3CZ9
+# F79a56bEQwZhS0dMPA6DoVtaB2lL25gRPzCfQV09Zg+CD8wSRAF1eHjrGcvHKMie
+# k/4FRnp9d2drhf0evoP8gaWVwN8KIfqzhkzUDn0vrauYf5P2F1hUE/5StwI3svoh
+# fIZLpIlJ7xoVjT8A49x7utn0uPIH/5Gsz19sxP92haLi1USco/VoEESsRfW4GT6O
+# UMIOXQ==
 # SIG # End signature block
