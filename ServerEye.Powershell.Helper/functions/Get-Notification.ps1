@@ -36,11 +36,14 @@
     
 #>
 function Get-Notification {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName='ofSensor')]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensor')]
         $SensorId,
-        [Parameter(Mandatory=$false)]
+        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensorhub')]
+        $SensorhubId,
+        [Parameter(Mandatory=$false,ParameterSetName='ofSensorhub')]
+        [Parameter(Mandatory=$false,ParameterSetName='ofSensor')]
         $AuthToken
     )
 
@@ -50,7 +53,14 @@ function Get-Notification {
     }
     
     Process {
-        $result += getNotificationBySensor -sensorId $SensorId -auth $AuthToken
+        if ($SensorId) {
+            $result += getNotificationBySensor -sensorId $SensorId -auth $AuthToken
+        } elseif ($SensorhubId) {
+            $result += getNotificationOfContainer -containerID $SensorhubId -auth $AuthToken
+        } else {
+            Write-Error "Unsupported input"
+        }
+        
     }
 
     End{
@@ -58,6 +68,49 @@ function Get-Notification {
     }
 }
 
+function getNotificationOfContainer ($containerID, $auth) {
+    $notifies = Get-SeApiContainerNotificationList -AuthToken $auth -CId $containerId
+    $container = Get-SeApiContainer -AuthToken $auth -CId $containerId
+
+    $sensorhubName = ""
+    $connectorName = ""
+    $customerName = ""
+    
+    if ($container.type -eq "0") {
+        $customer = Get-SeApiCustomer -AuthToken $auth -CId $container.customerId
+        $connectorName = $container.Name
+        $customerName = $customer.companyName
+    } else {
+        $sensorhub = Get-Sensorhub -AuthToken $auth -SensorhubId $containerId
+        $sensorhubName = $sensorhub.Name
+        $connectorName = $sensorhub.'OCC-Connector'
+        $customerName = $sensorhub.Customer
+    }
+    
+    $result = @()
+    
+    foreach ($notify in $notifies) {
+        $displayName = "$($notify.prename) $($notify.surname)".Trim() 
+       
+        $out = New-Object psobject
+        $out | Add-Member NoteProperty Name ($displayName)
+        $out | Add-Member NoteProperty Email ($notify.useremail)
+        $out | Add-Member NoteProperty byEmail ($notify.email)
+        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
+        $out | Add-Member NoteProperty byTicket ($notify.ticket)
+        if ($notify.deferTime) {
+            $out | Add-Member NoteProperty Delay ($notify.deferTime)
+        } else {
+            $out | Add-Member NoteProperty Delay (0)
+        }
+        $out | Add-Member NoteProperty NotificationId ($notify.nId)
+        $out | Add-Member NoteProperty Sensorhub ($sensorhubName)
+        $out | Add-Member NoteProperty OCC-Connector ($connectorName)
+        $out | Add-Member NoteProperty Customer ($customerName)
+        $result += $out
+    }
+    return $result
+}
 
 function getNotificationBySensor ($sensorId, $auth) {
     $notifies = Get-SeApiAgentNotificationList -AuthToken $auth -AId $sensorId
@@ -91,8 +144,8 @@ function getNotificationBySensor ($sensorId, $auth) {
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUbT/k96N3GJzZ7LHjjANsYBCu
-# vIqgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUKk6kjE2UBe/9biWCqKELW83S
+# i0ygghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -213,24 +266,24 @@ function getNotificationBySensor ($sensorId, $auth) {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQsGGSwXYy2uo02
-# F0TSEpsY/ykqVzANBgkqhkiG9w0BAQEFAASCAQBaQZiJO0bg4nPfzgvE2TfbbBB8
-# QRP0SUZ8CkwVRWLbeRDEw+RRZojB8tEMfkFZ+WsPxq7Tw40BXFWlN4y3mijYkFCz
-# VRb8ytMLhbhpBpe7sF89hMpxuOa15JHAXe1kq5IxBLX1VZSt0NNYM1sVNitIUruR
-# 0/o8AdNDGijfwYcMDpPXRNiWmEkytB7Ghzq/8AAjHJVgi82nkCEjIkUZ2x6Kf/1Z
-# SP4k8j84+/C1jFQWtWUT2FBwfuRpaKnHhqA6v+W5qIoPJfFhqEo5C7ir9CfD5k6N
-# LixM7R+HnEzDrsLqxS+fQWsbEVFhb6owmYmWT5AJTQWzmH13kKhBGlq8mUmUoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTif4HRDrpf8RF2
+# rFlQiXxr4VzHJzANBgkqhkiG9w0BAQEFAASCAQCAY1KzVNmm+tFHijxN2ruAy+cv
+# ETyg0+TUBl8USv28t/zg4bZJN0+X47UbvLsyejSI0IQMy9P3jnrT5ObT3RqbnwYE
+# zTZO8UJM9nIuu/SaUP+NiAKr+RLhEpRTIIA0ZRo0jkAYeePeaM8AyakraVbqYPRP
+# EHRsCZawZuGuvj3B6hU/t+a+/6vGOtlKfmVELzY/7X/r2VV1bqxjM2PQ/wOkkIba
+# bMeJkXm9qp3us97tgVzq3ixe5wZ93OBWO5X/8d0gEwM89VUTcdLTHII3ejTLfvl+
+# bCGvWON7RnN320f7RYFbBllhKaIQiGVh0jNgCyh+fh0tiVxfEYFPSwrnaXsToYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTAxMTMwMzM0WjAjBgkqhkiG9w0BCQQxFgQUNFxJ
-# AZvJj9qoemWKMtXBpwLTVHcwDQYJKoZIhvcNAQEBBQAEggEAuDaFv750NPELUAq5
-# 17yNjlXmJitRXdryo1tPxM6J2CD/GmtYamYHsD+knmnGsq/rJI7rD2GkuXRaPU82
-# jREBa9RR5mYWvE2v4OOmVbjdgBioZFIy2YRnbOYs5eQdMAQR7eOqinCZAfCbeSR3
-# 5DevzbfBhQEZB0VNxtUtLKVDcwRIuWm/U2HZriQhu89X3yvlZ5KtdSA8vbsKnML7
-# 7OJu5HMhTdGoCBtL8x7OHy1vHKXotIM3ODq2OLyVm8HkVJQ/dUmQ08zJNvcm45vj
-# btVzFtHyEGEXKWJrdCot9+5op0d2HJc+3wJ8MoRBNacFypU2j2qAbgG5AixE8auX
-# PCfaTg==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTA1MTQ0NjQzWjAjBgkqhkiG9w0BCQQxFgQUlS4o
+# vmLsl490QNo7kglP3oAyakYwDQYJKoZIhvcNAQEBBQAEggEA2uWXUh8/mZHRSxo7
+# R31LFAGlVfATVLckjT9YA6J9KZSjUgO9Fc7dky85Op3nu0plPpdbgVggC+vRBRjj
+# u83nqNPMtT3ifIN7cVeWlwqLJrBAYWHZrTP4bQpGaKX8ehKHqgy3mbrAcKFayY96
+# rwPdkcff5aTEwwk3sbhRMJ3NJQexQCYL+6Ry42+o74KfpIu97MH39gQTbuRYnLqH
+# Z7w8oTPXEs8zQZ65GuHQv9LNKrqRX8VH5x/Cm6rXcrloUHXHJ1QwxHKkIMqF7rN+
+# Ltu35X5iiUWnI6sPTFg5jN2jyLh4AhmK0vv8q2gEyy55UhfhycXUnnAgr0XAR9CU
+# h6an1A==
 # SIG # End signature block
