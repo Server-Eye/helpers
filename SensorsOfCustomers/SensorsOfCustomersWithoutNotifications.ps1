@@ -1,9 +1,11 @@
 [CmdletBinding()]
 Param(
-    [Parameter(Mandatory=$true,ValueFromPipeline=$true)]
+    [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
     $AuthToken
 )
+
+$AuthToken = Test-SEAuth -AuthToken $AuthToken
 
 $result = @()
 
