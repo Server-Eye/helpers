@@ -59,6 +59,7 @@ function getSensorhubById($sensorhubId, $auth) {
 
     $out = New-Object psobject
     $out | Add-Member NoteProperty Name ($sensorhub.name)
+    $out | Add-Member NoteProperty IsServer ($sensorhub.isServer)
     $out | Add-Member NoteProperty OCC-Connector ($occConnector.name)
     $out | Add-Member NoteProperty Customer ($customer.name)
     $out | Add-Member NoteProperty SensorhubId ($sensorhub.cId)
@@ -79,6 +80,7 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
                     if ((-not $filter) -or ($sensorhub.name -like $filter)) {
                         $out = New-Object psobject
                         $out | Add-Member NoteProperty Name ($sensorhub.name)
+                        $out | Add-Member NoteProperty IsServer ($sensorhub.isServer)
                         $out | Add-Member NoteProperty OCC-Connector ($container.name)
                         $out | Add-Member NoteProperty Customer ($customer.name)
                         $out | Add-Member NoteProperty SensorhubId ($sensorhub.id)
@@ -94,8 +96,8 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUnRjgodUjE3HuWZcl/LCEDeon
-# uECgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3JNzYtoyrV7u1yZnS5TzPWhB
+# 9j+gghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -216,24 +218,24 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQv5wRkWhSkUf5O
-# tAdgVE6PScGm3jANBgkqhkiG9w0BAQEFAASCAQCHuVx8TEARqXXyKmERtB2rM8iq
-# AEY2PhuhhHY7B9HdGzcjfmvnHv9UkNdUSoAFhAoXgTwGRkRZ78IjvwvzOJ3FrDuF
-# GfsQrS9kgxypqJwj1RGMq0pMNVqGBVSXTEzslWCubZVX+fpII9we/rumRLJFlsNj
-# hhH+XlbOJYx87ZPVga3IrecuDgdHLqYF67eagCTYQYRiMJ1ITnfgtPfcTxW56iUE
-# UW8YqLU5s6Y0YIo+S2da5iSsZcwp3aH741HsN9Ih/lBL9b8obk4fJ6tremZNxqLY
-# bq/BhQhy/nt16bjDnyW/1o/gRKkqn1K+4+gw7CAOP1uEy+XcO7A+HPoKox0JoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMNoKMUiw8QGHe
+# jytH/mbV5V08FzANBgkqhkiG9w0BAQEFAASCAQB8tzE5XZ3JJAR+3nc3X0OK8Svb
+# SA7DeZTbAPId7tVqNADEwG/Ox/3JdyQgKAtMm5rU5+rb/GoHE4n33u23yqqKx2yU
+# 5jLXON7HIjJHG1Ejrbfq+fCDIhgb0YJcYrs4c0Ep6ssfxe3katPbsswQPmDZmbr8
+# GykPeYPd7xuldlmhtxTO0TuUlcpxXMDnscwAtWWK3HBDrQH6Ny8gzWM99gFMlxVr
+# 4Uh5EZtgoxrDbYFk/mWpj+IVUkptBQwyNQI5zNlJ/lAmemPaZIrMP8Xb/YKcUe0G
+# uYJNlj79vqGLuE6rVBs/V6pyqJMSSLE+T9qgCM90ywwxIks5vAAz0oYYZsU/oYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTA1MTQ0NjQ5WjAjBgkqhkiG9w0BCQQxFgQUnhZX
-# wjuCkeW5jsGfWo1rbJsGAIowDQYJKoZIhvcNAQEBBQAEggEAa/P3RgguOLsi4N2p
-# U/NPt5nEZUfvJwh7gv53HywwROIin5kKQ9W0rptYPnVGbnSEGyZwWBIktO7X7eHH
-# 47hN4dA2WutDvNABEoXx7TSZAOF9zk5mcnYDOOTCmj6ARX4CZWfnShPygFB4Ct0k
-# ilGtYKXeIUQj8EriTGwpTX6gzDCcmxzK5cxqbVfvzI0u3sN6oEoTaxQecU7EPQeg
-# N3ywGODQJhAwTk2q36dzgPVbTz2W3a+Sivgr+MkIl1xOe5rBHHCzNO0h34wVXI4n
-# BkAz0WY0baJEjpTgXd1Gfo+21tz8uPDE5A1aZCCkLFda7+68bLuk8UFWp3D4sfti
-# SFUpog==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMjA4WjAjBgkqhkiG9w0BCQQxFgQUYPdI
+# 3KYdB9HbJEbutZ4XCsPm4DswDQYJKoZIhvcNAQEBBQAEggEAXJMyGr8NBXxLPois
+# VdHXaFWh8ugBi6njxzhKxkC5nMS5Kvf9vY7I9qMMk0vJG+ZKb4Q2S5PhBPkzwi+m
+# cduK/8LxXB89IRMxvQm0Il/1LQrdI3cy2CV4fZ3k/9mSFP8Jfos6QBFEOCkiSzr2
+# w3g3fPqQXvgS6AXVmiNJG7VaDw8ItMoTrtOSyH6fbObBAKhpDGmS9eXNaEWQeR1w
+# MphCKvs9GmRmriW2Vpxg4rwppuA/S17hPbKaCBnAPITpWqA6njY5VzkcUjeWa8AC
+# 2YeUNZchw2J9jWOVNA/qpw4U6XmRaFUy2vWKytijclSuUitsiy5XSAuxV2SdpYk2
+# D2K66w==
 # SIG # End signature block
