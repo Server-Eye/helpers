@@ -27,47 +27,41 @@ function Get-Customer {
         [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
         $AuthToken
     )
-
+    Begin{
+        $AuthToken = Test-Auth -AuthToken $AuthToken
+    }
     
     Process {
-        $AuthToken = Test-Auth -AuthToken $AuthToken
-
-        $result = @()
-        
         if ($CustomerId) {
 
             $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
-            $out = New-Object psobject
-            $out | Add-Member NoteProperty Name ($customer.companyName)
-            $out | Add-Member NoteProperty CustomerId ($customer.cId)
-            $out | Add-Member NoteProperty CustomerNumber ($customer.customerNumberExtern)
-            $result += $out
+            [PSCustomObject]@{
+                Name = $customer.companyName
+                CustomerId = $customer.cId
+                CustomerNumber = $customer.customerNumberExtern
+            }
 
         } else {
             $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
             foreach ($customer in $customers) {
     
                 if ((-not $Filter) -or ($customer.name -like $Filter)) {
-                    $out = New-Object psobject
-                    $out | Add-Member NoteProperty Name ($customer.name)
-                    $out | Add-Member NoteProperty CustomerId ($customer.id)
-                    $out | Add-Member NoteProperty CustomerNumber ($customer.customerNumberExtern)
-                    $result += $out
+                    [PSCustomObject]@{
+                        Name = $customer.name
+                        CustomerId = $customer.id
+                        CustomerNumber = $customer.customerNumberExtern
+                    }
                 }
             }
         }
-
-
-
-        $result
     }
 }
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQULhubmp/iFopIWFFhqCc5s6Ie
-# lXygghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU1B1zKu3dVd/Swu6jDEOdM2SD
+# U/igghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -188,24 +182,24 @@ function Get-Customer {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT68wF7aeI+RsiY
-# 9aGJKpp0qR1GVjANBgkqhkiG9w0BAQEFAASCAQBVPgrlDffKWr9C1IWpbAN12B3j
-# WG2iFFHnEVakZ3jQ8ZmVQ5bnhUVobdJnM7kZiZsi0GyXu438zaoQkbVVOdf8tHHa
-# 8bkekvLNClZVsYOFElyMGpMbtbM9luUWLdF8J3C3la4UfkILGKwahLJ+w6CISCCe
-# u3pqSvH55FgY9a+7Q+y3dp4euy+q86Qc/K5VIurQOQWgeBy8IkU+3VR+P/eDzFum
-# s383NVMoGpHnpaifxQDibQDkL9iYRPY61fXo2flxO0Dt+hvUt/xMXv31Tn9ARP+x
-# Pwy6Dml4aEvbtlAc0dcw1rP5ccJ5zt31nc1RHaRDMHjgNxYPrI4kD0PM1/DyoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBToFAInWe84tnV9
+# SZeOsYwFx8LWVzANBgkqhkiG9w0BAQEFAASCAQCSq8/Vu/+X/JtBn52vqRGd+7AQ
+# VMPAS71rZPCcPG6U3FtNTVbb6m8q53XQYQA0Hp9fDVTQynoAYH1DTIsS1AP9Rh8Q
+# EhAyRH11bxmj5Em0RPlfZNXGSOcfLavgczZBl5tB05Pb21FHZWvyn0BtH3269EaG
+# 7PzH4h2ms2sfxcSi6djoLk+DqaBih9LFCpyDcaPhznFJeev38yjN14gEBQ6IwbwZ
+# RgqqO8aOUIdFwtxtwywyME2zfIYq0TAREc8UYHIYFkEge9HpkbUKbGqCJh79NXL1
+# lu289U3QAZlbZcFvXtZFPGl9sQ5qpsU6QADetLfdJhQ72afQ7R4/Exm3J+AJoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMTU5WjAjBgkqhkiG9w0BCQQxFgQUNkyy
-# L1hMWKltg+T9LeHa4d96804wDQYJKoZIhvcNAQEBBQAEggEADtZAXnsyY4wyWd/9
-# ILZLtjNUIjThysTuOOEAR7EEkAawSbf7vj9c3MPeEj7KRmyeUjScLnydOupDLxuI
-# 8648Bpad2fHH4pwJt9DycUvcrCQG6yi/axNO2r+28VAul/b9Ogax7U4ZVejS0Xsr
-# luHlc6Vk3aPi3CXt8Y2+uixPBV9d5ecpD6p42rC0QE4LnQABxBl2oGLR1RhaGgJ3
-# FFm3Ntn9pnhxHr6ULt/SHefPQonbR3PD/T8GNAeQXnQgfktQBMsey2xme07b99Cy
-# PlCCubedd4hsfEDlHV9Xu8JFDibMvZ8VzcWTzMASSvD/+TaC5v3C3lre6hm5hnib
-# cmlwaA==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzI5WjAjBgkqhkiG9w0BCQQxFgQUkkO8
+# vrWuioNOU+b9qzjMCow3Yk4wDQYJKoZIhvcNAQEBBQAEggEA1XpScdv+mLRmV+b8
+# Eg6lc8tVTQH+An3sgzxDMlibPOlRc5Rc2I5RblzxaBS9711ZtJ8Ji4VdBk+z38zG
+# aHjEwSOyPTqnN8DbVVv6N74Stq3uZxnrs4u0y0MEy8TW8eiY93en/NEjJjFwnOJz
+# ub60tQAiwkFZEycy5/tUty6B6xGUfcO6v+QCzLS95eWAnyi+gRAN3BVrnBn9zCZw
+# KXOJ9j2opRyUnUcKGCHEEinamWwurmkbb57WKVRhaNAuc2n0E/Q0WFhVlUMTKTQV
+# /z1azJ/DVu/G/KDQy0FxSHCKTpkBuvgQNvCx0gMS//LPQn2TathmOiVYOaXOzvAc
+# d6l+pg==
 # SIG # End signature block

@@ -33,21 +33,20 @@ function Get-Sensorhub {
 
     Begin{
         $AuthToken = Test-Auth -AuthToken $AuthToken
-        $result = @()
     }
     
     Process {
         if ($CustomerId) {
-            $result += getSensorhubByCustomer -customerId $CustomerId -filter $Filter -filterByConnector $FilterByConnector -auth $AuthToken
+            getSensorhubByCustomer -customerId $CustomerId -filter $Filter -filterByConnector $FilterByConnector -auth $AuthToken
         } elseif ($SensorhubId) {
-            $result += getSensorhubById -sensorhubId $SensorhubId -auth $AuthToken
+            getSensorhubById -sensorhubId $SensorhubId -auth $AuthToken
         } else {
             Write-Error "Please provide a SensorhubId or a CustomerId."
         }
     }
 
     End {
-        $result
+
     }
 }
 
@@ -57,19 +56,17 @@ function getSensorhubById($sensorhubId, $auth) {
     $occConnector = Get-SeApiContainer -CId $sensorhub.parentId -AuthToken $auth
     $customer = Get-Customer -customerId $sensorhub.customerId
 
-    $out = New-Object psobject
-    $out | Add-Member NoteProperty Name ($sensorhub.name)
-    $out | Add-Member NoteProperty IsServer ($sensorhub.isServer)
-    $out | Add-Member NoteProperty OCC-Connector ($occConnector.name)
-    $out | Add-Member NoteProperty Customer ($customer.name)
-    $out | Add-Member NoteProperty SensorhubId ($sensorhub.cId)
-
-    return $out
+    [PSCustomObject]@{
+        Name = $sensorhub.name
+        IsServer = $sensorhub.isServer
+        'OCC-Connector' = $occConnector.name
+        Customer = $customer.name
+        SensorhubId = $sensorhub.cId
+    }
 }
 
 function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
-    $result = @()
     foreach ($container in $containers) {
         
         if (($container.subtype -eq "0") -and ((-not $filterByConnector) -or ($container.name -like $filterByConnector))  ){ # OCC-Connector
@@ -78,26 +75,26 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
             foreach ($sensorhub in $containers) {
                 if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
                     if ((-not $filter) -or ($sensorhub.name -like $filter)) {
-                        $out = New-Object psobject
-                        $out | Add-Member NoteProperty Name ($sensorhub.name)
-                        $out | Add-Member NoteProperty IsServer ($sensorhub.isServer)
-                        $out | Add-Member NoteProperty OCC-Connector ($container.name)
-                        $out | Add-Member NoteProperty Customer ($customer.name)
-                        $out | Add-Member NoteProperty SensorhubId ($sensorhub.id)
-                        $result += $out
+
+                        [PSCustomObject]@{
+                            Name = $sensorhub.name
+                            IsServer = $sensorhub.isServer
+                            'OCC-Connector' = $container.name
+                            Customer = $customer.name
+                            SensorhubId = $sensorhub.id
+                        }
                     }
                 }
             }
         }
     }
-    return $result
 }
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU3JNzYtoyrV7u1yZnS5TzPWhB
-# 9j+gghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiSJEIEYIm4xGO60U2xrWBe8o
+# M9OgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -218,24 +215,24 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSMNoKMUiw8QGHe
-# jytH/mbV5V08FzANBgkqhkiG9w0BAQEFAASCAQB8tzE5XZ3JJAR+3nc3X0OK8Svb
-# SA7DeZTbAPId7tVqNADEwG/Ox/3JdyQgKAtMm5rU5+rb/GoHE4n33u23yqqKx2yU
-# 5jLXON7HIjJHG1Ejrbfq+fCDIhgb0YJcYrs4c0Ep6ssfxe3katPbsswQPmDZmbr8
-# GykPeYPd7xuldlmhtxTO0TuUlcpxXMDnscwAtWWK3HBDrQH6Ny8gzWM99gFMlxVr
-# 4Uh5EZtgoxrDbYFk/mWpj+IVUkptBQwyNQI5zNlJ/lAmemPaZIrMP8Xb/YKcUe0G
-# uYJNlj79vqGLuE6rVBs/V6pyqJMSSLE+T9qgCM90ywwxIks5vAAz0oYYZsU/oYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBR+ZbMktlZAVV1f
+# LVHPefG0IM0ZfzANBgkqhkiG9w0BAQEFAASCAQBSmFKdI6Bcs4g+WZAvssqIj04S
+# gwdvZAmHwCWoy2xHQhjDzmGZUWF5FCso9B0EHePIsByU1xOapqZsjueJvpjSaz3J
+# jEtbhdlsM6ZFpZAesuEBy0sT1Wr+rtO4XTLMw1bsAQvB9wFaNPaqI+6hgAf4w0Z7
+# TaPF275dGx/BVIjhSaR44d0hE07vUEYQoHX/RnX02Kgu9EYs7greb2gt4IWRetl9
+# NoXfQqCRcEo6HDVRd/kW/UhbQloj0+PpgOyQXOKZRtsUehOqzRxTMtUbDx6Sp7B+
+# yBcvztR07uKBzd/s5kumFgq5+1k7f9yW4bDyokfcsC04hP9/ZLi7hJBWJdEpoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMjA4WjAjBgkqhkiG9w0BCQQxFgQUYPdI
-# 3KYdB9HbJEbutZ4XCsPm4DswDQYJKoZIhvcNAQEBBQAEggEAXJMyGr8NBXxLPois
-# VdHXaFWh8ugBi6njxzhKxkC5nMS5Kvf9vY7I9qMMk0vJG+ZKb4Q2S5PhBPkzwi+m
-# cduK/8LxXB89IRMxvQm0Il/1LQrdI3cy2CV4fZ3k/9mSFP8Jfos6QBFEOCkiSzr2
-# w3g3fPqQXvgS6AXVmiNJG7VaDw8ItMoTrtOSyH6fbObBAKhpDGmS9eXNaEWQeR1w
-# MphCKvs9GmRmriW2Vpxg4rwppuA/S17hPbKaCBnAPITpWqA6njY5VzkcUjeWa8AC
-# 2YeUNZchw2J9jWOVNA/qpw4U6XmRaFUy2vWKytijclSuUitsiy5XSAuxV2SdpYk2
-# D2K66w==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzM4WjAjBgkqhkiG9w0BCQQxFgQUWjIn
+# KP/eB1HDajCUYoFDiYylvV4wDQYJKoZIhvcNAQEBBQAEggEAOXMKLpJRqpLSfEez
+# O0esLex28tFZ2/2+t/MnNFoTeYUsLTrpAsL1ipPu5ZOSzxfHWRSDOmJTAx1jW/AY
+# DpwqZBhaYqWvvEqZ17dhg1gHOUoBi7H/RB2NjZik+SlB3EfizsSDIrXfVWQ8I0jV
+# NzhI5gtSclEMGiRlWpOyCtRrSvaP1DYs0p6cRisTICSCsSpePZV8/7Fs/GgZHnMG
+# ThXSrM7VwfGuv3hRxDwz1EL+DjpgV/twqlwmOz9n6T91tL/X9cznWrFkl5VdDDCq
+# perGN5MRVC9G8ZXvLkLTaCqD70wnnKZwEF2DkVYwSiG8+htNmgiDAEAr/cNv4sYm
+# M+Qg4w==
 # SIG # End signature block

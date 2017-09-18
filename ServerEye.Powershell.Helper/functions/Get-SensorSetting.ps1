@@ -22,15 +22,14 @@ function Get-SensorSetting {
 
     Begin{
         $AuthToken = Test-Auth -AuthToken $AuthToken
-        $result = @()
     }
     
     Process {
-        $result += getSettingBySensor -sensorId $SensorId -auth $AuthToken
+        getSettingBySensor -sensorId $SensorId -auth $AuthToken
     }
 
     End{
-        $result
+
     }
 }
 
@@ -54,16 +53,15 @@ function getSettingBySensor ($sensorId, $auth) {
         $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
         $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
         $out | Add-Member NoteProperty Customer ($sensor.customer)
-        $result += $out
+        $out
     }
-    return $result
 }
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU2u2cvJ6lg8eoSJ/WJdNI7jpi
-# QIagghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUf/hjarj2CI34WFP+uCZrMCCq
+# Q6ygghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -184,24 +182,24 @@ function getSettingBySensor ($sensorId, $auth) {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBRpAZ+qczrLKHR8
-# 4wDgK3Fx5HFHZzANBgkqhkiG9w0BAQEFAASCAQAWCFNsg4Wy481aKUSweRRrjg/5
-# UYRoR8ZRpwyaKmJN+hpc1vJVIN6InP7xE749pQ/Zm+2Qy+NyrHAt0q2UB59JZAZ/
-# 0RgY//Cg4kiGSNMSii53rmskAAkiCUgD78F1O1Vu9VbTcfWlZxZORRe5EOm0mAtk
-# +vEdFb89a4xYLoA9FpWh+4oUW1j7qCbb6MwdFRmzcxbG8+qbIcIsG779XJiunKCt
-# +Ae+yVw4B62w8p5NSRhk3KUk1T9w0gQ0tI89h8YI+r2U8E8jyTA/r+M1Fj3suOLt
-# 5nrTtpJkGmCFyXzxTvUetM07IlJeFaYalU2iplFxGMRQtDpvxGfSZ+TPQmDYoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSmB6DUfM6dHxel
+# JvNa9YorORnzvTANBgkqhkiG9w0BAQEFAASCAQBoYzpVwf00USqZcdCRxzY7OPql
+# mhNLof599VwDanA8YQTd7VPCc+3uv6YB9iOd19jV6g04YMvZ9slG85bp2sHp0su2
+# ZGIMiQ2vbjh+Ife2n3lqyuHXJBeHdf4txuNz9/W6QMM5hw6TfIe/YXZ8W3gAXHSi
+# BhLR/0P2GeJ/Gf8dNuC6DB5mOoARah6ILKv/mn2iCSrkXTLlIvN3YOLCwpMYx7OK
+# 59Wgbh9IK3WJ6ccI3KGv30POjtmCTpm0rcc18EkZUjdMOY+N8eD8CSlFnrpwFngZ
+# 9aYemS/iIrqN+0TCWLOzv0TtEGWKnILv/8XDCNhaogqmxdUDJcQ/YRSEUYdToYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMjExWjAjBgkqhkiG9w0BCQQxFgQUW3by
-# h34ngkQYaSok1xeZaj9+87UwDQYJKoZIhvcNAQEBBQAEggEABFQ+kDZEBcFyjOwU
-# bcj0eaZFpjRmBTU1dtsk5rFLAos5dnTY88hWk0P6GUTSl+FxY+eHcEZY8GppINtw
-# LcWIfQfjT1kccjJdO1edh3Fa9jB8tKpS1Uo00E0Ihb/Oo2NeH/D1Edgbup1GZ9xi
-# RoW51M3DvcWIcxQ8PISxd9yZ8z+qAVP9Pq+JKv65/kfpxgsct5l4C5qaib3jOWF+
-# j9yb5Xhvpmq/1yaBHVvk/D7HNod/uQNpf8CmvKS9rztL+BjUgBsba7m3DsyUEs6W
-# hpB/+rGjb2ShsFf4upKCa38bYtoeg1fnUGIMmceLHplAP8iQ9wyTowsiPmQChH0j
-# CSZKNQ==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzQxWjAjBgkqhkiG9w0BCQQxFgQUmSat
+# i39duYpxZHcMsh1V3vNyzS4wDQYJKoZIhvcNAQEBBQAEggEAbg3WGrfZt+5gvtWQ
+# tU3rvM9MpGoGyyJYs0HKBKI2explH2balBO2hZkOJWbos2dqZgf17JRid0j/Km2v
+# QHVE5RvEu9rXMjdMAjVeOJLGAM1+fRH5mxDCTzvwh65J8yN8zFdw37msXwfmct97
+# 8QTQrNS34BV5TvDInkZLa59XI2Qcc4KZchBeJfZZU+f+x3aEqbbjKKMoJnQ3li0d
+# uhyfEHVPHiNKfrx0mF5ipPZSE3MfGTN3hO9+QJdnE2VWHGm+RrKfApSD0dVNDk+o
+# HCz/iUCpZcEEwaCTUmQUNAUDY8CuXabOhUWURWYEt3ZdGGHEDEEVBVK5nFgV83rh
+# L+sxNA==
 # SIG # End signature block

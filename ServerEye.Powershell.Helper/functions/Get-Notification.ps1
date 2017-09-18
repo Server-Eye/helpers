@@ -49,14 +49,13 @@ function Get-Notification {
 
     Begin{
         $AuthToken = Test-Auth -AuthToken $AuthToken
-        $result = @()
     }
     
     Process {
         if ($SensorId) {
-            $result += getNotificationBySensor -sensorId $SensorId -auth $AuthToken
+            getNotificationBySensor -sensorId $SensorId -auth $AuthToken
         } elseif ($SensorhubId) {
-            $result += getNotificationOfContainer -containerID $SensorhubId -auth $AuthToken
+            getNotificationOfContainer -containerID $SensorhubId -auth $AuthToken
         } else {
             Write-Error "Unsupported input"
         }
@@ -64,7 +63,7 @@ function Get-Notification {
     }
 
     End{
-        $result
+
     }
 }
 
@@ -87,8 +86,6 @@ function getNotificationOfContainer ($containerID, $auth) {
         $customerName = $sensorhub.Customer
     }
     
-    $result = @()
-    
     foreach ($notify in $notifies) {
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
        
@@ -107,16 +104,13 @@ function getNotificationOfContainer ($containerID, $auth) {
         $out | Add-Member NoteProperty Sensorhub ($sensorhubName)
         $out | Add-Member NoteProperty OCC-Connector ($connectorName)
         $out | Add-Member NoteProperty Customer ($customerName)
-        $result += $out
+        $out
     }
-    return $result
 }
 
 function getNotificationBySensor ($sensorId, $auth) {
     $notifies = Get-SeApiAgentNotificationList -AuthToken $auth -AId $sensorId
     $sensor = get-SeSensor -SensorId $sensorId -AuthToken $auth
-
-    $result = @()
 
     foreach ($notify in $notifies) {
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
@@ -137,15 +131,16 @@ function getNotificationBySensor ($sensorId, $auth) {
         $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
         $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
         $out | Add-Member NoteProperty Customer ($sensor.customer)
-        $result += $out
+        $out
     }
-    return $result
+
 }
+
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUKk6kjE2UBe/9biWCqKELW83S
-# i0ygghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUW8aBKAHGJZTqoYiHpETQ2psF
+# M06gghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -266,24 +261,24 @@ function getNotificationBySensor ($sensorId, $auth) {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBTif4HRDrpf8RF2
-# rFlQiXxr4VzHJzANBgkqhkiG9w0BAQEFAASCAQCAY1KzVNmm+tFHijxN2ruAy+cv
-# ETyg0+TUBl8USv28t/zg4bZJN0+X47UbvLsyejSI0IQMy9P3jnrT5ObT3RqbnwYE
-# zTZO8UJM9nIuu/SaUP+NiAKr+RLhEpRTIIA0ZRo0jkAYeePeaM8AyakraVbqYPRP
-# EHRsCZawZuGuvj3B6hU/t+a+/6vGOtlKfmVELzY/7X/r2VV1bqxjM2PQ/wOkkIba
-# bMeJkXm9qp3us97tgVzq3ixe5wZ93OBWO5X/8d0gEwM89VUTcdLTHII3ejTLfvl+
-# bCGvWON7RnN320f7RYFbBllhKaIQiGVh0jNgCyh+fh0tiVxfEYFPSwrnaXsToYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ7R67c1m8K9wKE
+# 7EQXVJ4G6Dl1FzANBgkqhkiG9w0BAQEFAASCAQCL7wTHa5uNSLbwFhhsOLtUmB7C
+# h5X6lURRCEcO1D3IR7p87lTV6n89TburYp4rzGBf/aHcF3reXTnlX9UKi7CqJ5O2
+# 5FixFI1nU0/PQ699b6QlqPKvbDIF3azxVAnF9+Qom62TVNJdjifRdGEdtraeBVB/
+# 1OPVQwADoCuPs7w4NHEAZCqNcmN/+yhosUl6P1F0Ggu6A5l/UMqZ/ZJk8wljVBPj
+# nqb8k/4UrqKmYHxohhfAsbJDpSpIe6YATKDAAF9HGiWghUccht3aoBzG4NKPmIJY
+# pgb4vk9bOSl/369m17uNDm56XkuN8JeVR0LjsLDlQjoRazjzQ/KOgQTVT66loYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMjAyWjAjBgkqhkiG9w0BCQQxFgQUlS4o
-# vmLsl490QNo7kglP3oAyakYwDQYJKoZIhvcNAQEBBQAEggEABDS3PtK09kQzBi8V
-# 7/emD5JYgTR4iS8ToNUGt+17kMU4dqYYNtpItYpi3FSUKB7XuhRE9NW6oU1EHWtu
-# PGJN3i+p319o8P7E+XdWn5tASdc+kbECP2gKDDLKS9O+SBYPwP/MgS6ERw2TjgrS
-# 2pinioxiZ1/r42aTuO7zPu2tPmYO2KeR0UJtlp4pktxfViIlkZz6tgtyyTm/EBR/
-# wIdxDX2PAt/uRk4ezNxEYDKofu/LwpRSIQQSXs44HFiJFfIf0flUmmiUAnCYAXkj
-# l/hsYcu2KJGgswBVhNZVV1Q2DSNibB3RMYntJleKRrgf4JoWPjp/WrvVnYXSkBfg
-# e1L8zw==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzMyWjAjBgkqhkiG9w0BCQQxFgQUvHEa
+# KONNNaSNdvtDhDn8UNIvgvAwDQYJKoZIhvcNAQEBBQAEggEAqd7H5tJ51t2xnVai
+# D63/eFYwa5aEPbSCF8wenAXDTuZHV5/qhnbeRp6PY4SuXhGwbbiT4jZ3TROemAWc
+# b7vcsU47/TxfbwzC4MAPYb/6ginouzVboqp3/DdkYLk/yn6+XzMZGwOuLr/4feGW
+# qIWQM2YTFWhdkZv+ItuWOKbalIbP1diGen4wdM5qC8RBpSWaVruDBpvU9/sS1Fmt
+# gbqQRlzhxdIcPhzLJkqxKfbRpDlRHm9TjJjXRokLHmixHE0RC7KM2zERnQKg7Pdk
+# UKvHNBFbP4TvNjY7pF+/VwRZyrJBXDigq16noEbm6UNEpSK0cNbGYiHphEckAugT
+# xj5e6A==
 # SIG # End signature block

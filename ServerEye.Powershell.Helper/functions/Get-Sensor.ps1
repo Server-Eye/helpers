@@ -33,23 +33,21 @@ function Get-Sensor {
 
     Begin{
         $AuthToken = Test-Auth -AuthToken $AuthToken
-        $result = @()
         cacheSensorTypes -auth $AuthToken
     }
     
     Process {
         if ($SensorhubId) {
-            $result += getSensorBySensorhub -sensorhubId $SensorhubId -filter $Filter -auth $AuthToken
+            getSensorBySensorhub -sensorhubId $SensorhubId -filter $Filter -auth $AuthToken
         } elseif ($SensorId) {
-            $result += getSensorById -sensorId $SensorId -auth $AuthToken
+            getSensorById -sensorId $SensorId -auth $AuthToken
         } else {
             Write-Error "Please provide a SensorhubId or a SensorId."
         }
-
     }
 
     End {
-        $result
+
     }
 }
 
@@ -78,16 +76,16 @@ function cacheSensorTypes ($auth) {
 function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
     $agents = Get-SeApiContainerAgentList -AuthToken $auth -CId $sensorhubId 
     $sensorhub = Get-Sensorhub -SensorhubId $sensorhubId -AuthToken $auth
-    $result = @()
+
 
     foreach ($sensor in $agents) {
         $count++
         if ((-not $filter) -or ($sensor.name -like $filter)) {
-            $result += formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
+            formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
         }
     }
 
-    return $result
+
 }
 
 function getSensorById ($sensorId, $auth) {
@@ -95,7 +93,7 @@ function getSensorById ($sensorId, $auth) {
     $sensor | Add-Member NoteProperty id ($sensor.aId)
 
     $sensorhub = Get-Sensorhub -SensorhubId $sensor.parentId -AuthToken $auth
-    return formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
+    formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
 }
 
 function formatSensor($sensor, $sensorhub, $auth) {
@@ -103,27 +101,25 @@ function formatSensor($sensor, $sensorhub, $auth) {
 
     $type = $Global:SensorTypes.Get_Item($sensorDetails.type)
 
-    $out = New-Object psobject
-    $out | Add-Member NoteProperty Name ($sensor.name)
-    $out | Add-Member NoteProperty SensorType ($type.defaultName)
-    $out | Add-Member NoteProperty SensorId ($sensor.Id)
-    $out | Add-Member NoteProperty Interval ($sensorDetails.interval)
-    $out | Add-Member NoteProperty Error ($sensor.state -or $sensor.forceFailed)
-    $out | Add-Member NoteProperty Sensorhub ($sensorhub.name)
-    $out | Add-Member NoteProperty OCC-Connector ($sensorhub.'OCC-Connector')
-    $out | Add-Member NoteProperty Customer ($sensorhub.customer)
-    $out | Add-Member NoteProperty Message ($sensor.message)
+    [PSCustomObject]@{
 
-    
-    return $out
+        Name = $sensor.name
+        SensorType = $type.defaultName
+        SensorId = $sensor.Id
+        Interval = $sensorDetails.interval
+        Error = $sensor.state -or $sensor.forceFailed
+        Sensorhub = $sensorhub.name
+        'OCC-Connector' = $sensorhub.'OCC-Connector'
+        Customer = $sensorhub.customer
+        Message = $sensor.message
+    }
 }
-
 
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUuS66Hk3e165mVcvtCaF1STNj
-# DZqgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUzm4AbF/m96ugRDVk7UOryqWm
+# 5sGgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -244,24 +240,24 @@ function formatSensor($sensor, $sensorhub, $auth) {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQsX/7DEwggh+d4
-# fNhE6T4q+dqs9DANBgkqhkiG9w0BAQEFAASCAQACrRUIgHw8U68+RHMBm2eFLvgS
-# stQkBVcVysj9DYVDQ+YTTfJq4ALbAi5oY/kI+IcZ/oDUJ1J9AMT/QQjACXFDWqFB
-# MvFMacBD0jR6YJF9ewNug1BksnGRKcReYPYXmQQhs6jAGXn5mtNAXbDW54NkppE4
-# qdWRm9dBYlLzBjiZClJ7NyCWoqF+BtlQcP8jCCuR0AoD2PdMNR7HmXaOjmArkg+F
-# ANDESXP5ZfBDI6KfnXfUdAsITswHfak86uVujBNihxiCy7mjqV8gPZ0DCINTqa54
-# WVhurLFGWWHc683gLyP+Y5rx6MfS+1M/M9FF/4ZwIumEW5y9gghjOzUfpuyuoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQj7M3cAjLcXqro
+# tp7+ze/zoRO2OjANBgkqhkiG9w0BAQEFAASCAQAmr7KFWujk6yKHUlVjOONwG2S6
+# xkIQZc2lCc7cycuID0p68DFGwnkvGOeguHezGnm2Om1RWsSXXk+lU4XXxu+Y9RH2
+# DWHIJuTSny39Bu0JsaY+2uQPrYsHzJAZ2fpuknjUV7W5m29piZD86dB7oj5/r5Z6
+# WPwlblnX763as3XQHRtUNk3a2qlC3/Q2Lryp3+VtfCZB4lROlEg0HgOCL/AaQ+Ko
+# l6GC620gEi9lP+onieTE8esYyW22s6BR3/DDb0M8dDyVFj+16GR/9QMNv1GwG9vF
+# 01Hz5qbEQlltnXE1xLH/cnRucvnRBfp2yf+DQb6kNK2VEup4mKyxHZtD8pTCoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE0MDgxMjA1WjAjBgkqhkiG9w0BCQQxFgQUUWXl
-# GqFaNQas//oF04HO0FNCLXUwDQYJKoZIhvcNAQEBBQAEggEALw5bGShZshv67Usp
-# 3wEESe4K6V2J85egKyUEjNiahK4pND1utM2Y39g3r4+MknCylMV9ZW/lsY91HlKT
-# a9NFh5N0W2e7AtVHr3aaSnzUuBiDvT+4l6jZU/ueiKuqyZeb/6aeFX4AV7OeOOmB
-# kc9DKDnVn1Ud23ienuP5iuuq0cTDAUpce0b94XNejbcaniwWAv7J8rJRiLcqHaqU
-# OENDeQi+dGLTEQUW480d5nui1aiVaY/PbBAfAZKmXMRMyb1jctPvUtEL5MrDrueJ
-# +IQhVgtayzbnM1rl/eElW+y4EbiY2xaCYUpbaFMf/VN/Ivrf5jgYHKs/4p9vueUn
-# 7Cf9ew==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzM1WjAjBgkqhkiG9w0BCQQxFgQUeiWf
+# h+VFINnX6iR2pOp0wxplj54wDQYJKoZIhvcNAQEBBQAEggEADsoChzw04RBlsIC/
+# K6fuD62meCqlnuCSwTNShuLZW2hshe4EPbz+ZXZq2ZNz5c0WuaF5DortS+ZLz6fv
+# +eY7CYQ+0P50ftqnWvZu5XhAs3Uo2pRxDZm1rRJjfbbXD84DNAI/shAyDKKK16WP
+# RBlLsQwcBPhMwXgaUGorBh0soVeLmk4VR+txTvAKo9ik0L248raA8WxcFf+P53Yi
+# 1wr1mgCE4qVf3rIFPDumukeedhMPLGou+7W43HEWEkzuR1A/dVpTKoRYhqKnKROn
+# LveC9j9NjUUqQtncCmEuvrVrvaOjhp69xHCHhIP+PU1NLI5lwdVfcnou0zoHNSPv
+# w4WEhQ==
 # SIG # End signature block
