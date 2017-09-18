@@ -38,7 +38,7 @@ function Get-Sensor {
     
     Process {
         if ($SensorhubId) {
-            getSensorBySensorhub -sensorhubId $SensorhubId -filter $Filter -auth $AuthToken
+            #getSensorBySensorhub -sensorhubId $SensorhubId -filter $Filter -auth $AuthToken
         } elseif ($SensorId) {
             getSensorById -sensorId $SensorId -auth $AuthToken
         } else {
@@ -90,10 +90,27 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-SeApiAgent -AId $sensorId -AuthToken $auth
-    $sensor | Add-Member NoteProperty id ($sensor.aId)
 
     $sensorhub = Get-Sensorhub -SensorhubId $sensor.parentId -AuthToken $auth
-    formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
+    
+    $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
+    
+    $type = $Global:SensorTypes.Get_Item($sensor.type)
+    
+    [PSCustomObject]@{
+
+        Name = $sensor.name
+        SensorType = $type.defaultName
+        SensorId = $sensor.aId
+        Interval = $sensor.interval
+        Error = $state.state -or $state.forceFailed
+        Sensorhub = $sensorhub.name
+        'OCC-Connector' = $sensorhub.'OCC-Connector'
+        Customer = $sensorhub.customer
+        Message = $state.message
+    }
+
+    
 }
 
 function formatSensor($sensor, $sensorhub, $auth) {
@@ -115,11 +132,12 @@ function formatSensor($sensor, $sensorhub, $auth) {
     }
 }
 
+
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUzm4AbF/m96ugRDVk7UOryqWm
-# 5sGgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUdn/ceo9Lulxl1ZPeMoiG+bmh
+# gaOgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -240,24 +258,24 @@ function formatSensor($sensor, $sensorhub, $auth) {
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQj7M3cAjLcXqro
-# tp7+ze/zoRO2OjANBgkqhkiG9w0BAQEFAASCAQAmr7KFWujk6yKHUlVjOONwG2S6
-# xkIQZc2lCc7cycuID0p68DFGwnkvGOeguHezGnm2Om1RWsSXXk+lU4XXxu+Y9RH2
-# DWHIJuTSny39Bu0JsaY+2uQPrYsHzJAZ2fpuknjUV7W5m29piZD86dB7oj5/r5Z6
-# WPwlblnX763as3XQHRtUNk3a2qlC3/Q2Lryp3+VtfCZB4lROlEg0HgOCL/AaQ+Ko
-# l6GC620gEi9lP+onieTE8esYyW22s6BR3/DDb0M8dDyVFj+16GR/9QMNv1GwG9vF
-# 01Hz5qbEQlltnXE1xLH/cnRucvnRBfp2yf+DQb6kNK2VEup4mKyxHZtD8pTCoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSj2sM77WIV+S8B
+# AOE69M52PIvw/jANBgkqhkiG9w0BAQEFAASCAQAiaeYPz2JaxhLVTkunKL1dDES7
+# R36kYdVVmoP6VO86M/hsrYw8bsC3V3+dhi2XyaoNvC6YD17cKH4m8jd+QFaVx9yK
+# alfEMLHUVHO3GaPIE2QW5YvEcygN39melU6j7wYDkRG1P+XRjQZoYkoR/UGhRKqQ
+# 6TqRGsHGjRKcqnLTbjUfGpb9ocML04tLGfRNtNmwM+Be93atmPC8Pv1PggUSydZy
+# qxgvf4OL3XJeIiMG2IkabTYbgUMLqrovPeDrNHiBgY78yRnSeMZ/f5poefklaawS
+# GrECY7I9MYL+FG6rmIbW2WpPyM6Tjnbn0S7N7czCHrtoBDrrnJu73HvYz+pLoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTMzNzM1WjAjBgkqhkiG9w0BCQQxFgQUeiWf
-# h+VFINnX6iR2pOp0wxplj54wDQYJKoZIhvcNAQEBBQAEggEADsoChzw04RBlsIC/
-# K6fuD62meCqlnuCSwTNShuLZW2hshe4EPbz+ZXZq2ZNz5c0WuaF5DortS+ZLz6fv
-# +eY7CYQ+0P50ftqnWvZu5XhAs3Uo2pRxDZm1rRJjfbbXD84DNAI/shAyDKKK16WP
-# RBlLsQwcBPhMwXgaUGorBh0soVeLmk4VR+txTvAKo9ik0L248raA8WxcFf+P53Yi
-# 1wr1mgCE4qVf3rIFPDumukeedhMPLGou+7W43HEWEkzuR1A/dVpTKoRYhqKnKROn
-# LveC9j9NjUUqQtncCmEuvrVrvaOjhp69xHCHhIP+PU1NLI5lwdVfcnou0zoHNSPv
-# w4WEhQ==
+# BgkqhkiG9w0BCQUxDxcNMTcwOTE4MTYxMjE2WjAjBgkqhkiG9w0BCQQxFgQU0P3B
+# S+1BzDQVlQV6fXDPSMHoFCswDQYJKoZIhvcNAQEBBQAEggEALVeRFxSqDNsFvScr
+# ADXa+J7P70SXz68WGoxZ8hLCX1c2LJFP39I4iGq/s+G+ASdyNiyl2k9orEPJOnui
+# 5oZo0+zK+8byfb0K+RHVL2abGdxZixyn//JM7G/U67urxVuAkB2//Lob8HLIeJz4
+# AMzLhCO96cZ2PEuNvY/HavgMDrwYILfKRd4+7ZkPO9bgl7N5ebeVtKkGcBwOnufS
+# HqeYzLnSOK1na8y9nqeT9haqqBrlv72ERvPX6STvghm3ma93V+05f5OBy768AuPT
+# E82AeB/D1TLmg9UROm78SUfSWd8tj/Hj6TCkN8q+A1N5daSrThU1SX3scHXXp6+7
+# RUnZeA==
 # SIG # End signature block
