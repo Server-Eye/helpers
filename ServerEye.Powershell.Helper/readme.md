@@ -90,7 +90,9 @@ Disconnect-SESession
 * Get-SENotification
 * Get-SESensor
 * Get-SESensorSetting
++ Set-SESensorSetting
 * Get-SESensorhub
+* Restart-SESensorhub
 * New-SENotification
 
 #### SeApi Namespace
