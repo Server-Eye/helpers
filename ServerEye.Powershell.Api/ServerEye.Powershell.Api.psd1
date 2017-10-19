@@ -12,7 +12,7 @@
 RootModule = 'ServerEye.Powershell.Api.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.0.1'
+ModuleVersion = '2.0.2'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -268,7 +268,7 @@ PrivateData = @{
         IconUri = 'https://github.com/Server-Eye/helpers/raw/master/ServerEye.Powershell.Api/icon.png'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Initial Release'
+        ReleaseNotes = 'Bug fixes'
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
