@@ -34,7 +34,18 @@ function Get-SensorState {
         if ($IncludeRawData) {
             $withRawData = 'true'
         }
-        Get-SeApiAgentStateList -Aid $SensorId -AuthToken $AuthToken -Limit 1 -IncludeRawData $withRawData
+        $state = Get-SeApiAgentStateList -Aid $SensorId -AuthToken $AuthToken -Limit 1 -IncludeRawData $withRawData
+
+        [PSCustomObject]@{
+                    SensorId = $state.aId
+                    StateId = $state.sId
+                    Date = $state.date
+                    LastDate = $state.lastDate
+                    Error = $state.state -or $state.forceFailed
+                    Resolved = $state.resolved
+                    SilencedUntil = $state.silencedUntil
+                    Raw = $state.raw
+                }
     }
 
     End{

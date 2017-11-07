@@ -89,6 +89,7 @@ Disconnect-SESession
 * Get-SECustomer
 * Get-SENotification
 * Get-SESensor
+* Get-SESensorState
 * Get-SESensorSetting
 + Set-SESensorSetting
 * Get-SESensorhub
