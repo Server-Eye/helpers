@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2017-07-06T11:56:43.238Z
+DATE: 2018-01-23T10:09:33.860Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -12,7 +12,7 @@ DESC: Module enables easier access to the PowerShell API
 
     
         .PARAMETER $Query
-        Ob object containing different query parameters
+        An object containing different query parameters
         
         .PARAMETER $Limit
         How many entries of the actionlog do you need? Max value is 100.
@@ -436,6 +436,44 @@ $AkId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/agent/type/$AkId/setting" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Get all differences between a container / multiple containers and a template.
+
+    
+        .PARAMETER $CId
+        The id of a container or multiple ids as array.
+        
+        .PARAMETER $TId
+        The id of a template.
+        
+        .PARAMETER $Checks
+        An array of checks to check for violations between template and container.
+        
+    #>
+    function Get-ComplianceViolation {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+$TId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('applyNotifications','dropNotifications','applyTags','dropTags','applyAgents','dropAgents','applyAgentSettings')]
+$Checks,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/violation?cId=$CId&tId=$TId&checks=$Checks" -authtoken $AuthToken
         }
     }
     
@@ -1013,6 +1051,33 @@ $CId,
 
     <#
     .SYNOPSIS
+    Get a customers secretKey.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+    #>
+    function Get-CustomerSecret {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CId/secret" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     List customer settings.
 
     
@@ -1133,7 +1198,7 @@ $CId,
 [Parameter(Mandatory=$true)]
 $Year,
 [Parameter(Mandatory=$true)]
-[ValidateSet(1,2,3,4,5,6,7,8,9,10,11,12)]
+[ValidateSet('1','2','3','4','5','6','7','8','9','10','11','12')]
 $Month,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -1166,7 +1231,7 @@ $Month,
 [Parameter(Mandatory=$true)]
 $Year,
 [Parameter(Mandatory=$true)]
-[ValidateSet(1,2,3,4,5,6,7,8,9,10,11,12)]
+[ValidateSet('1','2','3','4','5','6','7','8','9','10','11','12')]
 $Month,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -2297,6 +2362,166 @@ $Value,
 
     <#
     .SYNOPSIS
+    Set the compliance template and config for a view filter.
+
+    
+        .PARAMETER $VfId
+        The id of a view filter.
+        
+        .PARAMETER $TId
+        The id of a template.
+        
+        .PARAMETER $ApplyNotifications
+        Add missing notifications of agents and update existing ones on the agent.
+        
+        .PARAMETER $DropNotifications
+        Drop notifications of agents that are not configured in the template.
+        
+        .PARAMETER $ApplyTags
+        Add missing tags of agents and update existing ones on the agent.
+        
+        .PARAMETER $DropTags
+        Drop tags of agents that are not configured in the template.
+        
+        .PARAMETER $ApplyAgents
+        Add agents from the template to the sensorhub and update existing ones.
+        
+        .PARAMETER $DropAgents
+        Drop agents on the sensorhub that are not configured in the template.
+        
+        .PARAMETER $ApplyAgentSettings
+        Update settings of agents.
+        
+    #>
+    function Set-ComplianceConfig {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$VfId,
+[Parameter(Mandatory=$true)]
+$TId,
+[Parameter(Mandatory=$false)]
+$ApplyNotifications,
+[Parameter(Mandatory=$false)]
+$DropNotifications,
+[Parameter(Mandatory=$false)]
+$ApplyTags,
+[Parameter(Mandatory=$false)]
+$DropTags,
+[Parameter(Mandatory=$false)]
+$ApplyAgents,
+[Parameter(Mandatory=$false)]
+$DropAgents,
+[Parameter(Mandatory=$false)]
+$ApplyAgentSettings,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'vfId' = $VfId
+            'tId' = $TId
+            'applyNotifications' = $ApplyNotifications
+            'dropNotifications' = $DropNotifications
+            'applyTags' = $ApplyTags
+            'dropTags' = $DropTags
+            'applyAgents' = $ApplyAgents
+            'dropAgents' = $DropAgents
+            'applyAgentSettings' = $ApplyAgentSettings
+            }
+
+            return Intern-PutJson -url "https://api.server-eye.de/2/compliance/config" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Apply the template and config to given containers.
+
+    
+        .PARAMETER $CId
+        The id of a container or multiple ids as array.
+        
+        .PARAMETER $TId
+        The id of a template.
+        
+        .PARAMETER $ApplyNotifications
+        Add missing notifications of agents and update existing ones on the agent.
+        
+        .PARAMETER $DropNotifications
+        Drop notifications of agents that are not configured in the template.
+        
+        .PARAMETER $ApplyTags
+        Add missing tags of agents and update existing ones on the agent.
+        
+        .PARAMETER $DropTags
+        Drop tags of agents that are not configured in the template.
+        
+        .PARAMETER $ApplyAgents
+        Add agents from the template to the sensorhub and update existing ones.
+        
+        .PARAMETER $DropAgents
+        Drop agents on the sensorhub that are not configured in the template.
+        
+        .PARAMETER $ApplyAgentSettings
+        Update settings of agents.
+        
+    #>
+    function Set-ComplianceFix {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+$TId,
+[Parameter(Mandatory=$false)]
+$ApplyNotifications,
+[Parameter(Mandatory=$false)]
+$DropNotifications,
+[Parameter(Mandatory=$false)]
+$ApplyTags,
+[Parameter(Mandatory=$false)]
+$DropTags,
+[Parameter(Mandatory=$false)]
+$ApplyAgents,
+[Parameter(Mandatory=$false)]
+$DropAgents,
+[Parameter(Mandatory=$false)]
+$ApplyAgentSettings,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'cId' = $CId
+            'tId' = $TId
+            'applyNotifications' = $ApplyNotifications
+            'dropNotifications' = $DropNotifications
+            'applyTags' = $ApplyTags
+            'dropTags' = $DropTags
+            'applyAgents' = $ApplyAgents
+            'dropAgents' = $DropAgents
+            'applyAgentSettings' = $ApplyAgentSettings
+            }
+
+            return Intern-PutJson -url "https://api.server-eye.de/2/compliance/fix" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Updates attributes of a container.
 
     
@@ -2682,7 +2907,7 @@ $CId,
         The id of the tag.
         
         .PARAMETER $Name
-        A describing name for the tag. Should be short and without spaces.
+        A describing name for the tag. Should be short and without spaces. Only 'A-Za-z0-9-.' allowed.
         
     #>
     function Set-CustomerTag {
@@ -2692,7 +2917,6 @@ $CId,
 [Parameter(Mandatory=$true)]
 $TId,
 [Parameter(Mandatory=$true)]
-[ValidateSet('A-Z','a-z','0-9','-.')]
 $Name,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -3470,7 +3694,7 @@ $SId,
 [Parameter(Mandatory=$false)]
 $Author,
 [Parameter(Mandatory=$true)]
-[ValidateSet('0 (working)','1 (reopen)','2 (false alert)','3 (hint)')]
+[ValidateSet('working','reopen','false alert','hint')]
 $HintType,
 [Parameter(Mandatory=$true)]
 $Message,
@@ -3547,7 +3771,7 @@ $Code,
 [Parameter(Mandatory=$true)]
 $Name,
 [Parameter(Mandatory=$false)]
-[ValidateSet('0 (user)','1 (customer)','2 (container)')]
+[ValidateSet('user','customer','container')]
 $Type,
 [Parameter(Mandatory=$false)]
 [ValidateSet('JavaScript UTC timestamp')]
@@ -3623,6 +3847,9 @@ $Message,
         .PARAMETER $CId
         The id of the container.
         
+        .PARAMETER $UserId
+        The id of the user or group that should receive a notification.
+        
         .PARAMETER $Email
         Send an email as notification.
         
@@ -3642,6 +3869,8 @@ $Message,
             
 [Parameter(Mandatory=$true)]
 $CId,
+[Parameter(Mandatory=$true)]
+$UserId,
 [Parameter(Mandatory=$false)]
 $Email,
 [Parameter(Mandatory=$false)]
@@ -3660,6 +3889,7 @@ $DeferId,
             $reqBody = @{
             
             'cId' = $CId
+            'userId' = $UserId
             'email' = $Email
             'phone' = $Phone
             'ticket' = $Ticket
@@ -3715,7 +3945,7 @@ $SId,
 [Parameter(Mandatory=$true)]
 $Author,
 [Parameter(Mandatory=$true)]
-[ValidateSet('0 (working)','1 (reopen)','2 (false alert)','3 (hint)')]
+[ValidateSet('working','reopen','false alert','hint')]
 $HintType,
 [Parameter(Mandatory=$true)]
 $Message,
@@ -3819,7 +4049,7 @@ $Name,
         The id of the customer.
         
         .PARAMETER $CouponCode
-        The couponCode you want to use.
+        The couponCode you want to use. Only 'A-Za-z0-9-._' allowed.
         
     #>
     function New-CustomerCoupon {
@@ -3829,7 +4059,6 @@ $Name,
 [Parameter(Mandatory=$true)]
 $CId,
 [Parameter(Mandatory=$true)]
-[ValidateSet('A-Z','a-z','0-9','-._')]
 $CouponCode,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -3937,7 +4166,7 @@ $AddressObject,
 
     
         .PARAMETER $Name
-        A describing name for the tag. Should be short and without spaces.
+        A describing name for the tag. Should be short and without spaces. Only 'A-Za-z0-9-.' allowed.
         
     #>
     function New-CustomerTag {
@@ -3945,7 +4174,6 @@ $AddressObject,
         Param(
             
 [Parameter(Mandatory=$true)]
-[ValidateSet('A-Z','a-z','0-9','-.')]
 $Name,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -5651,4 +5879,4 @@ $Password,
             return Intern-DeleteJson -url "https://api.server-eye.de/2/user/$UId/twofactor?password=$Password" -authtoken $AuthToken
         }
     }
-   
+    
