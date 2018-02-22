@@ -42,7 +42,7 @@ function Remove-Null {
   Process  {
     $result = @{}
     foreach ($key in $_.Keys) {
-        if ($_[$key]) {
+        if ($_[$key] -ne $null) {
             $result.Add($key, $_[$key])
         }
     }
