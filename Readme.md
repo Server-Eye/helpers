@@ -39,5 +39,8 @@ Connect-SESession | SensorsOfCustomersWithoutNotifications.ps1 | Export-Excel -P
 ```
 
 ## Support
-We provides these scripts as-is. We cannot guarantee that the scripts will work for you. For more information please contact our [support](https://support.server-eye.de).
+We provide these scripts as-is. We cannot guarantee that the scripts will work for you. For more information please contact our [support](https://support.server-eye.de).
 
+## Known issues
+All functions in this namespace require an internet connection to https://api.server-eye.de
+To run these functions, open Internet Explorer at least once and navigate to https://api.server-eye.de. If that works, the provided functions should work aswell.
