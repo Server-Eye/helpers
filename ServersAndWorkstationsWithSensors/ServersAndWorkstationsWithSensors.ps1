@@ -12,7 +12,7 @@ Param(
 Import-Module ServerEye.Powershell.Helper;
 
 function getNameOfFile($cId) {
-    $me = Get-Me -AuthToken $apiKey;
+    $me = Get-SeApiMe -AuthToken $apiKey;
     $date = Get-Date -format d;
 
     $retval = $me.surname + " " + $me.prename + " ServersAndWorkstationsWithSensors " + $date + ".xlsx";
@@ -23,19 +23,19 @@ function getNameOfFile($cId) {
 }
 
 function getVisibleCustomers() {
-    return Get-MyNodesList -AuthToken $apiKey -Filter "customer";
+    return Get-SeApiMyNodesList -AuthToken $apiKey -Filter "customer";
 }
 
 function getContainersOfCustomer($cId) {
-    return Get-CustomerContainerList -AuthToken $apiKey -CId $cId;
+    return Get-SeApiCustomerContainerList -AuthToken $apiKey -CId $cId;
 }
 
 function getAgentsOfContainer($cId) {
-    return Get-ContainerAgentList -AuthToken $apiKey -CId $cId;
+    return Get-SeApiContainerAgentList -AuthToken $apiKey -CId $cId;
 }
 
 function getStateOfAgent($aId) {
-    return Get-AgentStateList -AuthToken $apiKey -AId $aId -IncludeRawData "true";
+    return Get-SeApiAgentStateList -AuthToken $apiKey -AId $aId -IncludeRawData "true";
 }
 
 
