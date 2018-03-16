@@ -78,4 +78,4 @@ foreach ($customer in $customers) {
 }
 }
 }
-$result |ft
+$result

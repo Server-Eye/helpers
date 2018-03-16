@@ -8,12 +8,8 @@ Param(
     [bool]$email=$false,
     [bool]$Phone=$false,
     [bool]$ticket=$false,
-    [string]$deferId=$null
+    [string]$deferId=""
 )
-
-$UserID = "e35002c3-4d90-45b0-93a9-6668add6aae1"
-$AuthToken = "dfd844d5-be47-4265-ab62-fef204988baa"
-$SensorType = "B0772E80-2687-4FD1-B0AE-5007BD83F45B"
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 $result = @()
@@ -63,7 +59,8 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty EMail ($currentnotifcation.email)
                                 $out | Add-Member NoteProperty SMS ($currentnotifcation.phone)
                                 $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
-                                $out | Add-Member NoteProperty Verzoegert ($currentnotifcation.deferTime)
+                                $out | Add-Member NoteProperty verzögerungszeit ($currentnotifcation.deferTime)
+                                $out | Add-Member NoteProperty verzögerungszeitname ($currentnotifcation.deferName)
                                 $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
                                 $result += $out 
                                 }
@@ -74,11 +71,12 @@ foreach ($customer in $customers) {
                          }
                         else {
 
-                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket <#-DeferId $deferId#>
-                       
+                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket
+
                         if ($nnotifications) {
                                foreach ($nnotification in $nnotifications) {
                                $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | where {$_.Nid -eq $nnotification.nId}
+
                                 $out = New-Object psobject
                                 $out | Add-Member NoteProperty Kunde ($customer.name)
                                 $out | Add-Member NoteProperty Netzwerk ($container.name)
@@ -93,7 +91,12 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty EMail ($nnotification.email)
                                 $out | Add-Member NoteProperty SMS ($nnotification.phone)
                                 $out | Add-Member NoteProperty Tanss ($nnotification.ticket)
-                                $out | Add-Member NoteProperty Verzoegert ($nnotification.deferTime)
+                                if ($deferId -ne ""){
+                                $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                $out | Add-Member NoteProperty Verzoegertszeit ($gnn.deferTime)
+                                $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
+                                }
                                 $out | Add-Member NoteProperty Zustand ("Neu")
                                 $result += $out
                                 }           
@@ -106,5 +109,5 @@ foreach ($customer in $customers) {
 }
 }
 }
-$result | FT
+$result
 

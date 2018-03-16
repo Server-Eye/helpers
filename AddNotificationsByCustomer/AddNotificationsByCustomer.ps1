@@ -11,10 +11,6 @@ Param(
     [string]$deferId=$null
 )
 
-$UserID = "e35002c3-4d90-45b0-93a9-6668add6aae1"
-$AuthToken = "dfd844d5-be47-4265-ab62-fef204988baa"
-$CustomerID = "aac53bb3-2733-4247-a9ff-3844c9130b6e"
-
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 $result = @()
 
@@ -73,7 +69,7 @@ foreach ($customer in $customers) {
                          }
                         else {
 
-                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket <#-DeferId $deferId#>
+                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket
                        
                         if ($nnotifications) {
                                foreach ($nnotification in $nnotifications) {
@@ -92,9 +88,13 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty EMail ($nnotification.email)
                                 $out | Add-Member NoteProperty SMS ($nnotification.phone)
                                 $out | Add-Member NoteProperty Tanss ($nnotification.ticket)
-                                $out | Add-Member NoteProperty Verzoegert ($nnotification.deferTime)
+                                if ($deferId -ne ""){
+                                $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                $out | Add-Member NoteProperty Verzoegertszeit ($gnn.deferTime)
+                                $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
+                                }
                                 $out | Add-Member NoteProperty Zustand ("Neu")
-                                $result += $out
                                 }           
                             }
                             }                         
@@ -106,5 +106,5 @@ foreach ($customer in $customers) {
 }
 }
 }
-$result | FT
+$result
 
