@@ -1,177 +1,110 @@
-ï»¿<# AddNotificationsByAgentId
-AUTOR: Mike Semlitsch
-DATE: 24.02.2017
-VERSION: V1.0
-DESC: Adds a notification to all agents of the specified agent type. ATTENTION: Multiple executions of this script will add multiple notifications to each agent.
-#>
-
-param(
-    [string]$apiKey,
-    [string]$userId,
-    [string]$subtypeOfAgent
+[CmdletBinding()]
+Param(
+    [Parameter(ValueFromPipeline=$true)]
+    [alias("ApiKey","Session")]
+    $AuthToken,
+    [string]$userID,
+    [string]$SensorType,
+    [bool]$email=$false,
+    [bool]$Phone=$false,
+    [bool]$ticket=$false,
+    [string]$deferId=$null
 )
 
+$UserID = "e35002c3-4d90-45b0-93a9-6668add6aae1"
+$AuthToken = "dfd844d5-be47-4265-ab62-fef204988baa"
+$SensorType = "B0772E80-2687-4FD1-B0AE-5007BD83F45B"
 
+$AuthToken = Test-SEAuth -AuthToken $AuthToken
+$result = @()
 
+$customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 
-############################################
-#Get Visible Customers
-############################################
-function getVisibleCustomers() {
-    $url = "https://api.server-eye.de/2/me/nodes?apiKey=$apiKey&filter=customer";
+foreach ($customer in $customers) {
+    $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
+    foreach ($container in $containers) {
 
-    return $jsonResponse;
+        if ($container.subtype -eq "0") {
 
+            foreach ($sensorhub in $containers) {
+                if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
 
-}
+                    $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
 
-############################################
-#END Get Visible Customers
-############################################
+                     foreach ($agent in $agents) {
+                                                                                            
+                        if ($agent.subtype -eq $SensorType) {
 
+                        $notifications = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $agent.id
 
+                        if ($notifications){
 
+                          foreach ($notification in $notifications) {
 
+                            if ($notification.userId -eq $userID) {
+                                $currentnotifcations = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $notification.nId -Email $email -Phone $Phone -Ticket $ticket -DeferId $deferId
 
+                            if ($currentnotifcations) {
 
-############################################
-#Get Containers Of Customer
-############################################
-function getContainersOfCustomer($cId) {
-    $url = "https://api.server-eye.de/2/customer/$cId/containers?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Containers Of Customer
-############################################
-
-
-############################################
-#Get Agents Of Container
-############################################
-function getAgentsOfContainer($cId) {
-    $url = "https://api.server-eye.de/2/container/$cId/agents?apiKey=$apiKey";
-
-    $jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-
-    return $jsonResponse;
-
-
-}
-
-############################################
-#END Get Agents Of Container
-############################################
-
-############################################
-#Add Notification 
-############################################
-
-function addNotification($aId, $uId) {
-    
-    $url = "https://api.server-eye.de/2/agent/$aId/notification?apiKey=$apiKey";
-    #$url = "https://api.server-eye.de/2/agent/$aId/notification?apiKey=$apiKey&aId=$aId&userId=$uId";
-
-    #Write-Host $url
-
-    $body = @{
-        #aId=$aId
-        userId=$uId
-    }
-
-    $response = (Invoke-RestMethod -Uri $url -Method Post -Body $body);
-    #$jsonResponse = (Invoke-RestMethod -Uri $url -Method Get);
-}
-############################################
-#END Add Notification 
-############################################
-
-
-
-
-$customerFound = $false;
-
-$arrayCustomers = getVisibleCustomers;
-
-:outer foreach($customer in $arrayCustomers)
-{
-
-    $custId = $customer.id;
-    
-    #if ($customerId -eq $custId) {
-
-        $customerFound = $true;
-
-        Write-Host "customer name: " $customer.name;
-
-    
-
-        $arrayContainers = getContainersOfCustomer($custId);
-
-        :inner1 foreach($container in $arrayContainers)
-        {
-
-            #Write-Host "container ID: " $container.id " " $container.subtype;
-
-            if ($container.subtype -eq "0") {
-            
-                Write-Host "OCC-Connector: " $container.name ;
-
-                #Write-Host "container ID: " $container.id; 
-                #Write-Host "container Name: " $container.name;
-
-
-                :inner2 foreach($sensorhub in $arrayContainers)
-                {
-
-                
-                
-                    if ( $sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
-
-                        Write-Host "   Sensorhub: " $sensorhub.name;
-
-                        $arrayAgents = getAgentsOfContainer($sensorhub.id);
-
-            
-                        :inner3 foreach($agent in $arrayAgents)
-                        {
-
-
-                            if ($agent.subtype -like $subtypeOfAgent) {
-
-                            
-                                Write-Host "      SensorName: " $agent.name;
-                            #showAgentState $agent.id $container.name;
-
-                                addNotification $agent.id $userId
+                               foreach ($currentnotifcation in $currentnotifcations) {
+                                $currentnotifcation = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $currentnotifcation.aId | where {$_.Nid -eq $currentnotifcation.nId}     
+                                $out = New-Object psobject
+                                $out | Add-Member NoteProperty Kunde ($customer.name)
+                                $out | Add-Member NoteProperty Netzwerk ($container.name)
+                                $out | Add-Member NoteProperty Server ($sensorhub.name)
+                                $out | Add-Member NoteProperty Sensor ($agent.name)
+                                if ($currentnotifcation.isGroup -eq $true) {
+                                    $out | Add-Member NoteProperty Benachrichtigung ($currentnotifcation.surname)
+                                } 
+                                else {
+                                    $out | Add-Member NoteProperty Benachrichtigung ($currentnotifcation.useremail)
+                                }
+                                $out | Add-Member NoteProperty EMail ($currentnotifcation.email)
+                                $out | Add-Member NoteProperty SMS ($currentnotifcation.phone)
+                                $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
+                                $out | Add-Member NoteProperty Verzoegert ($currentnotifcation.deferTime)
+                                $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
+                                $result += $out 
+                                }
                             }
+                                                     
+                         }
+                         }
+                         }
+                        else {
 
-                        #    break outer;
-                        }
-
-                    }
-                }
-
-
-
-        
-            }
-
-
-        }
-
-
-    #}
+                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket <#-DeferId $deferId#>
+                       
+                        if ($nnotifications) {
+                               foreach ($nnotification in $nnotifications) {
+                               $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | where {$_.Nid -eq $nnotification.nId}
+                                $out = New-Object psobject
+                                $out | Add-Member NoteProperty Kunde ($customer.name)
+                                $out | Add-Member NoteProperty Netzwerk ($container.name)
+                                $out | Add-Member NoteProperty Server ($sensorhub.name)
+                                $out | Add-Member NoteProperty Sensor ($agent.name)
+                                if ($nnotification.isGroup -eq $true) {
+                                    $out | Add-Member NoteProperty Benachrichtigung ($nnotification.surname)
+                                } 
+                                else {
+                                    $out | Add-Member NoteProperty Benachrichtigung ($nnotification.useremail)
+                                }
+                                $out | Add-Member NoteProperty EMail ($nnotification.email)
+                                $out | Add-Member NoteProperty SMS ($nnotification.phone)
+                                $out | Add-Member NoteProperty Tanss ($nnotification.ticket)
+                                $out | Add-Member NoteProperty Verzoegert ($nnotification.deferTime)
+                                $out | Add-Member NoteProperty Zustand ("Neu")
+                                $result += $out
+                                }           
+                            }
+                            }                         
+}                                                         
+}                 
 }
-
-if (!$customerFound) {
-    Write-Host "Customer NOT found!";
 }
+}
+}
+}
+$result | FT
+
