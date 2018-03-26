@@ -59,6 +59,7 @@ function Connect-Session {
                     return Connect-Session -Credentials $Credentials -Code $secondFactor
                 }
             } else {
+                Write-Output "The server send the error code: $($_.Exception.Response.StatusCode.Value__)"  
                 throw "Could not login. Please check username and password."
                 return
             }
