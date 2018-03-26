@@ -6,10 +6,10 @@ Param(
     [string]$userID,
     [string]$SensorType,
     [string]$CustomerID,
-    [bool]$email=$false,
-    [bool]$Phone=$false,
-    [bool]$ticket=$false,
-    [string]$deferId=$null
+    [switch]$email,
+    [switch]$Phone,
+    [switch]$ticket,
+    [string]$deferId=""
 )
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken

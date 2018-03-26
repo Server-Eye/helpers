@@ -5,9 +5,9 @@ Param(
     $AuthToken,
     [string]$userID,
     [string]$SensorType,
-    [bool]$email=$false,
-    [bool]$Phone=$false,
-    [bool]$ticket=$false,
+    [switch]$email,
+    [switch]$Phone,
+    [switch]$ticket,
     [string]$deferId=""
 )
 
