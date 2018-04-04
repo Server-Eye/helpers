@@ -3,8 +3,11 @@ Param(
     [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
     $AuthToken,
+    [Parameter(Mandatory=$True)]
     [string]$userID,
+    [Parameter(Mandatory=$True)]
     [string]$SensorType,
+    [Parameter(Mandatory=$True)]
     [string]$CustomerID,
     [switch]$email,
     [switch]$Phone,
@@ -41,7 +44,8 @@ foreach ($customer in $customers) {
                           foreach ($notification in $notifications) {
 
                             if ($notification.userId -eq $userID) {
-                                $currentnotifcations = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $notification.nId -Email $email -Phone $Phone -Ticket $ticket -DeferId $deferId
+
+                                $currentnotifcations = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $notification.nId -Email $email.IsPresent -Phone $Phone.IsPresent -Ticket $ticket.IsPresent
 
                             if ($currentnotifcations) {
 
@@ -61,7 +65,10 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty EMail ($currentnotifcation.email)
                                 $out | Add-Member NoteProperty SMS ($currentnotifcation.phone)
                                 $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
-                                $out | Add-Member NoteProperty Verzoegert ($currentnotifcation.deferTime)
+                                if ($deferId -ne ""){
+                                $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                }
                                 $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
                                 $result += $out 
                                 }
@@ -72,11 +79,12 @@ foreach ($customer in $customers) {
                          }
                         else {
 
-                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email -Phone $Phone -Ticket $ticket
-                       
+                        $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email.IsPresent -Phone $Phone.IsPresent -Ticket $ticket.IsPresent
+
                         if ($nnotifications) {
                                foreach ($nnotification in $nnotifications) {
                                $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | where {$_.Nid -eq $nnotification.nId}
+
                                 $out = New-Object psobject
                                 $out | Add-Member NoteProperty Kunde ($customer.name)
                                 $out | Add-Member NoteProperty Netzwerk ($container.name)
@@ -98,6 +106,7 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
                                 }
                                 $out | Add-Member NoteProperty Zustand ("Neu")
+                                $result += $out
                                 }           
                             }
                             }                         
@@ -110,4 +119,3 @@ foreach ($customer in $customers) {
 }
 }
 $result
-

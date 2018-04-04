@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 Param(
     [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
@@ -6,7 +6,7 @@ Param(
     [Parameter(Mandatory=$True)]
     [string]$userID,
     [Parameter(Mandatory=$True)]
-    [string]$CustomerID,
+    [string]$tag,
     [switch]$email,
     [switch]$Phone,
     [switch]$ticket,
@@ -19,7 +19,6 @@ $result = @()
 $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 
 foreach ($customer in $customers) {
-    if($customer.id -eq $CustomerID){
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
@@ -32,14 +31,19 @@ foreach ($customer in $customers) {
                     $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
 
                      foreach ($agent in $agents) {
-                                                                                            
-                                                $notifications = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $agent.id
+                           
+                       $tags = Get-SeApiAgentTagList -AuthToken $AuthToken -AId $agent.id  
+
+                                                  
+                        if ($tags.name -eq $tag) {
+
+                        $notifications = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $agent.id
 
                         if ($notifications){
 
                           foreach ($notification in $notifications) {
 
-                            if ($notification.userId -eq $userID) {
+                            if ($notification.userId -eq $userID) {   
                                 $currentnotifcations = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $notification.nId -Email $email.IsPresent -Phone $Phone.IsPresent -Ticket $ticket.IsPresent
 
                             if ($currentnotifcations) {
@@ -59,14 +63,13 @@ foreach ($customer in $customers) {
                                 }
                                 $out | Add-Member NoteProperty EMail ($currentnotifcation.email)
                                 $out | Add-Member NoteProperty SMS ($currentnotifcation.phone)
-                                $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
                                 if ($deferId -ne ""){
                                 $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
                                 $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
                                 $out | Add-Member NoteProperty Verzoegertszeit ($gnn.deferTime)
                                 $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
                                 }
-                                $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
+                                $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls ver�ndert!")
                                 $result += $out 
                                 }
                             }
@@ -77,12 +80,11 @@ foreach ($customer in $customers) {
                         else {
 
                         $nnotifications = New-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -UserId $userID -Email $email.IsPresent -Phone $Phone.IsPresent -Ticket $ticket.IsPresent
-
+                       
                         if ($nnotifications) {
                                foreach ($nnotification in $nnotifications) {
                                $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | where {$_.Nid -eq $nnotification.nId}
-
-                                $out = New-Object psobject
+                               $out = New-Object psobject
                                 $out | Add-Member NoteProperty Kunde ($customer.name)
                                 $out | Add-Member NoteProperty Netzwerk ($container.name)
                                 $out | Add-Member NoteProperty Server ($sensorhub.name)
@@ -115,3 +117,4 @@ foreach ($customer in $customers) {
 }
 }
 $result
+
