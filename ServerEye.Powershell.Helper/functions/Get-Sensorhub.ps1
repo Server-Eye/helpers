@@ -59,34 +59,53 @@ function getSensorhubById($sensorhubId, $auth) {
     [PSCustomObject]@{
         Name = $sensorhub.name
         IsServer = $sensorhub.isServer
+        IsVM = $sensorhub.isVm
         'OCC-Connector' = $occConnector.name
         Customer = $customer.name
         SensorhubId = $sensorhub.cId
+        OsName = $sensorhub.osName
+        OsVersion = $sensorhub.osVersion
+        OsServicepack = $sensorhub.osServicePack
+        Architecture = $sensorhub.architecture
+        Ip = $sensorhub.ip
+        PublicIp = $sensorhub.publicIp
+        LastBootTime = (([datetime]'1/1/1970').AddSeconds([int]($sensorhub.lastBootUpTime / 1000)))
+        LastRebootInfo = [PSCustomObject]@{ 
+            Reason = $sensorhub.lastRebootInfo.reason
+            Action = $sensorhub.lastRebootInfo.action
+            Comment = $sensorhub.lastRebootInfo.comment
+            User = $sensorhub.lastRebootInfo.user
+        }
+        NumberOfProcessors = $sensorhub.numberOfProcessors
+        TotalRam = [math]::Ceiling($sensorhub.totalRam /1024 /1024)
     }
 }
 
 function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
     foreach ($container in $containers) {
-        
         if (($container.subtype -eq "0") -and ((-not $filterByConnector) -or ($container.name -like $filterByConnector))  ){ # OCC-Connector
-            $customer = Get-Customer -customerId $container.customerId
-
+            #        $customer = Get-Customer -customerId $container.customerId
+            
             foreach ($sensorhub in $containers) {
                 if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
                     if ((-not $filter) -or ($sensorhub.name -like $filter)) {
-
-                        [PSCustomObject]@{
-                            Name = $sensorhub.name
-                            IsServer = $sensorhub.isServer
-                            'OCC-Connector' = $container.name
-                            Customer = $customer.name
-                            SensorhubId = $sensorhub.id
-                        }
+                        getSensorhubById -sensorhubId $sensorhub.id -auth $auth
                     }
                 }
             }
-        }
+
+        #                 [PSCustomObject]@{
+        #                     Name = $sensorhub.name
+        #                     IsServer = $sensorhub.isServer
+        #                     'OCC-Connector' = $container.name
+        #                     Customer = $customer.name
+        #                     SensorhubId = $sensorhub.id
+        #                 }
+        #             }
+        #         }
+        #     }
+         }
     }
 }
 
