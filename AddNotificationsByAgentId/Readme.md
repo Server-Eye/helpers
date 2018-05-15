@@ -1,6 +1,7 @@
 # AddNotificationsByAgentId.ps1
 
-Adds a notification to all agents of the specified customer AND specified by the agent id.
+Adds a notification to agents of the all customers with the specified agent id.
+Changes the notification if on for the User exist
 
 
 ## Download
@@ -25,3 +26,15 @@ The Id of the user who will receive the notification.
 
 ### subtypeOfAgent
 The Id of the agent-type to which you want to add the notification
+
+### email
+Set if you want to receive an email
+
+### phone
+Set if you want to receive an SMS
+
+### Ticket
+Set if you want to create a Ticket
+
+### deferid
+The ID of the delay you want to set
