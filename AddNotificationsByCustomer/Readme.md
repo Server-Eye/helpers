@@ -1,6 +1,6 @@
 # AddNotificationsByCustomer.ps1
 
-Adds a notification to all agents of the specified customer AND specified by the agent id. ATTENTION: Multiple executions of this script will add multiple notifications to each agent.
+Adds a notification to all agents of the specified customer AND specified by the agent id.
 
 
 ## Download
