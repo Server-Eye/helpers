@@ -46,7 +46,7 @@ foreach ($customer in $customers) {
                             if ($currentnotifcations) {
 
                                foreach ($currentnotifcation in $currentnotifcations) {
-                                $currentnotifcation = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $currentnotifcation.aId | where {$_.Nid -eq $currentnotifcation.nId}     
+                                $currentnotifcation = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $currentnotifcation.aId | Where-Object {$_.Nid -eq $currentnotifcation.nId}     
                                 $out = New-Object psobject
                                 $out | Add-Member NoteProperty Kunde ($customer.name)
                                 $out | Add-Member NoteProperty Netzwerk ($container.name)
@@ -63,11 +63,11 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
                                 if ($deferId -ne ""){
                                 $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
-                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | Where-Object {$_.Nid -eq $nnotification.nId}
                                 $out | Add-Member NoteProperty Verzoegertszeit ($gnn.deferTime)
                                 $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
                                 }
-                                $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
+                                $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verï¿½ndert!")
                                 $result += $out 
                                 }
                             }
@@ -81,7 +81,7 @@ foreach ($customer in $customers) {
 
                         if ($nnotifications) {
                                foreach ($nnotification in $nnotifications) {
-                               $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | where {$_.Nid -eq $nnotification.nId}
+                               $nnotification = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $nnotification.aId | Where-Object {$_.Nid -eq $nnotification.nId}
 
                                 $out = New-Object psobject
                                 $out | Add-Member NoteProperty Kunde ($customer.name)
@@ -99,7 +99,7 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty Tanss ($nnotification.ticket)
                                 if ($deferId -ne ""){
                                 $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
-                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | Where-Object {$_.Nid -eq $nnotification.nId}
                                 $out | Add-Member NoteProperty Verzoegertszeit ($gnn.deferTime)
                                 $out | Add-Member NoteProperty Verzoegertsname ($gnn.deferName)
                                 }
