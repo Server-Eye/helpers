@@ -1,6 +1,6 @@
 # AddNotificationsByAgentId.ps1
 
-Adds a notification to all customers with the specified agent id.
+Adds a notification to all agents of all customers with the specified agent id.
 
 Changes the notification if one notification for the User exist
 
@@ -25,10 +25,10 @@ AddNotificationsByAgentId.ps1 -apiKey yourApiKey -userId TheIdOfTheUser -subtype
 ## Parameters
 
 ### apiKey
-The api-Key of the user. ATTENTION only nessesary im no Server-Eye Session exists in den Powershell.
+The api-Key of the user. ATTENTION only nessesary im no Server-Eye Session exists in den Powershell
 
 ### userId
-The Id of the user who will receive the notification.
+The Id of the user who will receive the notification
 
 ### subtypeOfAgent
 The Id of the agent-type to which you want to add the notification
