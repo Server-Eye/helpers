@@ -8,7 +8,7 @@ Param(
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 $Sensortype = "72AC0BFD-0B0C-450C-92EB-354334B4DAAB"
-$result = @()
+#$result = @()
 
 $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 foreach ($customer in $customers) {
@@ -28,13 +28,14 @@ foreach ($customer in $customers) {
                         
                         if ($agent.subtype -like $Sensortype){
                             $version = Get-SeApiAgentStateList -AuthToken $AuthToken -AId $agent.id -IncludeRawData "true"
-                            $out = New-Object psobject
-                            $out | Add-Member NoteProperty Kunde ($customer.name)
-                            $out | Add-Member NoteProperty Netzwerk ($container.name)
-                            $out | Add-Member NoteProperty System ($sensorhub.name)
-                            $out | Add-Member NoteProperty Sensor ($agent.name)
-                            $out | Add-Member NoteProperty Version ($version.raw.data.productVersion.version) 
-                            $result += $out
+                            [PSCustomObject]@{
+
+                            Kunde = $customer.name
+                            Netzwerk = $container.name
+                            System = $sensorhub.name
+                            Sensor = $agent.name
+                            Version = $version.raw.data.productVersion.version 
+                            }
                             }
                         }
                     }
