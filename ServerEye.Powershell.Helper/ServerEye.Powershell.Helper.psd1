@@ -109,7 +109,7 @@ PrivateData = @{
         IconUri = 'https://github.com/Server-Eye/helpers/raw/master/ServerEye.Powershell.Helper/icon.png'
 
         # ReleaseNotes of this module
-        ReleaseNotes = 'Bug Fixes and adding of Function Get-CustomerManager'
+        ReleaseNotes = 'Bug Fixes.'
 
         # External dependent modules of this module
         # ExternalModuleDependencies = ''
