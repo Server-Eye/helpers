@@ -39,7 +39,7 @@ Set if you want to receive an email
 ### phone
 Set if you want to receive an SMS
 
-### Ticket
+### ticket
 Set if you want to create a Ticket
 
 ### deferid
