@@ -1,7 +1,8 @@
 # AddNotificationsByAgentId.ps1
 
-Adds a notification to agents of the all customers with the specified agent id.
-Changes the notification if on for the User exist
+Adds a notification to all customers with the specified agent id.
+
+Changes the notification if one notification for the User exist
 
 
 ## Download
@@ -11,7 +12,12 @@ Please download the helper script with following powershell command:
 iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/AddNotificationsByAgentId/AddNotificationsByAgentId.ps1" -OutFile AddNotificationsByAgentId.ps1
 ```
 
-## Call
+## Call with Session via Connect-SESession
+```
+Connect-SESession | AddNotificationsByAgentId.ps1 -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
+```
+
+## Call with API Key
 ```
 AddNotificationsByAgentId.ps1 -apiKey yourApiKey -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
 ```
@@ -19,7 +25,7 @@ AddNotificationsByAgentId.ps1 -apiKey yourApiKey -userId TheIdOfTheUser -subtype
 ## Parameters
 
 ### apiKey
-The api-Key of the user.
+The api-Key of the user. ATTENTION only nessesary im no Server-Eye Session exists in den Powershell.
 
 ### userId
 The Id of the user who will receive the notification.
