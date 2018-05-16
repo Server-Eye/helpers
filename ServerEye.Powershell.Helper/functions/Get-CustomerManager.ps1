@@ -30,7 +30,7 @@ function Get-CustomerManager {
 
                 foreach ($manager in $managers){
                     [PSCustomObject]@{
-                        Name = $Customer.companyName
+                        CustomerName = $Customer.companyName
                         CustomerId = $Customer.cId
                         CustomerNumber = $Customer.customerNumberExtern
                         User = $manager.prename + " " +  $manager.surname
