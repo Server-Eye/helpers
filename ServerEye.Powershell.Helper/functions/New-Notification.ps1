@@ -17,6 +17,9 @@
     .PARAMETER SendTicket
     Should the alarm be sent to the ticket system. If not specified the default for the user will be selected.
 
+    .PARAMETER DeferId
+    The deferid you want to use. To see all posible DeferIDs use the CmdLet Get-SEDispatchTime
+
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
     
@@ -34,6 +37,8 @@ function New-Notification {
         $SendTextmessage,
         [Parameter(Mandatory=$false)]
         $SendTicket,
+        [Parameter(Mandatory=$false)]
+        $DeferId="",
         [Parameter(Mandatory=$false)]
         $AuthToken
     )
@@ -55,11 +60,12 @@ function New-Notification {
         $out | Add-Member NoteProperty byEmail ($notify.email)
         $out | Add-Member NoteProperty byTextmessage ($notify.phone)
         $out | Add-Member NoteProperty byTicket ($notify.ticket)
-        if ($notify.deferTime) {
-            $out | Add-Member NoteProperty Delay ($notify.deferTime)
-        } else {
-            $out | Add-Member NoteProperty Delay (0)
-        }
+        if ($deferId -ne ""){
+            $sn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -NId $notify.nId -DeferId $deferId 
+            $gn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $sn.aId | Where-Object {$_.Nid -eq $notify.nId}
+            $out | Add-Member NoteProperty Verzoegertszeit ($gn.deferTime)
+            $out | Add-Member NoteProperty Verzoegertsname ($gn.deferName)
+            }
         $out | Add-Member NoteProperty NotificationId ($notify.nId)
         $out | Add-Member NoteProperty Sensor ($sensor.name)
         $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
@@ -71,5 +77,4 @@ function New-Notification {
     End {
 
     }
-
 }
