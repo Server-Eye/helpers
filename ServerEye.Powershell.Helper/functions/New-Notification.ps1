@@ -63,8 +63,8 @@ function New-Notification {
         if ($deferId -ne ""){
             $sn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -NId $notify.nId -DeferId $deferId 
             $gn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $sn.aId | Where-Object {$_.Nid -eq $notify.nId}
-            $out | Add-Member NoteProperty Verzoegertszeit ($gn.deferTime)
-            $out | Add-Member NoteProperty Verzoegertsname ($gn.deferName)
+            $out | Add-Member NoteProperty Defertime ($gn.deferTime)
+            $out | Add-Member NoteProperty Defername ($gn.deferName)
             }
         $out | Add-Member NoteProperty NotificationId ($notify.nId)
         $out | Add-Member NoteProperty Sensor ($sensor.name)
