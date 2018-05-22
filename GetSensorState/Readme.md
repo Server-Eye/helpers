@@ -2,7 +2,7 @@
 
 Shows all Sensors in an Error State.
 
-If -All Parameter is set, all Sensor States are Shown
+If -All Parameter is set, all Sensor States are shown
 
 
 ## Download
