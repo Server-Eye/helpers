@@ -19,29 +19,24 @@ function Get-DispatchTime {
     }
     
     Process {
-            $users = Get-SeApiUserList -AuthToken $AuthToken
-            foreach ($user in $users){
+        $users = Get-SeApiUserList -AuthToken $AuthToken
+        foreach ($user in $users){
 
-                [PSCustomObject]@{
+            [PSCustomObject]@{
 
-                    if ($user.isGroup -eq $true) {
-                        Username = $user.surname
-                    } 
-                    else{
-                        $displayName = ("$($user.prename) $($user.surname)".Trim()) 
-                        Username = $displayName
-                    }
-                    EMail = $user.email
-                    Company = $user.companyName
-                    UserID = $user.uid
+                Username = if ($user.isGroup -eq $true) {
+                    $user.surname
+                } else{
+                    ("$($user.prename) $($user.surname)".Trim()) 
+                }
+                EMail = $user.email
+                Company = $user.companyName
+                UserID = $user.uid
 
-                }    
-            }
-        }        
-    }
+            }    
+        }
+    }        
+    
     End {
     }
 }
-
-
-
