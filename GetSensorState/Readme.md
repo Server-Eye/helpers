@@ -14,7 +14,7 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetSensorState/
 
 ## Call with Session via Connect-SESession
 ```
-Connect-SESession | GetSensorState.ps1 -all
+Connect-SESession | GetSensorState.ps1
 ```
 
 ## Call with Session via Connect-SESession, show all Sensors
