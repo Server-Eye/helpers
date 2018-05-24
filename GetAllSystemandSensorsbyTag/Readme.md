@@ -11,7 +11,7 @@ This script needs the Server-Eye Powershell helper. Please see https://github.co
 
 You can download the helper script with following powershell command:
 ```
-iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetAllSystembyTag/GetAllSystemandSensorwithTag.ps1" -OutFile GetAllSystemandSensorwithTag.ps1
+iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetAllSystemandSensorsbyTag/GetAllSystemandSensorwithTag.ps1" -OutFile GetAllSystemandSensorwithTag.ps1
 ```
 
 ## Execute
@@ -48,7 +48,7 @@ This script supports login via API key and via username and password.
 
 You can download the helper script with following powershell command:
 ```
-iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetAllSystembyTag/GetAllSystemandSensorwithoutTag.ps1" -OutFile GetAllSystemandSensorwithoutTag.ps1
+iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetAllSystemandSensorsbyTag/GetAllSystemandSensorwithoutTag.ps1" -OutFile GetAllSystemandSensorwithoutTag.ps1
 ```
 
 ## Execute
