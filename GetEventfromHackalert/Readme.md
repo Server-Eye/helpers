@@ -14,10 +14,10 @@ Agent intervall from the OCC.
 
 Please download the helper script with following powershell command:
 ```
-iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetEventfromHackalert/GetEventformHackalert.ps1" -OutFile GetEventformHackalert.ps1
+iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetEventfromHackalert/GetEventfromHackalert.ps1" -OutFile GetEventfromHackalert.ps1
 ```
 
 ## Call
 ```
-GetEventformHackalert.ps1 -AgentIntervall "Minutes from the OCC"
+GetEventfromHackalert.ps1 -AgentIntervall "Minutes from the OCC"
 ```
