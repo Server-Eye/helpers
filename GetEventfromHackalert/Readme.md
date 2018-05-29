@@ -19,5 +19,5 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/GetEventfromHac
 
 ## Call
 ```
-GetEventformHackalert.ps1 -AgentIntervall "Minutes form the OCC"
+GetEventformHackalert.ps1 -AgentIntervall "Minutes from the OCC"
 ```
