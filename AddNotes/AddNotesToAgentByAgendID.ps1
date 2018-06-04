@@ -1,18 +1,38 @@
+<# 
+    .SYNOPSIS
+    Add a Note to an all specified Agent based on the AgentType.
+
+    .DESCRIPTION
+    Add a Note to an Agent based on the AgentType.
+
+    .PARAMETER Apikey 
+    The api-Key of the user. ATTENTION only nessesary if no Server-Eye Session exists in den Powershell
+
+    .PARAMETER Agenttype
+    The ID of Agenttype the note should be added to.
+
+    .PARAMETER Message
+    The Message you want to add.
+    
+#>
+
 [CmdletBinding()]
 Param(
-    [Parameter(ValueFromPipeline=$true)]
-    [alias("ApiKey","Session")]
+    [Parameter(ValueFromPipeline = $true)]
+    [alias("ApiKey", "Session")]
     $AuthToken,
-    $Sensortype,
-    $message=(Read-Host "Wie lautet die gewünschte Notiz")
+    [Parameter(Mandatory = $True)]
+    $Agenttype,
+    [Parameter(Mandatory = $True)]
+    $Message
 )
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-$result = @()
-
 $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
+
 foreach ($customer in $customers) {
+
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
@@ -22,20 +42,21 @@ foreach ($customer in $customers) {
             foreach ($sensorhub in $containers) {
 
                 if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
-                
-                   $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
-                                       
-                        foreach ($agent in $agents) {
+                    
+                    $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id
+                                        
+                    foreach ($agent in $agents) {
 
-                        if ($agent.subtype -eq $Sensortype) {
+                        if ($agent.subtype -eq $Agenttype) {
+
                             $note = New-SeApiAgentNote -AuthToken $AuthToken -AId $agent.id -Message $message
-                            $out = New-Object psobject
-                            $out | Add-Member NoteProperty Kunde ($customer.name)
-                            $out | Add-Member NoteProperty Netzwerk ($container.name)
-                            $out | Add-Member NoteProperty System ($sensorhub.name)
-                            $out | Add-Member NoteProperty Sensor ($agent.name)
-                            $out | Add-Member NoteProperty Notiz ($note.message)
-                            $result += $out
+
+                            [PSCustomObject]@{
+                                Customer = ($customer.name)
+                                Network  = ($container.name)
+                                System   = ($sensorhub.name)
+                                Agent    = ($agent.name)
+                                Note     = ($note.message)
                             }
                         }
                     }
@@ -43,4 +64,4 @@ foreach ($customer in $customers) {
             }
         }
     }
-$result
+}
