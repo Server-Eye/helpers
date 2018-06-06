@@ -24,7 +24,8 @@ function Get-Customer {
         [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
         [string]$CustomerId,
         [Parameter(Mandatory=$false,ParameterSetName='byFilter')]
-        [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
+        [Parameter(ValueFromPipeline=$true,Mandatory=$false,ParameterSetName='byCustomerId')]
+        [alias("ApiKey","Session")]
         $AuthToken
     )
     Begin{
