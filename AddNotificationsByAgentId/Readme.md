@@ -14,12 +14,12 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/AddNotification
 
 ## Call with Session via Connect-SESession
 ```
-Connect-SESession | AddNotificationsByAgentId.ps1 -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
+Connect-SESession | AddNotificationsByAgentId.ps1 -userId TheIdOfTheUser -AgentType theIdOfTheAgentType
 ```
 
 ## Call with API Key
 ```
-AddNotificationsByAgentId.ps1 -apiKey yourApiKey -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
+AddNotificationsByAgentId.ps1 -apiKey yourApiKey -userId TheIdOfTheUser -AgentType theIdOfTheAgentType
 ```
 
 ## Parameters
@@ -30,7 +30,7 @@ The api-Key of the user. ATTENTION only nessesary im no Server-Eye Session exist
 ### userId
 The Id of the user who will receive the notification
 
-### subtypeOfAgent
+### AgentType
 The Id of the agent-type to which you want to add the notification
 
 ### email

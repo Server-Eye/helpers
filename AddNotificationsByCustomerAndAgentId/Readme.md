@@ -12,12 +12,12 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/AddNotification
 
 ## Call with Session via Connect-SESession
 ```
-Connect-SESession | AddNotificationsByCustomerAndAgentId.ps1 -customerId TheIdOfTheCustomer -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
+Connect-SESession | AddNotificationsByCustomerAndAgentId.ps1 -customerId TheIdOfTheCustomer -userId TheIdOfTheUser -AgentType theIdOfTheAgentType
 ```
 
 ## Call with API Key
 ```
-AddNotificationsByCustomerAndAgentId.ps1 -apiKey yourApiKey -customerId TheIdOfTheCustomer -userId TheIdOfTheUser -subtypeOfAgent theIdOfTheAgentType
+AddNotificationsByCustomerAndAgentId.ps1 -apiKey yourApiKey -customerId TheIdOfTheCustomer -userId TheIdOfTheUser -AgentType theIdOfTheAgentType
 ```
 
 ## Parameters
@@ -31,7 +31,7 @@ The id of the customer.
 ### userId
 The Id of the user who will receive the notification.
 
-### subtypeOfAgent
+### AgentType
 The Id of the agent-type to which you want to add the notification
 
 ### email
