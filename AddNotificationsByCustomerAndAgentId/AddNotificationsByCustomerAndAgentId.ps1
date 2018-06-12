@@ -66,8 +66,8 @@ foreach ($customer in $customers) {
                                 $out | Add-Member NoteProperty SMS ($currentnotifcation.phone)
                                 $out | Add-Member NoteProperty Tanss ($currentnotifcation.ticket)
                                 if ($deferId -ne ""){
-                                $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
-                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $nnotification.nId}
+                                $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $currentnotifcation.nId -DeferId $deferId 
+                                $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | where {$_.Nid -eq $currentnotifcation.nId}
                                 }
                                 $out | Add-Member NoteProperty Zustand ("Schon vorhanden, gegebenfalls verändert!")
                                 $result += $out 

@@ -62,8 +62,8 @@ foreach ($customer in $customers) {
                                                     Phone        = $currentnotifcation.phone
                                                     Ticket       = $currentnotifcation.ticket
                                                     Defer        = if ($deferId -ne "") {
-                                                        $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $nnotification.nId -DeferId $deferId 
-                                                        $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | Where-Object {$_.Nid -eq $nnotification.nId}
+                                                        $snn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $agent.id -NId $currentnotifcation.nId -DeferId $deferId 
+                                                        $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $Snn.aId | Where-Object {$_.Nid -eq $currentnotifcation.nId}
                                                         [PSCustomObject]@{
                                                             Defertime = $gnn.deferTime
                                                             Defername = $gnn.deferName
