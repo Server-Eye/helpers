@@ -48,8 +48,9 @@ function Connect-Session {
         } | ConvertTo-Json
         try {
             $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-            -ContentType "application/json" -Method Post -SessionVariable session
-
+            -ContentType "application/json" -Method Post -SessionVariable session -UseBasicParsing
+            # adding the parameter -UseBasicParsing avoids the usage of IE and its first-launch cofiguration
+            # additionally useful when IE is not installed or not used via the default path e.g. in a terminal server environment
         } catch {
             if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
                 $secondFactor = Read-Host -Prompt "Second Factor"
