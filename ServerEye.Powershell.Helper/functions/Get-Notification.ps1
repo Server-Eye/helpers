@@ -88,6 +88,7 @@ function getNotificationOfContainer ($containerID, $auth) {
     } else {
         $sensorhub = Get-SESensorhub -AuthToken $auth -SensorhubId $containerId
         $sensorhubName = $sensorhub.Name
+        $SensorhubId = $Sensorhub.sensorhubId 
         $connectorName = $sensorhub.'OCC-Connector'
         $customerName = $sensorhub.Customer
     }
@@ -127,6 +128,7 @@ function formatSensorNotification($notify, $auth, $sensor){
         }
         NotificationId = $notify.nId
         Sensor = $sensor.name
+        SensorID = $sensor.id
         Sensorhub = $sensor.sensorhub
         'OCC-Connector' = $sensor.'OCC-Connector'
         Customer = $sensor.customer
@@ -147,6 +149,7 @@ function formatContainerNotification($notify, $auth){
         }
         NotificationId = $notify.nId
         Sensorhub = $sensorhubName
+        SensorhubId = $SensorhubId
         'OCC-Connector' = $connectorName
         Customer = $customerName
     }
