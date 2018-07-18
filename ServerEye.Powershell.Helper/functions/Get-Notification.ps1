@@ -7,6 +7,9 @@
     
     .PARAMETER SensorId
     The id of the sensor for which the notifications should be listed.
+
+    .PARAMETER Filter
+    You can filter the notification based on the FullName (Prename and Surname) or the Email of the User.
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
@@ -38,6 +41,9 @@
 function Get-Notification {
     [CmdletBinding(DefaultParameterSetName='ofSensor')]
     Param(
+        [Parameter(Mandatory=$false,ParameterSetName="ofSensor",Position=0)]
+        [Parameter(Mandatory=$false,ParameterSetName="ofSensorhub",Position=0)]
+        [string]$Filter,
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensor')]
         $SensorId,
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensorhub')]
@@ -48,7 +54,7 @@ function Get-Notification {
     )
 
     Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
@@ -80,7 +86,7 @@ function getNotificationOfContainer ($containerID, $auth) {
         $connectorName = $container.Name
         $customerName = $customer.companyName
     } else {
-        $sensorhub = Get-Sensorhub -AuthToken $auth -SensorhubId $containerId
+        $sensorhub = Get-SESensorhub -AuthToken $auth -SensorhubId $containerId
         $sensorhubName = $sensorhub.Name
         $connectorName = $sensorhub.'OCC-Connector'
         $customerName = $sensorhub.Customer
@@ -88,23 +94,9 @@ function getNotificationOfContainer ($containerID, $auth) {
     
     foreach ($notify in $notifies) {
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
-       
-        $out = New-Object psobject
-        $out | Add-Member NoteProperty Name ($displayName)
-        $out | Add-Member NoteProperty Email ($notify.useremail)
-        $out | Add-Member NoteProperty byEmail ($notify.email)
-        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
-        $out | Add-Member NoteProperty byTicket ($notify.ticket)
-        if ($notify.deferTime) {
-            $out | Add-Member NoteProperty Delay ($notify.deferTime)
-        } else {
-            $out | Add-Member NoteProperty Delay (0)
+        if ((-not $filter) -or ($notify.useremail -like $filter) -or $displayName -like $filter){
+        formatContainerNotification -notify $notify -auth $auth
         }
-        $out | Add-Member NoteProperty NotificationId ($notify.nId)
-        $out | Add-Member NoteProperty Sensorhub ($sensorhubName)
-        $out | Add-Member NoteProperty OCC-Connector ($connectorName)
-        $out | Add-Member NoteProperty Customer ($customerName)
-        $out
     }
 }
 
@@ -114,24 +106,48 @@ function getNotificationBySensor ($sensorId, $auth) {
 
     foreach ($notify in $notifies) {
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
-       
-        $out = New-Object psobject
-        $out | Add-Member NoteProperty Name ($displayName)
-        $out | Add-Member NoteProperty Email ($notify.useremail)
-        $out | Add-Member NoteProperty byEmail ($notify.email)
-        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
-        $out | Add-Member NoteProperty byTicket ($notify.ticket)
-        if ($notify.deferTime) {
-            $out | Add-Member NoteProperty Delay ($notify.deferTime)
-        } else {
-            $out | Add-Member NoteProperty Delay (0)
+        if ((-not $filter) -or ($notify.useremail -like $filter) -or $displayName -like $filter){
+            formatSensorNotification -notify $notify -auth $auth -sensor $sensor
         }
-        $out | Add-Member NoteProperty NotificationId ($notify.nId)
-        $out | Add-Member NoteProperty Sensor ($sensor.name)
-        $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
-        $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
-        $out | Add-Member NoteProperty Customer ($sensor.customer)
-        $out
     }
 
+}
+
+function formatSensorNotification($notify, $auth, $sensor){
+    [PSCustomObject]@{
+        Name = $displayName
+        Email = $notify.useremail
+        byEmail = $notify.email
+        byTextmessage = $notify.phone
+        byTicket = $notify.ticket
+        Delay = if ($notify.deferTime) {
+            $notify.deferTime
+        } else {
+            "0"
+        }
+        NotificationId = $notify.nId
+        Sensor = $sensor.name
+        Sensorhub = $sensor.sensorhub
+        'OCC-Connector' = $sensor.'OCC-Connector'
+        Customer = $sensor.customer
+    }
+}
+
+function formatContainerNotification($notify, $auth){
+    [PSCustomObject]@{
+        Name = $displayName
+        Email = $notify.useremail
+        byEmail = $notify.email
+        byTextmessage = $notify.phone
+        byTicket = $notify.ticket
+        Delay = if ($notify.deferTime) {
+            $notify.deferTime
+        } else {
+            "0"
+        }
+        NotificationId = $notify.nId
+        Sensorhub = $sensorhubName
+        'OCC-Connector' = $connectorName
+        Customer = $customerName
+    }
 }
