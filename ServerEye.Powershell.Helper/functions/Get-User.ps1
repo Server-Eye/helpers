@@ -31,7 +31,13 @@ function Get-User {
                 }
                 EMail = $user.email
                 Company = $user.companyName
-                UserID = $user.uid
+                UserID = if ($user.isGroup -eq $true) {
+                    $user.gid
+                }
+                else  {
+                    $user.uid
+                } 
+                   
 
             }    
         }
