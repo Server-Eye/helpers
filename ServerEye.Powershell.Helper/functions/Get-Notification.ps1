@@ -128,7 +128,7 @@ function formatSensorNotification($notify, $auth, $sensor){
         }
         NotificationId = $notify.nId
         Sensor = $sensor.name
-        SensorID = $sensor.id
+        SensorID = $sensor.SensorId
         Sensorhub = $sensor.sensorhub
         'OCC-Connector' = $sensor.'OCC-Connector'
         Customer = $sensor.customer
