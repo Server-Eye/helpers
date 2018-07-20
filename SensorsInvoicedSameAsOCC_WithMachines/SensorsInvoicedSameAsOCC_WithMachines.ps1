@@ -9,6 +9,17 @@ Param(
     [alias("ApiKey","Session")]
     $AuthToken
 )
+# Check if module is installed, if not install it
+if (!(Get-Module -ListAvailable -Name "ServerEye.Powershell.Helper")) {
+    Write-Host "ServerEye PowerShell Module is not installed. Installing it..." -ForegroundColor Red
+    Install-Module "ServerEye.Powershell.Helper" -Scope CurrentUser -Force
+}
+
+# Check if module is loaded, if not load it
+if (!(Get-Module "ServerEye.Powershell.Helper")) {
+    Import-Module ServerEye.Powershell.Helper
+}
+
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
 Write-Warning "The count for server and workstation is evaluated now. It has no relation to the Month and Year given."
