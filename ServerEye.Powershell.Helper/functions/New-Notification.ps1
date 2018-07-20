@@ -32,11 +32,11 @@ function New-Notification {
         [Parameter(Mandatory=$false)]
         $UserId,
         [Parameter(Mandatory=$false)]
-        $SendEmail,
+        [switch]$SendEmail,
         [Parameter(Mandatory=$false)]
-        $SendTextmessage,
+        [switch]$SendTextmessage,
         [Parameter(Mandatory=$false)]
-        $SendTicket,
+        [switch]$SendTicket,
         [Parameter(Mandatory=$false)]
         $DeferId="",
         [Parameter(Mandatory=$false)]
@@ -48,7 +48,7 @@ function New-Notification {
     }
 
     Process {
-        $notify = New-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -UserId $UserId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket
+        $notify = New-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -UserId $UserId -Email $SendEmail.IsPresent -Phone $SendTextmessage.IsPresent -Ticket $SendTicket.IsPresent
 
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
         
