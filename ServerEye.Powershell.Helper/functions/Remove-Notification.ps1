@@ -1,9 +1,9 @@
  <#
     .SYNOPSIS
-    Get notifications for a sensor. 
+    Removes notifications for a sensor. 
     
     .DESCRIPTION
-    This will list all notifications for a sensor.
+    This will Remove all notifications for a sensor/Sensorhub.
     
     .PARAMETER SensorId
     The id of the sensor for which the notifications should be removed.
