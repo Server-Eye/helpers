@@ -17,11 +17,24 @@ Betriebssystem-Key
 Office Version
 Office-Key
 
-
-
-## Call
+### With an API Key
+```powershell
+ContainerInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
 ```
-ContainerInventory.ps1 -apiKey yourApiKey [-custID specificCustomerID]
+
+### Via Login
+```powershell
+Connect-SESession | ContainerInventory.ps1 [-custID specificCustomerID]
+```
+
+### With an API Key
+```powershell
+ProgrammInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
+```
+
+### Via Login
+```powershell
+Connect-SESession | ProgrammInventory.ps1 [-custID specificCustomerID]
 ```
 
 ## Parameters
