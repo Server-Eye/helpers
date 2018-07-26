@@ -3,7 +3,7 @@ Param(
     [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
     $AuthToken,
-    [Parameter]
+    [string]
     $custID
 )
 
@@ -37,24 +37,22 @@ foreach ($customer in $customers) {
                     if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
                         try {
                             $inventorys = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
-                                foreach ($inventory in $inventorys){
+                            foreach ($inventory in $inventorys){
+                                for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
                                     [PSCustomObject]@{
                                         Sensorhub = $sensorhub.name
-                                            Software = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
-                                                [PSCustomObject]@{
-                                                Pos = ($i+1)
-                                                Produkt = $inventory.PROGRAMS[$i].Produkt
-                                                Version = $inventory.PROGRAMS[$i].SWVERSION
-                                                }
-                                            }
+                                        Pos = ($i+1)
+                                        Produkt = $inventory.PROGRAMS[$i].Produkt
+                                        Version = $inventory.PROGRAMS[$i].SWVERSION
                                     }
                                 }
+                            }
                         }
                         catch {
                             if($x[0].ErrorRecord.ErrorDetails.Message -match ('"message":"server_error","error":"not_connected"')  ){
                                 [PSCustomObject]@{
                                     Sensorhub = $sensorhub.name
-                                    Software = "is Offline."
+                                    Status = "is Offline."
                                 }
                             }
                         }
