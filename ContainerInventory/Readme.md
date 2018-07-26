@@ -24,7 +24,7 @@ ContainerInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
 
 ### Via Login
 ```powershell
-Connect-SESession | ContainerInventory.ps1 [-custID specificCustomerID]
+Connect-SESession | ContainerInventory.ps1 [-custID "specificCustomerID"]
 ```
 
 ### With an API Key
@@ -34,7 +34,7 @@ ProgrammInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
 
 ### Via Login
 ```powershell
-Connect-SESession | ProgrammInventory.ps1 [-custID specificCustomerID]
+Connect-SESession | ProgrammInventory.ps1 [-custID "specificCustomerID"]
 ```
 
 ## Parameters

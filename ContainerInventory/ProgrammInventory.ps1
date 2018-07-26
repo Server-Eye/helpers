@@ -3,8 +3,8 @@ Param(
     [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
     $AuthToken,
-    [Parameter(Mandatory=$true)]
-    $CustomerID
+    [Parameter]
+    $custID
 )
 
 # Check if module is installed, if not install it
@@ -25,7 +25,7 @@ $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 
 foreach ($customer in $customers) {
 
-    if ($customer.id -eq $CustomerID) {
+    if ($customer.id -eq $custID) {
 
         $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
