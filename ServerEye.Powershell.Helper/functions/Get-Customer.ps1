@@ -11,6 +11,9 @@
 
     .PARAMETER CustomerId
     Shows the specific customer with this customer Id.
+
+    .PARAMETER All
+    Shows the specific customer with this customer Id.
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
@@ -24,6 +27,8 @@ function Get-Customer {
         [Parameter(Mandatory=$false,ParameterSetName='byCustomerId')]
         [string]$CustomerId,
         [Parameter(Mandatory=$false,ParameterSetName='byFilter')]
+        [switch]$all,
+        [Parameter(Mandatory=$false,ParameterSetName='byFilter')]
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='byCustomerId')]
         [alias("ApiKey","Session")]
         $AuthToken
@@ -31,8 +36,19 @@ function Get-Customer {
     Begin{
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
-    
+
     Process {
+        if ($all.IsPresent -eq $true) {
+            $customers = Get-SeApiCustomerList -AuthToken $AuthToken
+            foreach ($customer in $customers) {
+                [PSCustomObject]@{
+                    Name = $customer.companyName
+                    CustomerId = $customer.cId
+                    CustomerNumber = $customer.customerNumberExtern
+                }
+            }
+        }
+
         if ($CustomerId) {
 
             $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
