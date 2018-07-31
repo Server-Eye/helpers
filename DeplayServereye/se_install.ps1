@@ -15,20 +15,20 @@ $parentGuid=""
 $logdatei="c:\se_install_log.txt"
 $remoteLog="\\fileserver\se_install\$env:computername.txt"
 # Ändern auf $true wenn keine Log bei bestehender Installtion gewünscht sind
-$noinstalledLog = $false
+$noinstallLog = $false
 #
 # Aendern Sie bitte nichts unterhalb dieser Zeile
 #
 
 # Download der aktuellen Version
-#$WebClient = New-Object System.Net.WebClient
-#$WebClient.DownloadFile("https://occ.server-eye.de/download/se/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
+$WebClient = New-Object System.Net.WebClient
+$WebClient.DownloadFile("https://occ.server-eye.de/download/se/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
 
 
 # Installation Server-Eye
-cd "C:\Tools\DeplayServereye\"
+Set-Location "C:\Tools\DeplayServereye\"
 
-If ($noinstalledLog -eq $true){
+If ($noinstallLog -eq $true){
     .\ServerEye.ps1 -InstallDotNet -Download -Install -Deploy SensorhubOnly -ParentGuid $parentGuid -Customer $customer -Secret $secret -ApplyTemplate -TemplateId $templateid -ApiKey $apikey -DeployPath "$env:windir\temp" -LogFile $logdatei -SkipLogInstalledCheck
 }
 else {
@@ -36,4 +36,4 @@ else {
 }
 
 
-copy $logdatei $remoteLog 
+Copy-Item $logdatei $remoteLog 
