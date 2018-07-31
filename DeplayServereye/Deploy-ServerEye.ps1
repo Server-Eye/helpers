@@ -63,9 +63,6 @@
 	.PARAMETER LogFile
 		Path including filename. Logs messages also to that file.
 
-	.PARAMETER InstallDotNet
-		Insures that .Net Framework 3.5 is installed.
-
 	.PARAMETER NoExit
 		Using this, the script is no longer terminated with "exit", allowing it to be used as part of a greater script.
 	
@@ -161,9 +158,6 @@ param (
 	
 	[string]
 	$LogFile,
-	
-	[switch]
-	$InstallDotNet,
 	
 	[switch]
 	$NoExit
@@ -483,10 +477,7 @@ function Start-ServerEyeInstallation
 		
 		$HubConfig,
 		
-		$TemplateConfig,
-		
-		[bool]
-		$InstallDotNet
+		$TemplateConfig
 	)
 	
 	if (-not $Silent) { Write-Header }
@@ -527,12 +518,6 @@ function Start-ServerEyeInstallation
 	#endregion Really install OCC Connector?
 	
 	Write-Log "Starting installation process"
-	
-	if ($InstallDotNet)
-	{
-		Write-Log "Installing .Net 3.5" -EventID 201
-		& DISM /Online /Enable-Feature /FeatureName:NetFx3 /All
-	}
 	
 	if ($Download)
 	{
