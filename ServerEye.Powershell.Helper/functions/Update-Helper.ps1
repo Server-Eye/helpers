@@ -21,7 +21,7 @@ Param(
         Import-Module -Name $Modulename
         }
         elseif($module.Version -ne $online.Version){
-        Update-Module -Name $Modulenamer -force
+        Update-Module -Name $Modulename -force
         Remove-Module -Name $Modulename
         Uninstall-Module -Name $Modulename -RequiredVersion $module.Version 
         Import-Module -Name $Modulename
