@@ -97,7 +97,7 @@
 		https://github.com/Server-Eye/se-installer-cli
 #>
 
-#Requires –Version 2.0
+#Requires -Version 2
 
 [CmdletBinding(DefaultParameterSetName = 'None')]
 param (
