@@ -22,11 +22,11 @@ $noinstallLog = $false
 
 # Download der aktuellen Version
 $WebClient = New-Object System.Net.WebClient
-$WebClient.DownloadFile("https://occ.server-eye.de/download/se/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
+$WebClient.DownloadFile("https://raw.githubusercontent.com/Server-Eye/helpers/master/DeployServereye/signed/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
 
 
 # Installation Server-Eye
-Set-Location "C:\Tools\DeplayServereye\"
+Set-Location "$env:windir\temp"
 
 If ($noinstallLog -eq $true){
     .\ServerEye.ps1 -InstallDotNet -Download -Install -Deploy SensorhubOnly -ParentGuid $parentGuid -Customer $customer -Secret $secret -ApplyTemplate -TemplateId $templateid -ApiKey $apikey -DeployPath "$env:windir\temp" -LogFile $logdatei -SkipLogInstalledCheck
