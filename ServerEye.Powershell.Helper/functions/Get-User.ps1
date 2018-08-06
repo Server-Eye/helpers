@@ -18,6 +18,8 @@ function Get-User {
 
     )
     Begin{
+        Update-SEHelper -Modulename "Servereye.powershell.api"
+        Update-SEHelper -Modulename "Servereye.powershell.helper"
         $AuthToken = Test-Auth -AuthToken $AuthToken
     }
     
@@ -25,28 +27,50 @@ function Get-User {
         $users = Get-SeApiUserList -AuthToken $AuthToken
         foreach ($user in $users){
 
-                [PSCustomObject]@{
-
-                    Username = if ($user.isGroup -eq $true) {
-                        $user.surname
-                    } else{
-                        ("$($user.prename) $($user.surname)".Trim()) 
-                    }
-                    EMail = $user.email
-                    Company = $user.companyName
-                    UserID = if ($user.isGroup -eq $true) {
-                        $user.gid
-                    }
-                    else  {
-                        $user.uid
-                    } 
-                    Rolles = if ($roles.IsPresent -eq $true){
-                        $user.roles
-                    }
-                }    
+            if ($roles.IsPresent -eq $false){
+                formatUser -user $user
+            }else{
+                formatRoles -user $user
+            }
         }
     }        
     
     End {
+    }
+}
+
+function formatUser($user) {
+    [PSCustomObject]@{
+        Username = if ($user.isGroup -eq $true) {
+            $user.surname
+        } else{
+            ("$($user.prename) $($user.surname)".Trim()) 
+        }
+        EMail = $user.email
+        Company = $user.companyName
+        UserID = if ($user.isGroup -eq $true) {
+            $user.gid
+        }
+        else  {
+            $user.uid
+        } 
+    }
+}
+function formatRoles($user) {
+    [PSCustomObject]@{
+        Username = if ($user.isGroup -eq $true) {
+            $user.surname
+        } else{
+            ("$($user.prename) $($user.surname)".Trim()) 
+        }
+        EMail = $user.email
+        Company = $user.companyName
+        UserID = if ($user.isGroup -eq $true) {
+            $user.gid
+        }
+        else  {
+            $user.uid
+        } 
+        Roles = $user.roles
     }
 }
