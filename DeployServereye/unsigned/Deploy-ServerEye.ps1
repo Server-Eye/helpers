@@ -1018,7 +1018,6 @@ Invoke-WebRequest "$($SE_baseDownloadUrl)/$($SE_cloudIdentifier)/Deploy-ServerEy
 		OCCConfig = $OCCConfig
 		HubConfig = $HubConfig
 		TemplateConfig = $TemplateConfig
-		InstallDotNet = $InstallDotNet.ToBool()
 	}
 	Start-ServerEyeInstallation @params
 }
