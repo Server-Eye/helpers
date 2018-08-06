@@ -12,7 +12,10 @@
 function Get-User {
     [CmdletBinding(DefaultParameterSetName='byFilter')]
     Param(
+        [switch]
+        $roles,
         $AuthToken
+
     )
     Begin{
         $AuthToken = Test-Auth -AuthToken $AuthToken
@@ -22,24 +25,25 @@ function Get-User {
         $users = Get-SeApiUserList -AuthToken $AuthToken
         foreach ($user in $users){
 
-            [PSCustomObject]@{
+                [PSCustomObject]@{
 
-                Username = if ($user.isGroup -eq $true) {
-                    $user.surname
-                } else{
-                    ("$($user.prename) $($user.surname)".Trim()) 
-                }
-                EMail = $user.email
-                Company = $user.companyName
-                UserID = if ($user.isGroup -eq $true) {
-                    $user.gid
-                }
-                else  {
-                    $user.uid
-                } 
-                   
-
-            }    
+                    Username = if ($user.isGroup -eq $true) {
+                        $user.surname
+                    } else{
+                        ("$($user.prename) $($user.surname)".Trim()) 
+                    }
+                    EMail = $user.email
+                    Company = $user.companyName
+                    UserID = if ($user.isGroup -eq $true) {
+                        $user.gid
+                    }
+                    else  {
+                        $user.uid
+                    } 
+                    Rolles = if ($roles.IsPresent -eq $true){
+                        $user.roles
+                    }
+                }    
         }
     }        
     
