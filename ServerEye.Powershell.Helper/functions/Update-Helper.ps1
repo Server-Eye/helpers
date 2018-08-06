@@ -20,7 +20,7 @@ Param(
         Install-Module -Name $Modulename -Scope CurrentUser -Force
         Import-Module -Name $Modulename
         }
-        elseif($module.Version -ne $online.Version){
+        elseif($module.Version.ToString() -ne $online.Version){
         Update-Module -Name $Modulename -force
         Remove-Module -Name $Modulename
         Uninstall-Module -Name $Modulename -RequiredVersion $module.Version 
