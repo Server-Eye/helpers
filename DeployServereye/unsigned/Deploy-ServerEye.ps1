@@ -800,6 +800,7 @@ name=$($HubConfig.NodeName)
 description=
 port=$($HubConfig.HubPort)
 "@
+
 		if ($HubConfig.ParentGuid)
 		{
 			"parentGuid=$($HubConfig.ParentGuid)" | Add-Content $HubConfig.ConfFileCC  -ErrorAction Stop
