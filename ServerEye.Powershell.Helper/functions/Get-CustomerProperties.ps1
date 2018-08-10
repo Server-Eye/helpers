@@ -15,7 +15,7 @@
 function Get-CustomerProperties{
     [CmdletBinding(DefaultParameterSetName='None')]
     Param(
-        [parameter(ValueFromPipelineByPropertyName)]
+        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
         $CustomerId,
         $AuthToken
     )
@@ -24,6 +24,9 @@ function Get-CustomerProperties{
     }
     
     Process {
+            if (-not $customerid){
+                Read-Host 
+            }
             $customer = Get-SeApiCustomer -AuthToken $authtoken -CId $CustomerId
                 [PSCustomObject]@{
                         Name = $customer.companyName
