@@ -9,11 +9,10 @@
 function Update-Helper {
 [CmdletBinding()]
 Param(
-    [parameter(Mandatory=$true)]
-    $Modulename
+
 )
 
-
+        $Modulename = "Servereye.powershell.helper"
         $module = Get-Module -ListAvailable -Name $Modulename -ErrorAction Stop -ErrorVariable errormodule
         $online = Find-Module -Name $Modulename -Repository PSGallery -ErrorAction Stop
         if(!$module){
