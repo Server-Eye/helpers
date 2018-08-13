@@ -26,6 +26,9 @@ function Connect-Session {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$false)] 
+        $Apikey,
+
+        [Parameter(Mandatory=$false)] 
         $Credentials,
 
         [Parameter(Mandatory=$false)] 
@@ -38,6 +41,11 @@ function Connect-Session {
     )
 
     Process {
+        if ($Apikey) {
+            $Global:Authtokentest = $Apikey
+            Return
+        }
+
         if (-not $Credentials) {
             $Credentials = Get-Credential -Message 'Server-Eye Login'
         }
