@@ -43,7 +43,7 @@ function Connect-Session {
     Process {
         if ($Apikey) {
             $Global:ServerEyeGlobalApiKey = $Apikey
-            Return $Global:ServerEyeGlobalApiKey
+            Return
         }
 
         if (-not $Credentials) {
