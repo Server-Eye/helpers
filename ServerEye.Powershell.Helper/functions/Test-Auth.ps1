@@ -1,6 +1,6 @@
-function Test-Auth {
-    if ($Global:AuthToken) {
-        return $global:AuthToken
+function Test-Auth ($AuthToken) {
+    if ($AuthToken) {
+        return $AuthToken
     } elseif ($Script:ServerEyeLocalSession) {
         return $Script:ServerEyeLocalSession
     } elseif ($Global:ServerEyeGlobalSession) {
@@ -11,4 +11,3 @@ function Test-Auth {
     }
 
 }
-
