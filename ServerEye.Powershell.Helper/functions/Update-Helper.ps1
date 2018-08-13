@@ -12,7 +12,8 @@ Param(
 
 )
 
-        $Modulename = "Servereye.powershell.helper"
+    $Moduls = @("Servereye.powershell.helper","Servereye.powershell.api")
+    foreach ($modulename in $Moduls){
         $module = Get-Module -ListAvailable -Name $Modulename -ErrorAction Stop -ErrorVariable errormodule
         $online = Find-Module -Name $Modulename -Repository PSGallery -ErrorAction Stop
         if(!$module){
@@ -25,5 +26,6 @@ Param(
         Uninstall-Module -Name $Modulename -RequiredVersion $module.Version 
         Import-Module -Name $Modulename
         }
+    }
 
 }
