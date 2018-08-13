@@ -1,5 +1,11 @@
-function Test-Auth ($AuthToken) {
+function Test-Auth{
+    Param(
+        $AuthToken
+    )
     if ($AuthToken) {
+        return $AuthToken
+    }elseif($Global:ServerEyeGlobalApiKey){
+        $AuthToken = $Global:ServerEyeGlobalApiKey
         return $AuthToken
     } elseif ($Script:ServerEyeLocalSession) {
         return $Script:ServerEyeLocalSession
