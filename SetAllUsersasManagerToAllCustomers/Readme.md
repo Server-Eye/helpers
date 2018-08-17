@@ -19,7 +19,7 @@ There are several ways to run this script.
 
 ### With an API Key
 ```powershell
-SetAllUsersasManagerToAllCustomers.ps1 -ApiKey "yourApiKey"
+SetAllUsersasManagerToAllCustomers.ps1 -AuthToken "yourApiKey"
 ```
 
 ### Via Login
