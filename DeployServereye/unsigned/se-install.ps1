@@ -23,7 +23,7 @@ $noinstallLog = $false
 
 # Download der aktuellen Version
 $WebClient = New-Object System.Net.WebClient
-$WebClient.DownloadFile("https://raw.githubusercontent.com/Server-Eye/helpers/master/DeployServereye/signed/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
+$WebClient.DownloadFile("https://occ.server-eye.de/download/se/Deploy-ServerEye.ps1","$env:windir\temp\ServerEye.ps1")
 
 
 # Installation Server-Eye
