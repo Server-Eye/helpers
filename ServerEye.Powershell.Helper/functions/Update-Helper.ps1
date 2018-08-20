@@ -12,19 +12,19 @@ Param(
 
 )
 
-    $Moduls = @("Servereye.powershell.helper","Servereye.powershell.api")
-    foreach ($modulename in $Moduls){
-        $module = Get-Module -ListAvailable -Name $Modulename -ErrorAction Stop -ErrorVariable errormodule
-        $online = Find-Module -Name $Modulename -Repository PSGallery -ErrorAction Stop
-        if(!$module){
-        Install-Module -Name $Modulename -Scope CurrentUser -Force
-        Import-Module -Name $Modulename
+    $SEModules = @("Servereye.powershell.helper","Servereye.powershell.api")
+    foreach ($SEModule in $SEModules){
+        $SEmod = Get-Module -ListAvailable -Name $SEModule -ErrorAction Stop -ErrorVariable errormodule
+        $online = Find-Module -Name $SEModule -Repository PSGallery -ErrorAction Stop
+        if(!$SEmod){
+        Install-Module -Name $SEModule -Scope CurrentUser -Force
+        Import-Module -Name $SEModule
         }
-        elseif($module.Version.ToString() -ne $online.Version){
-        Update-Module -Name $Modulename -force
-        Remove-Module -Name $Modulename
-        Uninstall-Module -Name $Modulename -RequiredVersion $module.Version 
-        Import-Module -Name $Modulename
+        elseif($SEmod.Version.ToString() -ne $online.Version){
+        Update-Module -Name $SEModule -force
+        Remove-Module -Name $SEModule
+        Uninstall-Module -Name $SEModule -RequiredVersion $module.Version 
+        Import-Module -Name $SEModule
         }
     }
 
