@@ -18,8 +18,7 @@ function Get-User {
 
     )
     Begin{
-        Update-SEHelper -Modulename "Servereye.powershell.api"
-        Update-SEHelper -Modulename "Servereye.powershell.helper"
+        Update-SEHelper
         $AuthToken = Test-Auth -AuthToken $AuthToken
     }
     
