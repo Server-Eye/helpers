@@ -18,11 +18,12 @@ if (!(Get-Module -ListAvailable -Name "ServerEye.Powershell.Helper")) {
 #Auth Test
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-$Users = Get-SEUser
-$Customers = Get-SECustomer -all
+$Users = Get-SEUser -AuthToken $AuthToken
+$Customers = Get-SECustomer -all -AuthToken $AuthToken
 
 Foreach($customer in $customers){
     foreach ($user in $users){
-    Set-SEManager -CustomerId $customer.CustomerId -email $user.EMail
+        Set-SEManager -CustomerId $customer.CustomerId -email "rene.thulke@server-eye.de" -AuthToken $AuthToken
     }
 }
+
