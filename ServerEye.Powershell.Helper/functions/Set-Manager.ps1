@@ -15,6 +15,8 @@
 function Set-Manager {
     [CmdletBinding()]
     Param(
+        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        $AuthToken,
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
         $CustomerId,
         [Parameter(Mandatory=$true)]
