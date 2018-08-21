@@ -1,9 +1,7 @@
 <#
     .SYNOPSIS
-    Updates the Helper or the Api Module.
+    Updates the Helper and the Api Module.
 
-    .PARAMETER Modulename
-    The Name of the Module that should be Updatet.
 #>
 
 function Update-Helper {
