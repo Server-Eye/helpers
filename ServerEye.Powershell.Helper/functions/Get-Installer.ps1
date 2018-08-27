@@ -10,7 +10,7 @@ The path were the msi Files should be placed.
 
 
 #>
-function Download-Installer {
+function Get-Installer {
 
     [CmdletBinding()]
 	Param (
