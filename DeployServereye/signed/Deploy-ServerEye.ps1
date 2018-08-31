@@ -663,14 +663,19 @@ function Download-SEInstallationFiles
 	$wc = new-object system.net.webclient
 	$curVersion = $wc.DownloadString("$BaseDownloadUrl/$SE_cloudIdentifier/currentVersion")
 	Write-Log "done" -ForegroundColor Green
+
+	Write-Log "  downloading ServerEye.Core... " -NoNewline
+	Download-SEFile "$BaseDownloadUrl/$SE_cloudIdentifier/ServerEyeSetup.exe" "$Path\ServerEyeSetup.exe"
+	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Vendor... " -NoNewline
 	Download-SEFile "$BaseDownloadUrl/vendor/$Vendor/Vendor.msi" "$Path\Vendor.msi"
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Core... " -NoNewline
-	Download-SEFile "$BaseDownloadUrl/$curVersion/ServerEye.msi" "$Path\ServerEye.msi"
+	Download-SEFile "$BaseDownloadUrl/setup/ServerEye.msi" "$Path\ServerEye.msi"
 	Write-Log "done" -ForegroundColor Green
+
 	
 }
 
@@ -679,13 +684,10 @@ function Install-SEConnector
 	[CmdletBinding()]
 	Param (
 		[string]
-		$Path,
-		
-		[string]
-		$Vendor
+		$Path
 	)
 	
-	Write-Host "  installing $($Vendor)...  " -NoNewline
+	Write-Host "  installing Server-eye in Version:$SE_version...  " -NoNewline
 	if (-not (Test-Path "$Path\Vendor.msi"))
 	{
 		Write-Host "failed" -ForegroundColor Red
@@ -693,11 +695,7 @@ function Install-SEConnector
 		Write-Log -Message "Installation failed, file not found: $Path\Vendor.msi" -EventID 666 -EntryType Error -Silent $true
 		Stop-Execution
 	}
-	
-	Start-Process "$Path\Vendor.msi" /passive -Wait
-	Write-Host "done" -ForegroundColor Green
-	
-	Write-Host "  installing ServerEye.Core...  " -NoNewline
+
 	if (-not (Test-Path "$Path\ServerEye.msi"))
 	{
 		Write-Host "failed" -ForegroundColor Red
@@ -705,8 +703,15 @@ function Install-SEConnector
 		Write-Log -Message "Installation failed, file not found: $Path\ServerEye.msi" -EventID 666 -EntryType Error -Silent $true
 		Stop-Execution
 	}
+	if (-not (Test-Path "$Path\ServerEyeSetup.exe"))
+	{
+		Write-Host "failed" -ForegroundColor Red
+		Write-Host "  The file ServerEyeSetup.exe is missing." -ForegroundColor Red
+		Write-Log -Message "Installation failed, file not found: $Path\ServerEyeSetup.exe" -EventID 666 -EntryType Error -Silent $true
+		Stop-Execution
+	}
 	
-	Start-Process "$Path\ServerEye.msi" /passive -Wait
+	Start-Process -Wait -FilePath "$Path\ServerEyeSetup.exe" -ArgumentList "/install /passive /quiet /l C:\kits\se\log.txt"
 	Write-Host "done" -ForegroundColor Green
 }
 
@@ -1027,8 +1032,8 @@ while ($false)
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUuSbZUl+mTbEZUxWqXiGJ+lsh
-# QWegghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUUqBRJtVnacyNATfU1bGrHhLF
+# PIigghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -1149,24 +1154,24 @@ while ($false)
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBT+Blmt3niMHHja
-# wYAJZDWS0isnKDANBgkqhkiG9w0BAQEFAASCAQCL3bWVP6QMtBbGHXiMamkCoZwN
-# GzLhqhciCSyamYY4RWcDmxm0qbcBC+68PGt0EMV9ygGVF3Rsf9rV2swnVZvjrGT8
-# Fh1DpNHplXcGevp7w6IJI+RfvKkB7oJCPjkCVBCHE30Z1r4NnFxlR3td2JfrjTh6
-# lH7SYZxrSRHTsxTlNntqKonvWGam0ckKjnoI39OFQBSp2sO1BTnoebSzwVWEl7qB
-# WBEV0t81osR7+RuBmY4ciyS/J0pf4sh9s0CgHJz51xPfTys9COAcfjf+ULloXdnR
-# Bz7i7NAEyXQtt10763mU1JYVlDMx2M8q9smY8Ow/di8u2ZGLclHt4Jvq6b6FoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQ1jfcNggBXNisz
+# UDqpX76BFnnA0DANBgkqhkiG9w0BAQEFAASCAQBqOMynz7QD8KCz8+5jbtWYwG93
+# dQmnvJGqP2Rp8nVeRJPOiIGovPSaY+4sxJ3LBEjFxZtEIi8cjD6zffIPhdTPhPG7
+# p8ul4wyDJnZEXPg68ptUA1tR/dLCG2ASsEoeA1+pU7MYSdrmXyYRh7NwjuEC4zrt
+# RST1RQK7TWOdcXz8bVHATZ7h5u7EDRJ9e+r0Y523DrvE7vLhRaGZ5RQMPwyIia7p
+# RfHO8vhDm4ow3qmg+tIkT6GalFiDr/q691vLwhfS0x7XR8+/gxN9aHKN7o75lFAO
+# QMGWCOdEVk57erYg/AA/e/xVsdxWNdpudfm4WAazUDREDa6GcmFslBgrfwWCoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTgwODEwMDkxMjA2WjAjBgkqhkiG9w0BCQQxFgQUP/lR
-# 2uol9kRrW6Om2ag4WBQeiOYwDQYJKoZIhvcNAQEBBQAEggEAbeNrNz4tEkeKF2ir
-# 74fJhH9bLU/yjj1Yg+lyKVeZ9AsPAIpJYVcsqfkAjUS5xWyYmTzPz25SFPNsmQ0j
-# GMK04ifPZ95w7+ef8gAl7du2rzktzulnhs4jIDgn6jflO0bo69zG5oROz0U3r2rK
-# bPPjQYUqQIKV0nQzBLdPARIJnbrVtOYELckenTr0nVWGqsv80s2gsic+cuOtC2A5
-# vY0sxOTWdHmg2FUys5Cl/lxQvX5HWQa9Yxh7oDl8vH7EBbq4OXBzRFHw2ZNJr9D0
-# CIdOA0QmeTHcIeXK1mmkvap94kRSjhA9ZDDlvuXnnAxGwA0Wma5ESE7XLk3EPbOG
-# VzEqag==
+# BgkqhkiG9w0BCQUxDxcNMTgwODMxMTEyNDI4WjAjBgkqhkiG9w0BCQQxFgQUmfuK
+# dj/Xlu2/K6r2vyKfhp6QRuowDQYJKoZIhvcNAQEBBQAEggEAKt8OJzNjn2l+tKqP
+# J2L9Jd3DiJDR0MeRCQPgMwhhpJtRW8y1Dd+Pcgws3HXVHx7ZmW85/l38F/RmsnkX
+# hx3/L+dZioSWv3bHV6SNguKvIn2xQh5c5muK9pI9HrcQM7kb/f36L6+ES6DHe/X7
+# Hv7WOcxHe8OVerY8PyhPnnMW7kAf62xOxrrJISIaDhlSMLwHcBcBIi0QJour7xsC
+# sdI6zVGdcpFLfl9V7/fqJ6QiP3fP9zjjnUplfRhj2ZtORXK9qBbyGlaZ6zS6OFPi
+# UdKzf2qzqjmr+3hZIukjxpYqwuOAoB4B4kyi3g97xj9QLwcK4boYnDdJPbC901SZ
+# jMrzKw==
 # SIG # End signature block

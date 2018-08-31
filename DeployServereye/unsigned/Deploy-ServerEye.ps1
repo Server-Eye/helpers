@@ -663,14 +663,19 @@ function Download-SEInstallationFiles
 	$wc = new-object system.net.webclient
 	$curVersion = $wc.DownloadString("$BaseDownloadUrl/$SE_cloudIdentifier/currentVersion")
 	Write-Log "done" -ForegroundColor Green
+
+	Write-Log "  downloading ServerEye.Core... " -NoNewline
+	Download-SEFile "$BaseDownloadUrl/$SE_cloudIdentifier/ServerEyeSetup.exe" "$Path\ServerEyeSetup.exe"
+	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Vendor... " -NoNewline
 	Download-SEFile "$BaseDownloadUrl/vendor/$Vendor/Vendor.msi" "$Path\Vendor.msi"
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Core... " -NoNewline
-	Download-SEFile "$BaseDownloadUrl/$curVersion/ServerEye.msi" "$Path\ServerEye.msi"
+	Download-SEFile "$BaseDownloadUrl/setup/ServerEye.msi" "$Path\ServerEye.msi"
 	Write-Log "done" -ForegroundColor Green
+
 	
 }
 
@@ -679,13 +684,10 @@ function Install-SEConnector
 	[CmdletBinding()]
 	Param (
 		[string]
-		$Path,
-		
-		[string]
-		$Vendor
+		$Path
 	)
 	
-	Write-Host "  installing $($Vendor)...  " -NoNewline
+	Write-Host "  installing Server-eye in Version:$SE_version...  " -NoNewline
 	if (-not (Test-Path "$Path\Vendor.msi"))
 	{
 		Write-Host "failed" -ForegroundColor Red
@@ -693,11 +695,7 @@ function Install-SEConnector
 		Write-Log -Message "Installation failed, file not found: $Path\Vendor.msi" -EventID 666 -EntryType Error -Silent $true
 		Stop-Execution
 	}
-	
-	Start-Process "$Path\Vendor.msi" /passive -Wait
-	Write-Host "done" -ForegroundColor Green
-	
-	Write-Host "  installing ServerEye.Core...  " -NoNewline
+
 	if (-not (Test-Path "$Path\ServerEye.msi"))
 	{
 		Write-Host "failed" -ForegroundColor Red
@@ -705,8 +703,15 @@ function Install-SEConnector
 		Write-Log -Message "Installation failed, file not found: $Path\ServerEye.msi" -EventID 666 -EntryType Error -Silent $true
 		Stop-Execution
 	}
+	if (-not (Test-Path "$Path\ServerEyeSetup.exe"))
+	{
+		Write-Host "failed" -ForegroundColor Red
+		Write-Host "  The file ServerEyeSetup.exe is missing." -ForegroundColor Red
+		Write-Log -Message "Installation failed, file not found: $Path\ServerEyeSetup.exe" -EventID 666 -EntryType Error -Silent $true
+		Stop-Execution
+	}
 	
-	Start-Process "$Path\ServerEye.msi" /passive -Wait
+	Start-Process -Wait -FilePath "$Path\ServerEyeSetup.exe" -ArgumentList "/install /passive /quiet /l C:\kits\se\log.txt"
 	Write-Host "done" -ForegroundColor Green
 }
 
