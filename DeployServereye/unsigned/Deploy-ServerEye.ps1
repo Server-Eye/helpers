@@ -465,9 +465,6 @@ function Start-ServerEyeInstallation
 		$BaseDownloadUrl,
 		
 		[string]
-		$Vendor,
-		
-		[string]
 		$Version,
 		
 		[string]
@@ -650,9 +647,6 @@ function Download-SEInstallationFiles
 		$BaseDownloadUrl,
 		
 		[string]
-		$Vendor,
-		
-		[string]
 		$Version,
 		
 		[string]
@@ -669,7 +663,7 @@ function Download-SEInstallationFiles
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Vendor... " -NoNewline
-	Download-SEFile "$BaseDownloadUrl/vendor/$Vendor/Vendor.msi" "$Path\Vendor.msi"
+	Download-SEFile "$BaseDownloadUrl/vendor/$SE_vendor/Vendor.msi" "$Path\Vendor.msi"
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Core... " -NoNewline
@@ -1018,7 +1012,6 @@ Invoke-WebRequest "$($SE_baseDownloadUrl)/$($SE_cloudIdentifier)/Deploy-ServerEy
 		Install = $Install
 		OCCServer = $SE_occServer
 		BaseDownloadUrl = $SE_baseDownloadUrl
-		Vendor = $SE_vendor
 		Version = $SE_version
 		Path = $DeployPath
 		OCCConfig = $OCCConfig

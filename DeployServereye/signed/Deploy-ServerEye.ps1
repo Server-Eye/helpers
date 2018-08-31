@@ -465,9 +465,6 @@ function Start-ServerEyeInstallation
 		$BaseDownloadUrl,
 		
 		[string]
-		$Vendor,
-		
-		[string]
 		$Version,
 		
 		[string]
@@ -650,9 +647,6 @@ function Download-SEInstallationFiles
 		$BaseDownloadUrl,
 		
 		[string]
-		$Vendor,
-		
-		[string]
 		$Version,
 		
 		[string]
@@ -669,7 +663,7 @@ function Download-SEInstallationFiles
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Vendor... " -NoNewline
-	Download-SEFile "$BaseDownloadUrl/vendor/$Vendor/Vendor.msi" "$Path\Vendor.msi"
+	Download-SEFile "$BaseDownloadUrl/vendor/$SE_vendor/Vendor.msi" "$Path\Vendor.msi"
 	Write-Log "done" -ForegroundColor Green
 	
 	Write-Log "  downloading ServerEye.Core... " -NoNewline
@@ -1018,7 +1012,6 @@ Invoke-WebRequest "$($SE_baseDownloadUrl)/$($SE_cloudIdentifier)/Deploy-ServerEy
 		Install = $Install
 		OCCServer = $SE_occServer
 		BaseDownloadUrl = $SE_baseDownloadUrl
-		Vendor = $SE_vendor
 		Version = $SE_version
 		Path = $DeployPath
 		OCCConfig = $OCCConfig
@@ -1032,8 +1025,8 @@ while ($false)
 # SIG # Begin signature block
 # MIIa0AYJKoZIhvcNAQcCoIIawTCCGr0CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU4jPxBMEC8uf2Eu3enOLovjSh
-# ZKCgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU/OMHumddh7/LCOdKr4k/QUTT
+# gASgghW/MIIEmTCCA4GgAwIBAgIPFojwOSVeY45pFDkH5jMLMA0GCSqGSIb3DQEB
 # BQUAMIGVMQswCQYDVQQGEwJVUzELMAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQg
 # TGFrZSBDaXR5MR4wHAYDVQQKExVUaGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNV
 # BAsTGGh0dHA6Ly93d3cudXNlcnRydXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJG
@@ -1154,24 +1147,24 @@ while ($false)
 # RE8gQ0EgTGltaXRlZDEjMCEGA1UEAxMaQ09NT0RPIFJTQSBDb2RlIFNpZ25pbmcg
 # Q0ECEQCv7icoJNV+tAq55yqVK4LMMAkGBSsOAwIaBQCgeDAYBgorBgEEAYI3AgEM
 # MQowCKACgAChAoAAMBkGCSqGSIb3DQEJAzEMBgorBgEEAYI3AgEEMBwGCisGAQQB
-# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBQrpQpzS/a2DLs5
-# WjK/MOTeBQ/JmjANBgkqhkiG9w0BAQEFAASCAQBtTJeXjzY6b7OKibOvkDQnRV6H
-# zD/A8FocQovEt5U2T84kg2jRYo5iZnG7GfM84xxdLQlu3O7t1CDnfqYuv59uiFs9
-# eo2tPY5UaVWn7iUD4HJ8i62GzZIWI9HNzMl0elzVq0qcblE88MnmjX2q5Vm38MDq
-# el+AHCA1aOEiOJF7y+BI8+r4of1+7SlWrFauiAHiN145tpsn2S599fKeekur74lt
-# pO9yvGpt3TFS2l63FEadp95pusz91betWPFR0PrnCm0Gb9b/rG660ue9IvXwx0XA
-# WWXI7M/GBAEpO87e92o0cWsVsJMmqNGs/PCWiGg0q0OQ6yePgIPmB62+0iyYoYIC
+# gjcCAQsxDjAMBgorBgEEAYI3AgEVMCMGCSqGSIb3DQEJBDEWBBSvDV3w9UgaTFiY
+# qR7gQrH7yFmd/DANBgkqhkiG9w0BAQEFAASCAQCjC6vtfV2zndCvgU5SF0Khrrsr
+# FdbgLhDoqNwZ/RYYJBFubIn/HkkpHFt8d+B8KkBYdqJe0CJpITzyS3T8RKl7YXaR
+# lqzQ8z/mXtDtwHkpJTKgoCkqi+Gnm0w0WY70tDutDUwWHoAuQHUljVN7+KhXbEud
+# NvZNW7tbWCv3N5XUfyXisgVJAA6yQfOmwgdNc3Q4ihqXElIneal9xD5mYyijXMe8
+# A5MfIgr5foBSSIULM6ZhnlJP7220aIpmC5xscjGdzgKkV0wY9HQ2aNeD7r1GYoZQ
+# u0PBXQ+YbWp4YLB0CiHZpSFhzC/d9+rHsqcv57/G5pM9ylY4smkYeeCOcufXoYIC
 # QzCCAj8GCSqGSIb3DQEJBjGCAjAwggIsAgEBMIGpMIGVMQswCQYDVQQGEwJVUzEL
 # MAkGA1UECBMCVVQxFzAVBgNVBAcTDlNhbHQgTGFrZSBDaXR5MR4wHAYDVQQKExVU
 # aGUgVVNFUlRSVVNUIE5ldHdvcmsxITAfBgNVBAsTGGh0dHA6Ly93d3cudXNlcnRy
 # dXN0LmNvbTEdMBsGA1UEAxMUVVROLVVTRVJGaXJzdC1PYmplY3QCDxaI8DklXmOO
 # aRQ5B+YzCzAJBgUrDgMCGgUAoF0wGAYJKoZIhvcNAQkDMQsGCSqGSIb3DQEHATAc
-# BgkqhkiG9w0BCQUxDxcNMTgwODMxMTE1NTQzWjAjBgkqhkiG9w0BCQQxFgQUVI4N
-# YWr2f2z4kBExyBILlVX2aDcwDQYJKoZIhvcNAQEBBQAEggEAACdQr87rbmP2vvg5
-# 3TEu4ngjVRF/c0asD54fmZwYwcVob95hKIjv90lC14GbNdwqjbDipRhvBYNWrDRo
-# 8j2Qr4EatRTb4uFoKVxFDcwX3dIRiNhBFd7AmafDWKlVAXYkNPYA287hM5W1vd/X
-# DmP63g8IdwXqsFvI/sA6yQtZz0uu9pGKUtWzBe7mEyKq3B0F09VYhPzmy58y8Xmk
-# iF2q1N4qPxRIP00ijKCWr1xHTBPeK1Q2DtGtIqRjoGxB7BPqaWpzD+IHKFsZD18D
-# 4t8uMwd+hG54lua/nlYljIhlFuuNXO1Faaj9WzTHFlYdKAwATpLA7mKBTVtVoxc+
-# qEi65g==
+# BgkqhkiG9w0BCQUxDxcNMTgwODMxMTIwMDM3WjAjBgkqhkiG9w0BCQQxFgQUN8uT
+# fCJtwpTbebCV8N35Vcee0YowDQYJKoZIhvcNAQEBBQAEggEAYIxwJKixsZogn6yX
+# +dKScFhs/L4r9DBay83jR0vF6XqEPwaPTEuVB5piAYpqlsvUJJxH2D9Avaki8qaM
+# 49I6FiHZlERxMN+V0XcxoBjh6xkqT2VHI3x+Qjb+DKdzNDH/kDo7c8jzMsJLM69K
+# aEnntjL+RV011s7tom4agIiOCh+BqwTZtmas/kCuic98bON28A4Q8NQcNGkMDID3
+# mqPf+WsxBLFgW/4x8OqwrY0NxbokxCdFSwqeFX0qirdZnMV/IDGHgwVzCQ3Tk/IJ
+# m14SjLCwQWi3SKyqchY5CklnwToKWmn8NVE19sCW7w1OvH12/hlb4Ry0t07QN52u
+# 6FvsbQ==
 # SIG # End signature block
