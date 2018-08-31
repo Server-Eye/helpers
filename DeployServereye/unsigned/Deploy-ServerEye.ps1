@@ -522,14 +522,14 @@ function Start-ServerEyeInstallation
 	if ($Download)
 	{
 		Write-Log "Starting Download Routine" -EventID 10
-		Download-SEInstallationFiles -BaseDownloadUrl $BaseDownloadUrl -Path $Path -Vendor $Vendor -Version $Version
+		Download-SEInstallationFiles -BaseDownloadUrl $BaseDownloadUrl -Path $Path -Version $Version
 		Write-Log "Download Routine finished" -EventID 11
 	}
 	
 	if ($Install)
 	{
 		Write-Log "Starting Installation Routine" -EventID 12
-		Install-SEConnector -Path $Path -Vendor $Vendor
+		Install-SEConnector -Path $Path
 		Write-Log "Installation Routine finished" -EventID 13
 	}
 	
