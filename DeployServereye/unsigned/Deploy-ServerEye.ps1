@@ -658,7 +658,7 @@ function Download-SEInstallationFiles
 	$curVersion = $wc.DownloadString("$BaseDownloadUrl/$SE_cloudIdentifier/currentVersion")
 	Write-Log "done" -ForegroundColor Green
 
-	Write-Log "  downloading ServerEye.Core... " -NoNewline
+	Write-Log "  downloading ServerEye.Setup... " -NoNewline
 	Download-SEFile "$BaseDownloadUrl/$SE_cloudIdentifier/ServerEyeSetup.exe" "$Path\ServerEyeSetup.exe"
 	Write-Log "done" -ForegroundColor Green
 	
