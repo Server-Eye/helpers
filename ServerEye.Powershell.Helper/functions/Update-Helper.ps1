@@ -21,7 +21,7 @@ Param(
         elseif($SEmod.Version.ToString() -ne $online.Version){
         Update-Module -Name $SEModule -force
         Remove-Module -Name $SEModule
-        Uninstall-Module -Name $SEModule -RequiredVersion $module.Version 
+        Uninstall-Module -Name $SEModule -RequiredVersion $SEmod.Version 
         Import-Module -Name $SEModule
         }
     }
