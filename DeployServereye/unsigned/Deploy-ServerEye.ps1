@@ -66,6 +66,9 @@
 	.PARAMETER NoExit
 		Using this, the script is no longer terminated with "exit", allowing it to be used as part of a greater script.
 	
+	.PARAMETER InstallDotNet
+		No longer in Use
+	
 	.EXAMPLE
 		PS C:\> .\Deploy-ServerEye.ps1 -Download
 		
@@ -160,7 +163,10 @@ param (
 	$LogFile,
 	
 	[switch]
-	$NoExit
+	$NoExit,
+
+	[switch]
+	$InstallDotNet
 )
 
 #region Preconfigure some static settings
