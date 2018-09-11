@@ -15,7 +15,7 @@
 function Set-Manager {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [Parameter(ValueFromPipelineByPropertyName)]
         $AuthToken,
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
         $CustomerId,
@@ -24,7 +24,7 @@ function Set-Manager {
     )
 
     Begin {
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
 
     Process {
