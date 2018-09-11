@@ -45,7 +45,7 @@ function New-Customer {
     }
 
     Process {
-                $customers = New-SeApiCustomer -AuthToken $AuthToken -companyName $companyName -zipCode $zipCode -city $city -country $country
+                $customer = New-SeApiCustomer -AuthToken $AuthToken -companyName $companyName -zipCode $zipCode -city $city -country $country
                 [PSCustomObject]@{
                     Name = $customer.companyName
                     CustomerId = $customer.customer_id
