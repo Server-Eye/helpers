@@ -53,8 +53,6 @@ function New-Customer {
                     CustomerNumber = $customer.customerNumberExtern
                 }
             }
-
-        }
 }
 
 
