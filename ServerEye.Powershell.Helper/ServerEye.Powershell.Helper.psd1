@@ -12,7 +12,7 @@
 RootModule = 'ServerEye.Powershell.Helper.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.8.13'
+ModuleVersion = '2.8.14'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
@@ -73,7 +73,7 @@ FunctionsToExport = 'Connect-Session', 'Disconnect-Session', "Get-Customer", "Ge
     "Get-Notification", "New-Notification", "Get-SensorSetting", "Set-SensorSetting", "Restart-Sensorhub", 
     "Get-SensorState", "Test-Auth", "Get-CustomerManager", "Get-User", "Get-Dispatchtime", "Get-Agenttype",
     "Set-Manager", "Remove-Notification","Get-Template","Remove-Manager", "Update-Helper","Get-CustomerProperties",
-    "Get-Installer", "Get-SensorInvoice"
+    "Get-Installer", "Get-SensorInvoice","New-Customer"
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
