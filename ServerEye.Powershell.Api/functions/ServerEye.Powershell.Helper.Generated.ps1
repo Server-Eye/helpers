@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2018-09-11T14:04:42.468Z
+DATE: 2018-09-11T14:14:59.086Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -2720,9 +2720,6 @@ $PId,
         .PARAMETER $Country
         The country of the customer.
         
-        .PARAMETER $ZipCode
-        The zip code of the customer.
-        
         .PARAMETER $Street
         The street of the customer.
         
@@ -2757,8 +2754,6 @@ $City,
 [Parameter(Mandatory=$false)]
 $Country,
 [Parameter(Mandatory=$false)]
-$ZipCode,
-[Parameter(Mandatory=$false)]
 $Street,
 [Parameter(Mandatory=$false)]
 $StreetNumber,
@@ -2785,7 +2780,6 @@ $Timezone,
             'zipCode' = $ZipCode
             'city' = $City
             'country' = $Country
-            'zipCode' = $ZipCode
             'street' = $Street
             'streetNumber' = $StreetNumber
             'email' = $Email
@@ -4195,8 +4189,6 @@ $ZipCode,
 $City,
 [Parameter(Mandatory=$true)]
 $Country,
-[Parameter(Mandatory=$true)]
-$ZipCode,
 [Parameter(Mandatory=$false)]
 $Street,
 [Parameter(Mandatory=$false)]
@@ -4223,7 +4215,6 @@ $Timezone,
             'zipCode' = $ZipCode
             'city' = $City
             'country' = $Country
-            'zipCode' = $ZipCode
             'street' = $Street
             'streetNumber' = $StreetNumber
             'email' = $Email
