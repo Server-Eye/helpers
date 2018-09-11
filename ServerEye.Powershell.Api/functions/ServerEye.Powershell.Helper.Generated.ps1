@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2018-01-23T10:09:33.860Z
+DATE: 2018-09-11T14:04:42.468Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -248,6 +248,9 @@ $AId,
         .PARAMETER $Key
         The key of the setting.
         
+        .PARAMETER $Information
+        An additional information for the agent. Sometimes required. Please check the call made by the OCC for possible values.
+        
     #>
     function Get-AgentRemoteSetting {
         [CmdletBinding()]
@@ -257,6 +260,8 @@ $AId,
 $AId,
 [Parameter(Mandatory=$true)]
 $Key,
+[Parameter(Mandatory=$false)]
+$Information,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -264,7 +269,7 @@ $Key,
         
         
         Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId/setting/$Key/remote" -authtoken $AuthToken
+            return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId/setting/$Key/remote?information=$Information" -authtoken $AuthToken
         }
     }
     
@@ -442,30 +447,29 @@ $AkId,
 
     <#
     .SYNOPSIS
-    Get all differences between a container / multiple containers and a template.
+    Check the given containers for compliance-violations. Returns true if at least one violation is found for this container.
 
     
-        .PARAMETER $CId
+        .PARAMETER $ContainerId
         The id of a container or multiple ids as array.
         
-        .PARAMETER $TId
-        The id of a template.
+        .PARAMETER $CustomerId
+        The id of the customer.
         
-        .PARAMETER $Checks
-        An array of checks to check for violations between template and container.
+        .PARAMETER $ViewFilterId
+        The id of the view filter.
         
     #>
-    function Get-ComplianceViolation {
+    function Get-ComplianceCheck {
         [CmdletBinding()]
         Param(
             
 [Parameter(Mandatory=$true)]
-$CId,
+$ContainerId,
 [Parameter(Mandatory=$true)]
-$TId,
+$CustomerId,
 [Parameter(Mandatory=$true)]
-[ValidateSet('applyNotifications','dropNotifications','applyTags','dropTags','applyAgents','dropAgents','applyAgentSettings')]
-$Checks,
+$ViewFilterId,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -473,7 +477,109 @@ $Checks,
         
         
         Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/violation?cId=$CId&tId=$TId&checks=$Checks" -authtoken $AuthToken
+            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/check?containerId=$ContainerId&customerId=$CustomerId&viewFilterId=$ViewFilterId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Get the compliance template and config for a customer/view filter.
+
+    
+        .PARAMETER $ViewFilterId
+        The id of a view filter.
+        
+        .PARAMETER $CustomerId
+        The id of the customer
+        
+    #>
+    function Get-ComplianceConfig {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$ViewFilterId,
+[Parameter(Mandatory=$true)]
+$CustomerId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/config?viewFilterId=$ViewFilterId&customerId=$CustomerId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Get all compliance configs for the given customers. Returns all configs for each given id.
+
+    
+        .PARAMETER $CustomerId
+        The id or an array of ids of the customer
+        
+    #>
+    function Get-ComplianceConfigCustomer {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CustomerId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/config/customer?customerId=$CustomerId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Get all differences between a container / multiple containers the template configured via /compliance/config.
+
+    
+        .PARAMETER $ContainerId
+        The id of a container or multiple ids as array.
+        
+        .PARAMETER $CustomerId
+        The id of the customer.
+        
+        .PARAMETER $ViewFilterId
+        The id of the view filter.
+        
+        .PARAMETER $MessageFormat
+        If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
+        
+    #>
+    function Get-ComplianceViolation {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$ContainerId,
+[Parameter(Mandatory=$true)]
+$CustomerId,
+[Parameter(Mandatory=$true)]
+$ViewFilterId,
+[Parameter(Mandatory=$false)]
+[ValidateSet('none','md','html')]
+$MessageFormat,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/violation?containerId=$ContainerId&customerId=$CustomerId&viewFilterId=$ViewFilterId&messageFormat=$MessageFormat" -authtoken $AuthToken
         }
     }
     
@@ -823,7 +929,7 @@ $CId,
 
     <#
     .SYNOPSIS
-    Get a specific api key or all of a customer and it's users.
+    Get a specific api key.
 
     
         .PARAMETER $CId
@@ -839,7 +945,7 @@ $CId,
             
 [Parameter(Mandatory=$true)]
 $CId,
-[Parameter(Mandatory=$false)]
+[Parameter(Mandatory=$true)]
 $Name,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -1045,6 +1151,33 @@ $CId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CId/manager" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Returns all customer properties.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+    #>
+    function Get-CustomerPropertyList {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CId/property" -authtoken $AuthToken
         }
     }
     
@@ -1410,38 +1543,6 @@ $Name,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/me/customer" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Returns your feed data. It is a history of recently happened agent or container status changes which only includes information that is important to you.
-
-    
-        .PARAMETER $Start
-        How many feed entries do you want to skip?
-        
-        .PARAMETER $Limit
-        How many feed entries do you want to load?
-        
-    #>
-    function Get-MyFeedList {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$false)]
-$Start,
-[Parameter(Mandatory=$false)]
-$Limit,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/me/feed?start=$Start&limit=$Limit" -authtoken $AuthToken
         }
     }
     
@@ -1921,7 +2022,7 @@ $RtId,
         Param(
             
 [Parameter(Mandatory=$true)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
 $Role,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -2362,35 +2463,20 @@ $Value,
 
     <#
     .SYNOPSIS
-    Set the compliance template and config for a view filter.
+    Set the compliance template and config for a customer/view filter.
 
     
-        .PARAMETER $VfId
+        .PARAMETER $ViewFilterId
         The id of a view filter.
         
-        .PARAMETER $TId
+        .PARAMETER $CustomerId
+        The id of a customer
+        
+        .PARAMETER $TemplateId
         The id of a template.
         
-        .PARAMETER $ApplyNotifications
-        Add missing notifications of agents and update existing ones on the agent.
-        
-        .PARAMETER $DropNotifications
-        Drop notifications of agents that are not configured in the template.
-        
-        .PARAMETER $ApplyTags
-        Add missing tags of agents and update existing ones on the agent.
-        
-        .PARAMETER $DropTags
-        Drop tags of agents that are not configured in the template.
-        
-        .PARAMETER $ApplyAgents
-        Add agents from the template to the sensorhub and update existing ones.
-        
-        .PARAMETER $DropAgents
-        Drop agents on the sensorhub that are not configured in the template.
-        
-        .PARAMETER $ApplyAgentSettings
-        Update settings of agents.
+        .PARAMETER $Checks
+        An array of checks to check for violations between template and the viewvilter's containers.
         
     #>
     function Set-ComplianceConfig {
@@ -2398,23 +2484,14 @@ $Value,
         Param(
             
 [Parameter(Mandatory=$true)]
-$VfId,
+$ViewFilterId,
 [Parameter(Mandatory=$true)]
-$TId,
-[Parameter(Mandatory=$false)]
-$ApplyNotifications,
-[Parameter(Mandatory=$false)]
-$DropNotifications,
-[Parameter(Mandatory=$false)]
-$ApplyTags,
-[Parameter(Mandatory=$false)]
-$DropTags,
-[Parameter(Mandatory=$false)]
-$ApplyAgents,
-[Parameter(Mandatory=$false)]
-$DropAgents,
-[Parameter(Mandatory=$false)]
-$ApplyAgentSettings,
+$CustomerId,
+[Parameter(Mandatory=$true)]
+$TemplateId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('applyNotifications','dropNotifications','applyTags','dropTags','applyAgents','dropAgents','applyAgentSettings')]
+$Checks,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -2424,15 +2501,10 @@ $ApplyAgentSettings,
         Process {
             $reqBody = @{
             
-            'vfId' = $VfId
-            'tId' = $TId
-            'applyNotifications' = $ApplyNotifications
-            'dropNotifications' = $DropNotifications
-            'applyTags' = $ApplyTags
-            'dropTags' = $DropTags
-            'applyAgents' = $ApplyAgents
-            'dropAgents' = $DropAgents
-            'applyAgentSettings' = $ApplyAgentSettings
+            'viewFilterId' = $ViewFilterId
+            'customerId' = $CustomerId
+            'templateId' = $TemplateId
+            'checks' = $Checks
             }
 
             return Intern-PutJson -url "https://api.server-eye.de/2/compliance/config" -authtoken $AuthToken -body $reqBody
@@ -2442,35 +2514,11 @@ $ApplyAgentSettings,
 
     <#
     .SYNOPSIS
-    Apply the template and config to given containers.
+    Apply the changes to the containers.
 
     
-        .PARAMETER $CId
-        The id of a container or multiple ids as array.
-        
-        .PARAMETER $TId
-        The id of a template.
-        
-        .PARAMETER $ApplyNotifications
-        Add missing notifications of agents and update existing ones on the agent.
-        
-        .PARAMETER $DropNotifications
-        Drop notifications of agents that are not configured in the template.
-        
-        .PARAMETER $ApplyTags
-        Add missing tags of agents and update existing ones on the agent.
-        
-        .PARAMETER $DropTags
-        Drop tags of agents that are not configured in the template.
-        
-        .PARAMETER $ApplyAgents
-        Add agents from the template to the sensorhub and update existing ones.
-        
-        .PARAMETER $DropAgents
-        Drop agents on the sensorhub that are not configured in the template.
-        
-        .PARAMETER $ApplyAgentSettings
-        Update settings of agents.
+        .PARAMETER $Changes
+        An array of changes to apply. A change corresponds to one returnvalue of <code>GET compliance/violation</code>
         
     #>
     function Set-ComplianceFix {
@@ -2478,23 +2526,7 @@ $ApplyAgentSettings,
         Param(
             
 [Parameter(Mandatory=$true)]
-$CId,
-[Parameter(Mandatory=$true)]
-$TId,
-[Parameter(Mandatory=$false)]
-$ApplyNotifications,
-[Parameter(Mandatory=$false)]
-$DropNotifications,
-[Parameter(Mandatory=$false)]
-$ApplyTags,
-[Parameter(Mandatory=$false)]
-$DropTags,
-[Parameter(Mandatory=$false)]
-$ApplyAgents,
-[Parameter(Mandatory=$false)]
-$DropAgents,
-[Parameter(Mandatory=$false)]
-$ApplyAgentSettings,
+$Changes,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -2504,15 +2536,7 @@ $ApplyAgentSettings,
         Process {
             $reqBody = @{
             
-            'cId' = $CId
-            'tId' = $TId
-            'applyNotifications' = $ApplyNotifications
-            'dropNotifications' = $DropNotifications
-            'applyTags' = $ApplyTags
-            'dropTags' = $DropTags
-            'applyAgents' = $ApplyAgents
-            'dropAgents' = $DropAgents
-            'applyAgentSettings' = $ApplyAgentSettings
+            'changes' = $Changes
             }
 
             return Intern-PutJson -url "https://api.server-eye.de/2/compliance/fix" -authtoken $AuthToken -body $reqBody
@@ -2684,6 +2708,39 @@ $PId,
         .PARAMETER $CId
         The id of the customer.
         
+        .PARAMETER $CompanyName
+        The name of the customer.
+        
+        .PARAMETER $ZipCode
+        The zip code of the customer.
+        
+        .PARAMETER $City
+        The city of the customer.
+        
+        .PARAMETER $Country
+        The country of the customer.
+        
+        .PARAMETER $ZipCode
+        The zip code of the customer.
+        
+        .PARAMETER $Street
+        The street of the customer.
+        
+        .PARAMETER $StreetNumber
+        The street number of the customer.
+        
+        .PARAMETER $Email
+        An email address of this customer.
+        
+        .PARAMETER $Phone
+        A phone number of this customer.
+        
+        .PARAMETER $Language
+        The default language for emails and other background translation for this customer.
+        
+        .PARAMETER $Timezone
+        The timezone of this customer.
+        
     #>
     function Set-Customer {
         [CmdletBinding()]
@@ -2691,6 +2748,29 @@ $PId,
             
 [Parameter(Mandatory=$true)]
 $CId,
+[Parameter(Mandatory=$false)]
+$CompanyName,
+[Parameter(Mandatory=$false)]
+$ZipCode,
+[Parameter(Mandatory=$false)]
+$City,
+[Parameter(Mandatory=$false)]
+$Country,
+[Parameter(Mandatory=$false)]
+$ZipCode,
+[Parameter(Mandatory=$false)]
+$Street,
+[Parameter(Mandatory=$false)]
+$StreetNumber,
+[Parameter(Mandatory=$false)]
+$Email,
+[Parameter(Mandatory=$false)]
+$Phone,
+[Parameter(Mandatory=$false)]
+[ValidateSet('en','de')]
+$Language,
+[Parameter(Mandatory=$false)]
+$Timezone,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -2701,6 +2781,17 @@ $CId,
             $reqBody = @{
             
             'cId' = $CId
+            'companyName' = $CompanyName
+            'zipCode' = $ZipCode
+            'city' = $City
+            'country' = $Country
+            'zipCode' = $ZipCode
+            'street' = $Street
+            'streetNumber' = $StreetNumber
+            'email' = $Email
+            'phone' = $Phone
+            'language' = $Language
+            'timezone' = $Timezone
             }
 
             return Intern-PutJson -url "https://api.server-eye.de/2/customer/$CId" -authtoken $AuthToken -body $reqBody
@@ -3225,7 +3316,7 @@ $Surname,
 [Parameter(Mandatory=$true)]
 $Email,
 [Parameter(Mandatory=$false)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
 $Roles,
 [Parameter(Mandatory=$false)]
 $Phone,
@@ -3291,6 +3382,45 @@ $GId,
 
     <#
     .SYNOPSIS
+    Set the roles of a user
+
+    
+        .PARAMETER $UId
+        The id of the user.
+        
+        .PARAMETER $Roles
+        The roles, that this user should have, as array
+        
+    #>
+    function Set-UserRole {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$UId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+$Roles,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'uId' = $UId
+            'roles' = $Roles
+            }
+
+            return Intern-PutJson -url "https://api.server-eye.de/2/user/$UId/role" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Updates settings of a user. Any parameter of <code>GET /user/:uId/setting</code> is valid.
 
     
@@ -3343,10 +3473,10 @@ $UId,
 [Parameter(Mandatory=$true)]
 $UId,
 [Parameter(Mandatory=$true)]
-[ValidateSet('sendSummary','defaultNotifyEmail','defaultNotifyPhone','defaultNotifyTicket','timezone')]
+[ValidateSet('sendSummary','defaultNotifyEmail','defaultNotifyPhone','defaultNotifyTicket','timezone','theme')]
 $Key,
 [Parameter(Mandatory=$true)]
-[ValidateSet('Boolean','Valid timezone')]
+[ValidateSet('Boolean','Valid timezone','bright/dark/colorblind theme')]
 $Value,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -3432,6 +3562,38 @@ $AId,
             }
 
             return Intern-PostJson -url "https://api.server-eye.de/2/agent/state" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    The same as <code>GET /container/:id/proposal</code>, but id can be a comma seperated list or an array of container ids. The result will be an object of proposal arrays with container id as keys.
+
+    
+        .PARAMETER $CId
+        The ids of the container.
+        
+    #>
+    function Get-ContainerProposalListbulk {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'cId' = $CId
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/container/proposal" -authtoken $AuthToken -body $reqBody
         }
     }
     
@@ -3987,11 +4149,67 @@ $Until,
     Creates a new customer of your distributor. Nearly any property of the <code>GET /customer/:id</code> result object can be modified and send to the server.
 
     
+        .PARAMETER $CompanyName
+        The name of the customer.
+        
+        .PARAMETER $ZipCode
+        The zip code of the customer.
+        
+        .PARAMETER $City
+        The city of the customer.
+        
+        .PARAMETER $Country
+        The country of the customer.
+        
+        .PARAMETER $ZipCode
+        The zip code of the customer.
+        
+        .PARAMETER $Street
+        The street of the customer.
+        
+        .PARAMETER $StreetNumber
+        The street number of the customer.
+        
+        .PARAMETER $Email
+        An email address of this customer.
+        
+        .PARAMETER $Phone
+        A phone number of this customer.
+        
+        .PARAMETER $Language
+        The default language for emails and other background translation for this customer.
+        
+        .PARAMETER $Timezone
+        The timezone of this customer.
+        
     #>
     function New-Customer {
         [CmdletBinding()]
         Param(
             
+[Parameter(Mandatory=$true)]
+$CompanyName,
+[Parameter(Mandatory=$true)]
+$ZipCode,
+[Parameter(Mandatory=$true)]
+$City,
+[Parameter(Mandatory=$true)]
+$Country,
+[Parameter(Mandatory=$true)]
+$ZipCode,
+[Parameter(Mandatory=$false)]
+$Street,
+[Parameter(Mandatory=$false)]
+$StreetNumber,
+[Parameter(Mandatory=$false)]
+$Email,
+[Parameter(Mandatory=$false)]
+$Phone,
+[Parameter(Mandatory=$false)]
+[ValidateSet('en','de')]
+$Language,
+[Parameter(Mandatory=$false)]
+$Timezone,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -4001,6 +4219,17 @@ $Until,
         Process {
             $reqBody = @{
             
+            'companyName' = $CompanyName
+            'zipCode' = $ZipCode
+            'city' = $City
+            'country' = $Country
+            'zipCode' = $ZipCode
+            'street' = $Street
+            'streetNumber' = $StreetNumber
+            'email' = $Email
+            'phone' = $Phone
+            'language' = $Language
+            'timezone' = $Timezone
             }
 
             return Intern-PostJson -url "https://api.server-eye.de/2/customer" -authtoken $AuthToken -body $reqBody
@@ -4156,6 +4385,50 @@ $AddressObject,
             }
 
             return Intern-PostJson -url "https://api.server-eye.de/2/customer/$CId/location" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Updates a property of a customer.
+
+    
+        .PARAMETER $CId
+        The id of the user.
+        
+        .PARAMETER $Key
+        The name of your custom property.
+        
+        .PARAMETER $Value
+        The value of the property.
+        
+    #>
+    function New-CustomerProperty {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+$Key,
+[Parameter(Mandatory=$true)]
+$Value,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'cId' = $CId
+            'key' = $Key
+            'value' = $Value
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/customer/$CId/property" -authtoken $AuthToken -body $reqBody
         }
     }
     
@@ -4529,7 +4802,7 @@ $Host,
         Does the user belong to a specific (windows) domain?
         
     #>
-    function New-PcivistStart {
+    function New-PcvisitStart {
         [CmdletBinding()]
 [Diagnostics.CodeAnalysis.SuppressMessageAttribute("PSAvoidUsingUserNameAndPassWordParams", "")]
         Param(
@@ -4567,6 +4840,44 @@ $Domain,
             }
 
             return Intern-PostJson -url "https://api.server-eye.de/2/pcvisit/$CustomerId/$CId/start" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Start a remote powershell session on a system.
+
+    
+        .PARAMETER $CustomerId
+        The id of the customer the container belongs to.
+        
+        .PARAMETER $CId
+        The id of the container.
+        
+    #>
+    function New-PowershellStart {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CustomerId,
+[Parameter(Mandatory=$true)]
+$CId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'customerId' = $CustomerId
+            'cId' = $CId
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/powershell/$CustomerId/$CId/start" -authtoken $AuthToken -body $reqBody
         }
     }
     
@@ -4772,7 +5083,7 @@ $Surname,
 [Parameter(Mandatory=$false)]
 $Email,
 [Parameter(Mandatory=$false)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
 $Roles,
 [Parameter(Mandatory=$false)]
 $Phone,
@@ -4838,6 +5149,45 @@ $Geo,
             }
 
             return Intern-PostJson -url "https://api.server-eye.de/2/user/$UId/location" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Add a role to the user
+
+    
+        .PARAMETER $UId
+        The id of the user.
+        
+        .PARAMETER $Role
+        The name of the role, that should be added to this user
+        
+    #>
+    function New-UserRole {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$UId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+$Role,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'uId' = $UId
+            'role' = $Role
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/user/$UId/role/$Role" -authtoken $AuthToken -body $reqBody
         }
     }
     
@@ -5132,6 +5482,38 @@ $TId,
         
         Process {
             return Intern-DeleteJson -url "https://api.server-eye.de/2/agent/$AId/tag/$TId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Delete the compliance config for a customer/view filter.
+
+    
+        .PARAMETER $ViewFilterId
+        The id of a view filter.
+        
+        .PARAMETER $CustomerId
+        The id of the customer
+        
+    #>
+    function Remove-ComplianceConfig {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$ViewFilterId,
+[Parameter(Mandatory=$true)]
+$CustomerId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-DeleteJson -url "https://api.server-eye.de/2/compliance/config?viewFilterId=$ViewFilterId&customerId=$CustomerId" -authtoken $AuthToken
         }
     }
     
@@ -5437,6 +5819,38 @@ $UId,
         
         Process {
             return Intern-DeleteJson -url "https://api.server-eye.de/2/customer/$CId/manager/$UId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Deletes a customer property.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+        .PARAMETER $Key
+        The custom property that you want to delete.
+        
+    #>
+    function Remove-CustomerProperty {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+$Key,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-DeleteJson -url "https://api.server-eye.de/2/customer/$CId/property/$Key" -authtoken $AuthToken
         }
     }
     
@@ -5818,6 +6232,39 @@ $GId,
         
         Process {
             return Intern-DeleteJson -url "https://api.server-eye.de/2/user/$UId/group/$GId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Remove a role of the user
+
+    
+        .PARAMETER $UId
+        The id of the user.
+        
+        .PARAMETER $Role
+        The name of the role, that should be deleted
+        
+    #>
+    function Remove-UserRole {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$UId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+$Role,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-DeleteJson -url "https://api.server-eye.de/2/user/$UId/role/$Role" -authtoken $AuthToken
         }
     }
     
