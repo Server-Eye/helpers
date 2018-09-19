@@ -52,9 +52,6 @@ function Get-Sensor {
 }
 
 function cacheSensorTypes ($auth) {
-    if ($Global:SensorTypes) {
-        return
-    }
     $Global:SensorTypes = @{}
 
     $types = Get-SeApiAgentTypeList -AuthToken $auth
