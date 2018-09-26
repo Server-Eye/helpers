@@ -20,23 +20,32 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-$customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
+$customers = Get-SECustomer -AuthToken $AuthToken -all
 
+#Write-Debug "Customer id "$customers.CustomerId
 
 foreach ($customer in $customers) {
 
-    if ($customer.id -eq $custID) {
+    if ($customer.CustomerId -eq $custID) {
 
-        $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
+        $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.CustomerId
 
         foreach ($container in $containers) {
 
             if ($container.subtype -eq "0") {
 
                 foreach ($sensorhub in $containers) {
+
                     if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
+
+                        #Write-Debug $sensorhub.id
+
                         try {
+
                             $inventorys = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
+
+                            Write-Debug $inventorys
+
                             foreach ($inventory in $inventorys){
                                 for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
                                     [PSCustomObject]@{
@@ -44,6 +53,7 @@ foreach ($customer in $customers) {
                                         Pos = ($i+1)
                                         Produkt = $inventory.PROGRAMS[$i].Produkt
                                         Version = $inventory.PROGRAMS[$i].SWVERSION
+                                        Status = "Online"
                                     }
                                 }
                             }
