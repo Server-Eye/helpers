@@ -20,43 +20,33 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-$customers = Get-SECustomer -AuthToken $AuthToken -all
-
 #Write-Debug "Customer id "$customers.CustomerId
 
-foreach ($customer in $customers) {
+    $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $custID
 
-    if ($customer.CustomerId -eq $custID) {
+        foreach ($sensorhub in $containers) {
 
-        $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.CustomerId
+            if ($sensorhub.subtype -eq "2") {
 
-        foreach ($container in $containers) {
+                 Write-Debug $sensorhub
 
-            if ($container.subtype -eq "0") {
+                    try {
 
-                foreach ($sensorhub in $containers) {
+                        $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
 
-                    if ($sensorhub.subtype -eq "2" -And $sensorhub.parentId -eq $container.id) {
-
-                        #Write-Debug $sensorhub.id
-
-                        try {
-
-                            $inventorys = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
-
-                            Write-Debug $inventorys
-
-                            foreach ($inventory in $inventorys){
-                                for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
-                                    [PSCustomObject]@{
-                                        Sensorhub = $sensorhub.name
+                         Write-Debug $inventory
+                            [PSCustomObject]@{
+                                Sensorhub = $sensorhub.name
+                                Status = "Online"
+                                    Software = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
+                                        [PSCustomObject]@{
                                         Pos = ($i+1)
                                         Produkt = $inventory.PROGRAMS[$i].Produkt
                                         Version = $inventory.PROGRAMS[$i].SWVERSION
-                                        Status = "Online"
+                                        }
                                     }
-                                }
                             }
+                            
                         }
                         catch {
                             if($x[0].ErrorRecord.ErrorDetails.Message -match ('"message":"server_error","error":"not_connected"')  ){
@@ -68,7 +58,3 @@ foreach ($customer in $customers) {
                         }
                     }
                 }
-            }
-        }
-    }
-}

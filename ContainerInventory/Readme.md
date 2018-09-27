@@ -19,23 +19,26 @@ Office-Key
 
 ### With an API Key
 ```powershell
-ContainerInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
+ContainerInventory.ps1 -apiKey "yourApiKey" -custID "specificCustomerID"
 ```
 
 ### Via Login
 ```powershell
-Connect-SESession | ContainerInventory.ps1 [-custID "specificCustomerID"]
+Connect-SESession | ContainerInventory.ps1 -custID "specificCustomerID"
 ```
 
 ### With an API Key
 ```powershell
-ProgrammInventory.ps1 -apiKey "yourApiKey" [-custID "specificCustomerID"]
+ProgrammInventory.ps1 -apiKey "yourApiKey" -custID "specificCustomerID"
 ```
 
 ### Via Login
 ```powershell
-Connect-SESession | ProgrammInventory.ps1 [-custID "specificCustomerID"]
+Connect-SESession | ProgrammInventory.ps1 -custID "specificCustomerID"
 ```
+
+### When Export to Excel use this Call
+.\ProgrammInventory.ps1 -custID "specificCustomerID" | Select-Object Sensorhub,Software | Select-Object -Property Sensorhub -ExpandProperty Software | Export-Excel -Path "Filename or Path "-AutoSize -NoNumberConversion Version
 
 ## Parameters
 
