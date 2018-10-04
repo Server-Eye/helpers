@@ -35,6 +35,7 @@ foreach ($customer in $customers) {
     $usageCustomer = $usage | Where-Object customerNumberExtern -eq $customer.CustomerNumber
     [PSCustomObject]@{ 
         CustomerName = $customer.Name
+        CustomerNumber = $customer.CustomerNumber
         Container = $usageCustomer.container
         Sensors = $usageCustomer.agents
         NFR = $usageCustomer.nfr
