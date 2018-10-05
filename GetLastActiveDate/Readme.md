@@ -1,6 +1,6 @@
 # GetLastActiveDate.ps1
 
-Shows all System with no connection and the time of the last activity.
+Shows all System with no connection and the time of the last activity or Systems that were not connected for 14 Days or more.
 
 Shows time based on the TimeZone of the System on which the Script was executed.
 
