@@ -17,7 +17,7 @@
 function New-Group {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName)]
+        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true))]
         [string]$CustomerId,
         [Parameter(Mandatory=$true)]
         [string]$Name,
