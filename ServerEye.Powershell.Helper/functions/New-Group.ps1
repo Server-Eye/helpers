@@ -17,8 +17,8 @@
 function New-Group {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
-        [string]$customerId,
+        [Parameter(ValueFromPipelineByPropertyName)]
+        [string]$CustomerId,
         [Parameter(Mandatory=$true)]
         [string]$Name,
         [Parameter()]
@@ -30,7 +30,7 @@ function New-Group {
     }
 
     Process {
-                $Group = New-SeApiGroup -AuthToken $AuthToken -customerId $companyName -name $Name
+                $Group = New-SeApiGroup -AuthToken $AuthToken -customerId $CustomerId -name $Name
                 [PSCustomObject]@{
                     Name = $Group.Surname
                     GroupId = $Group.gid
