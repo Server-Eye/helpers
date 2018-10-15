@@ -30,16 +30,20 @@ function Get-OCCConnector {
     )
 
     Begin{
-        $AuthToken = Test-SEAuth -AuthToken $AuthToken
+    $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
 
     if($customerID){
-    getOCCConnectorByCustomer -customerId $CustomerId -filter $Filter -Auth $AuthToken
-    }elseif($ConnectorId){
-    getOCCConnectorById -ConnectorId $ConnectorId -Auth $AuthToken
-    }
+
+        getOCCConnectorByCustomer -customerId $CustomerId -filter $Filter -auth $AuthToken
+
+        }elseif($ConnectorId){
+
+            getOCCConnectorById -ConnectorId $ConnectorId -auth $AuthToken
+
+        }
 
     }
 
@@ -48,7 +52,7 @@ function Get-OCCConnector {
     }
 }
 
-function getOCCConnectorById($ConnectorId, $Auth) {
+function getOCCConnectorById($ConnectorId, $auth) {
     $connector = Get-SeApiContainer -CId $ConnectorId -AuthToken $auth
     $customer = Get-SECustomer -customerId $connector.customerId
 
@@ -60,11 +64,17 @@ function getOCCConnectorById($ConnectorId, $Auth) {
     }
 }
 function getOCCConnectorByCustomer ($customerId, $filter, $auth) {
+
 $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
+
     foreach ($Connector in $containers) {
+
         if ($Connector.subtype -eq "0") {
+
             if ((-not $filter) -or ($Connector.name -like $filter)) {
+
                 getConnectorById -ConnectorId $Connector.id -AuthToken $auth
+
             }
         }
     }
