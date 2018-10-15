@@ -95,10 +95,10 @@ function setNotificationofSensor {
     $authtoken
     )
     $noti = Set-SeApiAgentNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
-    formatSensorNotification -notiID $noti.nid -authoken $authtoken -sensorid $noti.aid
+    formatSensorNotificationset -notiID $noti.nid -authoken $authtoken -sensorid $noti.aid
 }
 
-function formatSensorNotification($notiID, $authtoken, $SensorId){
+function formatSensorNotificationset($notiID, $authtoken, $SensorId){
     $n = Get-SENotification -SensorId  $SensorId | Where-Object {$_.NotificationId -eq $notiID}
     $sensor = Get-SESensor -SensorId $SensorId
     [PSCustomObject]@{
@@ -158,11 +158,11 @@ function SetNotificationofContainer {
         $customerName = $sensorhub.Customer
     }
     
-    formatContainerNotification -notiID $noti.nid -authoken $authtoken -SensorhubID $noti.cid
+    formatContainerNotificationSet -notiID $noti.nid -authoken $authtoken -SensorhubID $noti.cid
 
 }
 
-function formatContainerNotification ($notiID, $authoken, $SensorhubID){
+function formatContainerNotificationSet($notiID, $authoken, $SensorhubID){
     $n = Get-SENotification -SensorhubId $SensorhubId | Where-Object {$_.NotificationId -eq $notiID}
     [PSCustomObject]@{
         Name = $n.Name
