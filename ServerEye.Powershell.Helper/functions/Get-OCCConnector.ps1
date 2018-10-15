@@ -44,6 +44,9 @@ function Get-OCCConnector {
             getOCCConnectorById -ConnectorId $ConnectorId -auth $AuthToken
 
         }
+        else {
+            Write-Error "Please provide a ConnectorId or a CustomerId."
+        }
 
     }
 
