@@ -62,9 +62,9 @@ function Set-Notification {
     
     Process {
         if ($SensorId) {
-            setNotificationBySensor -AuthToken $AuthToken -SensorID $SensorId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+            setNotificationofSensor -AuthToken $AuthToken -SensorID $SensorId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } elseif ($SensorhubId) {
-            SetNotificationbyContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+            SetNotificationofContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } else {
             Write-Error "Unsupported input"
         }
@@ -76,7 +76,7 @@ function Set-Notification {
     }
 }
 
-function setNotificationBySensor {
+function setNotificationofSensor {
     Param(
     #Parameter help description
     [Parameter(Mandatory=$true)]
@@ -121,7 +121,7 @@ function formatSensorNotification($notiID, $authtoken, $SensorId){
     }
 }
 
-function SetNotificationbyContainer {
+function SetNotificationofContainer {
     Param(
         #Parameter help description
         [Parameter(Mandatory=$true)]
