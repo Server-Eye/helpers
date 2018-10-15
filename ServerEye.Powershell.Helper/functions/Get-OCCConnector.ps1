@@ -64,7 +64,7 @@ $containers = Get-SeApiCustomerContainerList -AuthToken $authtoken -CId $custome
     foreach ($Connector in $containers) {
         if ($Connector.subtype -eq "0") {
             if ((-not $filter) -or ($Connector.name -like $filter)) {
-                getConnectorById -ConnectorId $Connector.id -auth $authtoken
+                getConnectorById -ConnectorId $Connector.id -AuthToken $authtoken
             }
         }
     }
