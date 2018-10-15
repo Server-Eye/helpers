@@ -38,7 +38,7 @@ function Get-OCCConnector {
     if($customerID){
     getOCCConnectorByCustomer -customerId $CustomerId -filter $Filter -AuthToken $AuthToken
     }elseif($ConnectorId){
-    getOCCConnectorById -ConnectorId $ConnectorId -auth $AuthToken
+    getOCCConnectorById -ConnectorId $ConnectorId -AuthToken $AuthToken
     }
 
     }
@@ -48,7 +48,7 @@ function Get-OCCConnector {
     }
 }
 
-function getOCCConnectorById($ConnectorId, $auth) {
+function getOCCConnectorById($ConnectorId, $AuthToken) {
     $connector = Get-SeApiContainer -CId $ConnectorId -AuthToken $authtoken
     $customer = Get-SECustomer -customerId $connector.customerId
 
