@@ -22,10 +22,10 @@ function Get-OCCConnector {
         [string]$Filter,
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName="byCustomer")]
         $CustomerId,
-        [parameter(ValueFromPipelineByPropertyName,ParameterSetName="bySensorhub")]
+        [parameter(ValueFromPipelineByPropertyName,ParameterSetName="byOCCConnector")]
         $ConnectorId,
         [Parameter(Mandatory=$false,ParameterSetName="byCustomer")]
-        [Parameter(Mandatory=$false,ParameterSetName="bySensorhub")]
+        [Parameter(Mandatory=$false,ParameterSetName="byOCCConnector")]
         $AuthToken
     )
 
@@ -76,7 +76,7 @@ $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
 
             if ((-not $filter) -or ($Connector.name -like $filter)) {
 
-                getOCCConnectorById -ConnectorId $Connector.id -AuthToken $auth
+                getOCCConnectorById -ConnectorId $Connector.id -Auth $auth
 
             }
         }
