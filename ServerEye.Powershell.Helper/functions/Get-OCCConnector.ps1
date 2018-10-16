@@ -76,7 +76,7 @@ $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
 
             if ((-not $filter) -or ($Connector.name -like $filter)) {
 
-                getConnectorById -ConnectorId $Connector.id -AuthToken $auth
+                getOCCConnectorById -ConnectorId $Connector.id -AuthToken $auth
 
             }
         }
