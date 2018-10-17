@@ -49,7 +49,7 @@ function Get-Customer {
             }
         }
 
-        if ($CustomerId) {
+        elseif ($CustomerId) {
 
             $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
             [PSCustomObject]@{
