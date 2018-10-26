@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2018-09-11T14:14:59.086Z
+DATE: 2018-10-25T15:39:45.655Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -2959,6 +2959,15 @@ $Email,
         .PARAMETER $CId
         The id of the customer.
         
+        .PARAMETER $TanssUrl
+        The URL of an instance of TANSS.
+        
+        .PARAMETER $DefaultLanguage
+        The language of this customers reports and other automatically generated stuff
+        
+        .PARAMETER $Timezone
+        The timezone this customer is based.
+        
     #>
     function Set-CustomerSetting {
         [CmdletBinding()]
@@ -2966,6 +2975,13 @@ $Email,
             
 [Parameter(Mandatory=$true)]
 $CId,
+[Parameter(Mandatory=$false)]
+$TanssUrl,
+[Parameter(Mandatory=$false)]
+[ValidateSet('de','en')]
+$DefaultLanguage,
+[Parameter(Mandatory=$false)]
+$Timezone,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -2976,6 +2992,9 @@ $CId,
             $reqBody = @{
             
             'cId' = $CId
+            'tanssUrl' = $TanssUrl
+            'defaultLanguage' = $DefaultLanguage
+            'timezone' = $Timezone
             }
 
             return Intern-PutJson -url "https://api.server-eye.de/2/customer/$CId/setting" -authtoken $AuthToken -body $reqBody
@@ -4189,6 +4208,8 @@ $ZipCode,
 $City,
 [Parameter(Mandatory=$true)]
 $Country,
+[Parameter(Mandatory=$true)]
+$ZipCode,
 [Parameter(Mandatory=$false)]
 $Street,
 [Parameter(Mandatory=$false)]
@@ -4215,6 +4236,7 @@ $Timezone,
             'zipCode' = $ZipCode
             'city' = $City
             'country' = $Country
+            'zipCode' = $ZipCode
             'street' = $Street
             'streetNumber' = $StreetNumber
             'email' = $Email
