@@ -4208,8 +4208,6 @@ $ZipCode,
 $City,
 [Parameter(Mandatory=$true)]
 $Country,
-[Parameter(Mandatory=$true)]
-$ZipCode,
 [Parameter(Mandatory=$false)]
 $Street,
 [Parameter(Mandatory=$false)]
@@ -4236,7 +4234,6 @@ $Timezone,
             'zipCode' = $ZipCode
             'city' = $City
             'country' = $Country
-            'zipCode' = $ZipCode
             'street' = $Street
             'streetNumber' = $StreetNumber
             'email' = $Email
