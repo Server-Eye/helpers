@@ -3,7 +3,7 @@ Param(
     [Parameter(ValueFromPipeline=$true)]
     [alias("ApiKey","Session")]
     $AuthToken,
-    [Switch]$AllAll
+    [Switch]$All
 )
 
 # Check if module is installed, if not install it
