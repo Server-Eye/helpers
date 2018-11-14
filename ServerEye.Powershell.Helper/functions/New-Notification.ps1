@@ -25,56 +25,156 @@
     
 #>
 function New-Notification {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName="ofSensor")]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensor')]
         $SensorId,
-        [Parameter(Mandatory=$false)]
+        [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensorhub')]
+        $SensorhubId,
+        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
         $UserId,
-        [Parameter(Mandatory=$false)]
         [switch]$SendEmail,
-        [Parameter(Mandatory=$false)]
         [switch]$SendTextmessage,
-        [Parameter(Mandatory=$false)]
         [switch]$SendTicket,
-        [Parameter(Mandatory=$false)]
         $DeferId="",
-        [Parameter(Mandatory=$false)]
         $AuthToken
     )
 
     Begin {
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
 
     Process {
-        $notify = New-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -UserId $UserId -Email $SendEmail.IsPresent -Phone $SendTextmessage.IsPresent -Ticket $SendTicket.IsPresent
-
-        $displayName = "$($notify.prename) $($notify.surname)".Trim() 
+        if ($SensorId) {
+            newNotificationofSensor -AuthToken $AuthToken -SensorID $SensorId -UserId $UserId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+        } elseif ($SensorhubId) {
+            newNotificationofContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -UserId $UserId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+        } else {
+            Write-Error "Unsupported input"
+        }
         
-        $sensor = get-SeSensor -SensorId $notify.aId -AuthToken $AuthToken
-        
-        $out = New-Object psobject
-        $out | Add-Member NoteProperty Name ($displayName)
-        $out | Add-Member NoteProperty Email ($notify.useremail)
-        $out | Add-Member NoteProperty byEmail ($notify.email)
-        $out | Add-Member NoteProperty byTextmessage ($notify.phone)
-        $out | Add-Member NoteProperty byTicket ($notify.ticket)
-        if ($deferId -ne ""){
-            $sn = Set-SeApiAgentNotification -AuthToken $AuthToken -AId $SensorId -NId $notify.nId -DeferId $deferId 
-            $gn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -AId $sn.aId | Where-Object {$_.Nid -eq $notify.nId}
-            $out | Add-Member NoteProperty Defertime ($gn.deferTime)
-            $out | Add-Member NoteProperty Defername ($gn.deferName)
-            }
-        $out | Add-Member NoteProperty NotificationId ($notify.nId)
-        $out | Add-Member NoteProperty Sensor ($sensor.name)
-        $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
-        $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
-        $out | Add-Member NoteProperty Customer ($sensor.customer)
-        $out
     }
 
-    End {
+    End{
 
+    }
+}
+
+function NewNotificationofSensor {
+    Param(
+    #Parameter help description
+    [Parameter(Mandatory=$true)]
+    $SensorID,
+    [Parameter(Mandatory=$true)]
+    $UserId,
+    [Parameter(Mandatory=$false)]
+    $SendEmail,
+    [Parameter(Mandatory=$false)]
+    $SendTextmessage,
+    [Parameter(Mandatory=$false)]
+    $SendTicket,
+    [Parameter(Mandatory=$false)]
+    $deferid,
+    [Parameter(Mandatory=$true)]
+    $Authtoken
+    )
+    $noti = New-SeApiAgentNotification -AuthToken $Authtoken -AId $sensorId -UserId $UserId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket
+    formatSensorNotificationNew -Authtoken $Authtoken -notiID $noti.nid -sensorid $noti.aid  -DeferId $deferid
+}
+
+function formatSensorNotificationNew($notiID, $Authtoken, $SensorId, $deferid){
+    $n = Get-SENotification -SensorId  $SensorId | Where-Object {$_.NotificationId -eq $notiID}
+    $sensor = Get-SESensor -SensorId $SensorId
+    [PSCustomObject]@{
+        Name = $n.Name
+        Email = $n.email
+        byEmail = $n.byEmail
+        byTextmessage = $n.byTextmessage
+        byTicket = $n.byTicket
+        Defer        = if ($deferId -ne "") {
+            Set-SeApiAgentNotification -AuthToken $AuthToken -aid $SensorId -NId $n.NotificationId -DeferId $deferId | Out-Null
+            $gnn = Get-SeApiAgentNotificationList -AuthToken $AuthToken -aid $SensorId | Where-Object {$_.Nid -eq $n.NotificationId}
+            [PSCustomObject]@{
+                Defertime = $gnn.deferTime
+                Defername = $gnn.deferName
+            }
+        }
+        else {
+            "No Deferid was set."
+        }
+        NotificationId = $n.NotificationId
+        Sensor = $sensor.name
+        SensorID = $sensor.SensorId
+        Sensorhub = $sensor.sensorhub
+        'OCC-Connector' = $sensor.'OCC-Connector'
+        Customer = $sensor.customer
+    }
+}
+
+function NewNotificationofContainer {
+    Param(
+        #Parameter help description
+        [Parameter(Mandatory=$true)]
+        $SensorhubID,
+        [Parameter(Mandatory=$true)]
+        $UserId,
+        [Parameter(Mandatory=$false)]
+        $SendEmail,
+        [Parameter(Mandatory=$false)]
+        $SendTextmessage,
+        [Parameter(Mandatory=$false)]
+        $SendTicket,
+        [Parameter(Mandatory=$false)]
+        $deferid,
+        [Parameter(Mandatory=$true)]
+        $Authtoken
+        )
+    $noti = New-SeApiContainerNotification -AuthToken $Authtoken -CId $SensorhubID -UserId $UserId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket
+    $container = Get-SeApiContainer -AuthToken $Authtoken -CId $SensorhubID
+
+    $sensorhubName = ""
+    $connectorName = ""
+    $customerName = ""
+    
+    if ($container.type -eq "0") {
+        $customer = Get-SeApiCustomer -AuthToken $Authtoken -CId $container.customerId
+        $connectorName = $container.Name
+        $customerName = $customer.companyName
+    } else {
+        $sensorhub = Get-SESensorhub -AuthToken $Authtoken -SensorhubId $SensorhubID
+        $sensorhubName = $sensorhub.Name
+        $SensorhubId = $Sensorhub.sensorhubId 
+        $connectorName = $sensorhub.'OCC-Connector'
+        $customerName = $sensorhub.Customer
+    }
+    
+    formatContainerNotificationNew -notiID $noti.nid -authoken $Authtoken -SensorhubID $noti.cid -deferid $deferId
+
+}
+
+function formatContainerNotificationNew($notiID, $authoken, $SensorhubID, $deferId){
+    $n = Get-SENotification -SensorhubId $SensorhubId | Where-Object {$_.NotificationId -eq $notiID}
+    [PSCustomObject]@{
+        Name = $n.Name
+        Email = $n.email
+        byEmail = $n.byEmail
+        byTextmessage = $n.byTextmessage
+        byTicket = $n.byTicket
+        Defer        = if ($deferId -ne "") {
+            Set-SeApiContainerNotification -AuthToken $AuthToken -cid $SensorhubID -NId $n.NotificationId -DeferId $deferId | Out-Null
+            $gnn = Get-SeApiContainerNotificationList -AuthToken $AuthToken -cid $SensorhubID | Where-Object {$_.Nid -eq $n.NotificationId}
+            [PSCustomObject]@{
+                Defertime = $gnn.deferTime
+                Defername = $gnn.deferName
+            }
+        }
+        else {
+            "No Deferid was set."
+        }
+        NotificationId = $n.NotificationId
+        Sensorhub = $sensorhubName
+        SensorhubId = $SensorhubId
+        'OCC-Connector' = $connectorName
+        Customer = $customerName
     }
 }
