@@ -78,6 +78,9 @@ function getSensorhubById($sensorhubId, $auth) {
         }
         NumberOfProcessors = $sensorhub.numberOfProcessors
         TotalRam = [math]::Ceiling($sensorhub.totalRam /1024 /1024)
+        maxHeartbeatTimeout = $sensorhub.maxHeartbeatTimeout
+        alertOffline = $sensorhub.alertOffline
+        alertShutdown = $sensorhub.alertShutdown
     }
 }
 
