@@ -33,7 +33,9 @@ function Set-SensorTag {
         $Sensor = Get-SESensor -AuthToken $AuthToken -SensorId $SensorId
         New-SeApiAgentTag -AuthToken $AuthToken -AId $SensorId -TId $tagId
         $sensorname = $sensor.name
+        Write-Host "CmdLet is deprecated please use Set-SETag instead"
         Write-Host "Tag wurde gesetzt beim Sensor $sensorname"
+
 
     }
 }
