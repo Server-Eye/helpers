@@ -11,12 +11,12 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/UninstallAvira/
 
 ## Call
 ``` 
-UninstallAvira-ps1
+UninstallAvira.ps1
 ```
 
 ## Call with Restart
 ```
-AddNotificationsByCustomerAndAgentId.ps1 -Restart
+UninstallAvira.ps1 -Restart
 ```
 
 ## Parameters
