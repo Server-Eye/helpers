@@ -22,4 +22,4 @@ UninstallAvira.ps1 -Restart
 ## Parameters
 
 ### Restart
-Will Restart the System a the end.
+Will Restart the System at the end.
