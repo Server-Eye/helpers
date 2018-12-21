@@ -40,8 +40,8 @@ function Get-SensorInvoice{
             $usage = Get-SeApiCustomerUsageList -Year $year -Month $Month -AuthToken $AuthToken
 
         foreach ($customer in $customers) {
-            $serverCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object isServer -eq $true | Measure-Object).Count
-            $workstationCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object isServer -eq $false | Measure-Object).Count
+            $serverCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object {$_.isServer -eq $true -and $_.subtype -eq "2"}  | Measure-Object).Count
+            $workstationCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object {$_.isServer -eq $false -and $_.subtype -eq "2"}  | Measure-Object).Count
             $usageCustomer = $usage | Where-Object customerNumberExtern -eq $customer.CustomerNumber
             [PSCustomObject]@{ 
                 CustomerName = $customer.Name

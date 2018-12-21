@@ -29,7 +29,7 @@ $usage = Get-SeApiCustomerUsageList -Year $year -Month $Month -AuthToken $AuthTo
 
 foreach ($customer in $customers) {
     $serverCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object {$_.isServer -eq $true -and $_.subtype -eq "2"} | Measure-Object).Count
-    $workstationCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | {$_.isServer -eq $false -and $_.subtype -eq "2"}  | Measure-Object).Count
+    $workstationCount = (Get-SeApiCustomerContainerList -CId $customer.CustomerId -AuthToken $AuthToken | Where-Object {$_.isServer -eq $false -and $_.subtype -eq "2"}  | Measure-Object).Count
 
 
     $usageCustomer = $usage | Where-Object customerNumberExtern -eq $customer.CustomerNumber
