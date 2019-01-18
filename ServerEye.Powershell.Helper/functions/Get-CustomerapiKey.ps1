@@ -10,7 +10,7 @@
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
 #>
-function Get-apiKey {
+function Get-CustomerapiKey {
     [CmdletBinding()]
     Param(
         $AuthToken
