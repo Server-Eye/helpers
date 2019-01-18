@@ -23,7 +23,7 @@ $Customers = Get-SECustomer -all -AuthToken $AuthToken
 
 Foreach($customer in $customers){
     foreach ($user in $users){
-        Set-SEManager -CustomerId $customer.CustomerId -email "rene.thulke@server-eye.de" -AuthToken $AuthToken
+        Set-SEManager -CustomerId $customer.CustomerId -email $user.EMail -AuthToken $AuthToken
     }
 }
 
