@@ -1,7 +1,7 @@
 [CmdletBinding()]
 Param(
-    [Parameter(ValueFromPipeline=$true)]
-    [alias("ApiKey","Session")]
+    [Parameter(ValueFromPipeline = $true)]
+    [alias("ApiKey", "Session")]
     $AuthToken,
     [string]
     $custID
@@ -20,41 +20,24 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-#Write-Debug "Customer id "$customers.CustomerId
+$containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $custID
 
-    $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $custID
+foreach ($sensorhub in $containers) {
 
-        foreach ($sensorhub in $containers) {
+    if ($sensorhub.subtype -eq "2") {
 
-            if ($sensorhub.subtype -eq "2") {
-
-                 Write-Debug $sensorhub
-
-                    try {
-
-                        $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
-
-                         Write-Debug $inventory
-                            [PSCustomObject]@{
-                                Sensorhub = $sensorhub.name
-                                Status = "Online"
-                                    Software = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
-                                        [PSCustomObject]@{
-                                        Pos = ($i+1)
-                                        Produkt = $inventory.PROGRAMS[$i].Produkt
-                                        Version = $inventory.PROGRAMS[$i].SWVERSION
-                                        }
-                                    }
-                            }
-                            
-                        }
-                        catch {
-                            if($x[0].ErrorRecord.ErrorDetails.Message -match ('"message":"server_error","error":"not_connected"')  ){
-                                [PSCustomObject]@{
-                                    Sensorhub = $sensorhub.name
-                                    Status = "is Offline."
-                                }
-                            }
-                        }
-                    }
+        $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
+        [PSCustomObject]@{
+            Sensorhub = $sensorhub.name
+            Status    = "Online"
+            Software  = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
+                [PSCustomObject]@{
+                    Pos     = ($i + 1)
+                    Produkt = $inventory.PROGRAMS[$i].Produkt
+                    Version = $inventory.PROGRAMS[$i].SWVERSION
                 }
+            }
+        }
+
+    }
+}
