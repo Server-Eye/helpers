@@ -1,9 +1,7 @@
-# GetSensorhubWhereSensorIsNotAdded.ps1
+# CompareSystemsbetweenADandSE.ps1
 
-Shows all System where the given Sensor is not appled.
-
-Sensortype must be provided in English see this link for more Informations.
-https://servereye.freshdesk.com/support/solutions/articles/14000082889-auflistung-aller-sensor-in-der-powershell
+Compares System in the Active Directory and Server-Eye.
+Checks if on all Systems is Server-Eye installed or if Server-Eye is installed on to many Systems.
 
 ## Download
 
@@ -14,12 +12,22 @@ iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/CompareSystemsb
 
 ## Call with Session via Connect-SESession and Active Directory Check
 ```
-Connect-SESession | CompareSystemsbetweenADandSE.ps1 -CustomerID "ID of the Customer"
+Connect-SESession | CompareSystemsbetweenADandSE.ps1 -CustomerID "ID of the Customer" -ADCheck
 ```
 
-## Call with API Key
+## Call with API Key and Active Directory Check
 ```
-CompareSystemsbetweenADandSE.ps1 -apiKey yourApiKey 
+CompareSystemsbetweenADandSE.ps1 -apiKey yourApiKey -ADCheck
+```
+
+## Call with Session via Connect-SESession and Server-Eye Check
+```
+Connect-SESession | CompareSystemsbetweenADandSE.ps1 -CustomerID "ID of the Customer" -SECheck
+```
+
+## Call with API Key and Server-Eye Check
+```
+CompareSystemsbetweenADandSE.ps1 -apiKey yourApiKey -SECheck
 ```
 
 ## Parameters
@@ -28,11 +36,11 @@ CompareSystemsbetweenADandSE.ps1 -apiKey yourApiKey
 The api-Key of the user. ATTENTION only nessesary if no Server-Eye Session exists in den Powershell
 
 ### CustomerID
-The api-Key of the user. ATTENTION only nessesary if no Server-Eye Session exists in den Powershell
+ID of the Customer where you want to compare the Systemes.
 
 ### ADCheck
-The api-Key of the user. ATTENTION only nessesary if no Server-Eye Session exists in den Powershell
+Checks the AD System if Server-Eye is installed.
 
 ### SECheck
-The api-Key of the user. ATTENTION only nessesary if no Server-Eye Session exists in den Powershell
+Checks Server-Eye if all installed Systems are in the AD.
 
