@@ -24,7 +24,8 @@ function New-Note {
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensor')]
         $SensorId,
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensorhub')]
-        $SensorhubId,
+        [Alias("ConnectorID","SensorhubID")]
+        $containerID,
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensorhub')]
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensor')]
         [string]$message,
@@ -40,8 +41,8 @@ function New-Note {
     Process {
         if ($SensorId) {
             newNoteforSensor -AuthToken $AuthToken -SensorID $SensorId -message $message
-        } elseif ($SensorhubId) {
-            newNoteforContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -message $message
+        } elseif ($containerID) {
+            newNoteforContainer -AuthToken $AuthToken -containerID $containerID -message $message
         } else {
             Write-Error "Unsupported input"
         }
@@ -88,37 +89,41 @@ function newNoteforContainer {
     Param(
         #Parameter help description
         [Parameter(Mandatory=$true)]
-        $SensorhubID,
+        $containerID,
         [Parameter(Mandatory=$true)]
         $message,
         [Parameter(Mandatory=$true)]
         $Authtoken
         )
-    $note = New-SeApiContainerNote -AuthToken $Authtoken -CId $SensorhubID -Message $message    
-    $container = Get-SeApiContainer -AuthToken $Authtoken -CId $SensorhubID
+    $note = New-SeApiContainerNote -AuthToken $Authtoken -CId $containerID -Message $message    
+    $container = Get-SeApiContainer -AuthToken $Authtoken -CId $containerID
+
+    Write-Debug $container
 
     $sensorhubName = ""
     $connectorName = ""
     $customerName = ""
     
     if ($container.type -eq "0") {
-        $customer = Get-SeApiCustomer -AuthToken $Authtoken -CId $container.customerId
+        $customer = Get-SECustomer -CustomerId $container.customerId
         $connectorName = $container.Name
-        $customerName = $customer.companyName
+        $connectorID = $container.cid 
+        $customerName = $customer.Name
+        formatConnectorNoteNew -noteID $note.nid -authoken $Authtoken -containerID $note.cid
     } else {
-        $sensorhub = Get-SESensorhub -AuthToken $Authtoken -SensorhubId $SensorhubID
+        $sensorhub = Get-SESensorhub -AuthToken $Authtoken -SensorhubId $containerID
         $sensorhubName = $sensorhub.Name
         $SensorhubId = $Sensorhub.sensorhubId 
         $connectorName = $sensorhub.'OCC-Connector'
         $customerName = $sensorhub.Customer
+        formatSensorhubNoteNew -noteID $note.nid -authoken $Authtoken -containerID $note.cid
     }
     
-    formatContainerNotenNew -noteID $note.nid -authoken $Authtoken -SensorhubID $note.cid
 
 }
 
-function formatContainerNotenNew($noteID, $authoken, $SensorhubID){
-    $n = Get-SENote -SensorhubId $SensorhubId | Where-Object {$_.NoteId -eq $noteID}
+function formatSensorhubNoteNew($noteID, $authoken, $containerID) {
+    $n = Get-SENote -containerID $containerID | Where-Object {$_.NoteId -eq $noteID}
     [PSCustomObject]@{
         Message = $n.message
         PostedOn  = $n.PostedOn
@@ -129,5 +134,18 @@ function formatContainerNotenNew($noteID, $authoken, $SensorhubID){
         SensorhubId = $SensorhubId
         'OCC-Connector' = $connectorName
         Customer = $customerName
+    }
+}
+function formatConnectorNoteNew($noteID, $authoken, $containerID) {
+    $n = Get-SENote -containerID $containerID | Where-Object {$_.NoteId -eq $noteID}
+    [PSCustomObject]@{
+        Message = $note.Message 
+        PostedOn = $note.postedOn
+        PostedFrom = $displayName
+        Email = $note.email
+        NoteID = $note.nId
+        'OCC Connector' = $connectorName
+        ConnectorID = $connectorID
+        Customer        = $customerName
     }
 }
