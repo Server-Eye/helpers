@@ -21,6 +21,7 @@ function Get-Note {
         [parameter(ValueFromPipelineByPropertyName, Mandatory = $true, ParameterSetName = 'ofSensor')]
         $SensorId,
         [parameter(ValueFromPipelineByPropertyName, Mandatory = $true, ParameterSetName = 'ofSensorhub')]
+        [Alias("ConnectorID")]
         $SensorhubId,
         [Parameter(Mandatory = $false, ParameterSetName = 'ofSensorhub')]
         [Parameter(Mandatory = $false, ParameterSetName = 'ofSensor')]
@@ -60,7 +61,13 @@ function getNoteOfContainer ($containerID, $auth) {
     if ($container.type -eq "0") {
         $customer = Get-SECustomer -AuthToken $auth -CustomerId $container.customerId
         $connectorName = $container.Name
-        $customerName = $customer.companyName
+        $connectorID = $container.cId
+        $customerName = $customer.Name
+        foreach ($note in $notes) {
+            $displayName = "$($note.prename) $($note.surname)".Trim() 
+            formatConnectorNote -note $note -auth $auth
+    
+        }
     }
     else {
         $sensorhub = Get-SESensorhub -AuthToken $auth -SensorhubId $containerId
@@ -68,12 +75,11 @@ function getNoteOfContainer ($containerID, $auth) {
         $SensorhubId = $Sensorhub.sensorhubId 
         $connectorName = $sensorhub.'OCC-Connector'
         $customerName = $sensorhub.Customer
-    }
+        foreach ($note in $notes) {
+            $displayName = "$($note.prename) $($note.surname)".Trim() 
+            formatSensorhubNote -note $note -auth $auth
     
-    foreach ($note in $notes) {
-        $displayName = "$($note.prename) $($note.surname)".Trim() 
-        formatContainerNote -note $note -auth $auth
-
+        }
     }
 }
 
@@ -103,7 +109,7 @@ function formatSensorNote($note, $auth, $sensor) {
     }
 }
 
-function formatContainerNote($note, $auth) {
+function formatSensorhubNote($note, $auth) {
     [PSCustomObject]@{
         Message = $note.Message 
         PostedOn = $note.postedOn
@@ -112,7 +118,19 @@ function formatContainerNote($note, $auth) {
         NoteID = $note.nId
         Sensorhub       = $sensorhubName
         SensorhubId     = $SensorhubId
-        'OCC-Connector' = $connectorName
+        'OCC Connector' = $connectorName
+        Customer        = $customerName
+    }
+}
+function formatConnectorNote($note, $auth) {
+    [PSCustomObject]@{
+        Message = $note.Message 
+        PostedOn = $note.postedOn
+        PostedFrom = $displayName
+        Email = $note.email
+        NoteID = $note.nId
+        'OCC Connector' = $connectorName
+        $ConnectorID = $ConnectorID
         Customer        = $customerName
     }
 }
