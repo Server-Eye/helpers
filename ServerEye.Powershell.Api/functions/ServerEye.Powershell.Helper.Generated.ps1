@@ -1,18 +1,21 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2018-10-25T15:39:45.655Z
+DATE: 2019-03-12T12:55:40.979Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
 
     <#
     .SYNOPSIS
-    Query the actionlog using a query parameter.
+    Query the actionlog.
 
     
-        .PARAMETER $Query
-        An object containing different query parameters
+        .PARAMETER $Of
+        A comma separated list of ids. This can be any ids in any combination, e.g. id of a container or id of a user. You will receive the complete history behind any of these ids.
+        
+        .PARAMETER $Type
+        You can reduce the result to a specific change type. For a list of change types, please query the action log and pick one form the change object.
         
         .PARAMETER $Limit
         How many entries of the actionlog do you need? Max value is 100.
@@ -23,13 +26,18 @@ DESC: Module enables easier access to the PowerShell API
         .PARAMETER $MessageFormat
         If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
         
+        .PARAMETER $IncludeRawData
+        If the entry should contain the raw data. This includes the change object and additional information, if available, in each resulting entry.
+        
     #>
     function Get-ActionlogList {
         [CmdletBinding()]
         Param(
             
-[Parameter(Mandatory=$true)]
-$Query,
+[Parameter(Mandatory=$false)]
+$Of,
+[Parameter(Mandatory=$false)]
+$Type,
 [Parameter(Mandatory=$false)]
 $Limit,
 [Parameter(Mandatory=$false)]
@@ -37,6 +45,8 @@ $Start,
 [Parameter(Mandatory=$false)]
 [ValidateSet('none','md','html')]
 $MessageFormat,
+[Parameter(Mandatory=$false)]
+$IncludeRawData,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
             $AuthToken
@@ -44,7 +54,7 @@ $MessageFormat,
         
         
         Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/actionlog?query=$Query&limit=$Limit&start=$Start&messageFormat=$MessageFormat" -authtoken $AuthToken
+            return Intern-GetJson -url "https://api.server-eye.de/2/actionlog?of=$Of&type=$Type&limit=$Limit&start=$Start&messageFormat=$MessageFormat&includeRawData=$IncludeRawData" -authtoken $AuthToken
         }
     }
     
@@ -4173,9 +4183,6 @@ $Until,
         
         .PARAMETER $Country
         The country of the customer.
-        
-        .PARAMETER $ZipCode
-        The zip code of the customer.
         
         .PARAMETER $Street
         The street of the customer.
