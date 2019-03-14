@@ -7,6 +7,12 @@
 
     .PARAMETER Session 
     If passed the cmdlet will end that session.
+
+    .EXAMPLE 
+    Disconnect-Session
+
+    .LINK 
+    https://api.server-eye.de/docs/2/
 #>
 
 function Disconnect-Session ($Session) {

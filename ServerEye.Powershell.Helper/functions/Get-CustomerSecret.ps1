@@ -1,28 +1,31 @@
 <#
     .SYNOPSIS
-    Get a list of all customers. 
+    Get a list with the secret Key.
     
     .DESCRIPTION
-    A list of all customers the user has been assigned to. 
-    To see all customers use Get-SeApiCustomerList.
-    
-    .PARAMETER Filter
-    Filter the list to show only matching customers. Customers are filterd based on the name of the customer.
+    Get a list with the secret Key for a customer, nessesary for the installation of Server-Eye via the PowerShell.
 
     .PARAMETER CustomerId
     Shows the specific customer with this customer Id.
 
-    .PARAMETER All
-    Shows the specific customer with this customer Id.
-    
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
-    
+
+    .EXAMPLE 
+    Get-SECustomerSecret -CustomerId "4028e08a2e0ed329012e4ca526f705b1"
+
+    Name             CustomerId                       CustomerNumber secretKey
+    ----             ----------                       -------------- ---------
+    Systemmanager IT 4028e08a2e0ed329012e4ca526f705b1       75953213 *********************************
+
+    .LINK 
+    https://api.server-eye.de/docs/2/
+        
 #>
 function Get-CustomerSecret {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory = $true)]
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         [string]$CustomerId,
         [Parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
         [alias("ApiKey", "Session")]
@@ -39,7 +42,7 @@ function Get-CustomerSecret {
             Name           = $customer.Name
             CustomerId     = $customer.CustomerId
             CustomerNumber = $customer.CustomerNumber
-            secretKey = $Secret.secretKey
+            secretKey      = $Secret.secretKey
         }
     }
 }

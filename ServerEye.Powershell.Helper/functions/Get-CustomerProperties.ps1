@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get a list of all Customer Properties. 
     
@@ -10,28 +10,35 @@
         
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+
+    .EXAMPLE 
+    Get-SECustomer -Filter "Systemmanager*" | Get-SECustomerProperties
+
+    Name             CustomerId                       Properties
+    ----             ----------                       ----------
+    Systemmanager IT 4028e08a2e0ed329012e4ca526f705b1 @{Key=Value; Benutzerdefiniertes=Feld}
+
+    .LINK 
+    https://api.server-eye.de/docs/2/
     
 #>
-function Get-CustomerProperties{
-    [CmdletBinding(DefaultParameterSetName='None')]
+function Get-CustomerProperties {
+    [CmdletBinding(DefaultParameterSetName = 'None')]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $CustomerId,
         $AuthToken
     )
-    Begin{
-        $AuthToken = Test-seAuth -AuthToken $AuthToken
+    Begin {
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
-            if (-not $customerid){
-                Read-Host 
-            }
-            $customer = Get-SeApiCustomer -AuthToken $authtoken -CId $CustomerId
-                [PSCustomObject]@{
-                        Name = $customer.companyName
-                        CustomerId = $customer.cid
-                        Properties = $customer.Properties
-                }     
+        $customer = Get-SeApiCustomer -AuthToken $authtoken -CId $CustomerId
+        [PSCustomObject]@{
+            Name       = $customer.companyName
+            CustomerId = $customer.cid
+            Properties = $customer.Properties
+        }     
     }
 }

@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get all settings for a Customer. 
     
@@ -6,21 +6,35 @@
     This will list all settings for a Customer.
     
     .PARAMETER CustomerId
-    The id of the sensor for which the settings should be listed.
+    The id of the Customer for which the settings should be listed.
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+
+    .EXAMPLE 
+    Get-SECustomerSetting -CustomerId "4028e08a2e0ed329012e4ca526f705b1"
+
+    CustomerId      : 4028e08a2e0ed329012e4ca526f705b1
+    CustomerName    : Systemmanager IT
+    TANSSURL        : https://tanss.kraemer-it.de
+    TANSSVersion    :
+    defaultLanguage : de
+    pcvSupporterId  :
+    timezone        : Europe/Berlin
+
+    .LINK 
+    https://api.server-eye.de/docs/2/
 #>
 function Get-CustomerSetting {
     [CmdletBinding()]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $CustomerId,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
 
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
@@ -28,7 +42,7 @@ function Get-CustomerSetting {
         getSettingByCustomer -customerId $CustomerId -auth $AuthToken
     }
 
-    End{
+    End {
 
     }
 }
@@ -39,13 +53,13 @@ function getSettingByCustomer ($customerId, $auth) {
     $Customer = Get-SeApiCustomer -cid $customerId -AuthToken $auth
 
     [PSCustomObject]@{
-        CustomerId = $settings.cid
-        CustomerName = $Customer.companyName
-        TANSSURL = $settings.TANSSURL
-        TANSSVersion = $settings.TANSSVersion
+        CustomerId      = $settings.cid
+        CustomerName    = $Customer.companyName
+        TANSSURL        = $settings.TANSSURL
+        TANSSVersion    = $settings.TANSSVersion
         defaultLanguage = $settings.defaultLanguage
-        pcvSupporterId = $senttings.pcvSupporterId
-        timezone = $settings.timezone
+        pcvSupporterId  = $senttings.pcvSupporterId
+        timezone        = $settings.timezone
 
     
     }

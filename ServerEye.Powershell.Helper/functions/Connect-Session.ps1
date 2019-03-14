@@ -5,6 +5,9 @@ Connect to a new Server-Eye API session.
 .DESCRIPTION
 Creates a new session for interacting with the Server-Eye cloud. Two-Factor authentication is supported.
 
+.PARAMETER Apikey 
+If passed the cmdlet will use this APIKey instead of asking for username and password.
+
 .PARAMETER Credentials 
 If passed the cmdlet will use this credential object instead of asking for username and password.
 

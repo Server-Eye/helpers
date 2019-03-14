@@ -1,109 +1,132 @@
 <# 
-.SYNOPSIS
-Download the Server-Eye msi Files
+    .SYNOPSIS
+    Download the Server-Eye msi Files
 
-.DESCRIPTION
-Download the Server-Eye msi Files
+    .DESCRIPTION
+    Download the Server-Eye msi Files
 
-.PARAMETER path
-The path were the msi Files should be placed.
+    .PARAMETER path
+    The path were the msi Files should be placed, if not given the current path in the PowerShell seesion will be used.
 
+    .EXAMPLE 
+    Get-SEInstaller
+        
+        ___                          ___
+        / __| ___ _ ___ _____ _ _ ___| __|  _ ___
+        \__ \/ -_) '_\ V / -_) '_|___| _| || / -_)
+        |___/\___|_|  \_/\___|_|     |___\_, \___|
+                                        |__/
+    getting current Server-Eye version... done
+    current version: 808
+    downloading ServerEye.Vendor... done
+    downloading ServerEye.Core... done
+
+    .EXAMPLE 
+    Get-SEInstaller -Path C:\temp\
+        ___                          ___
+        / __| ___ _ ___ _____ _ _ ___| __|  _ ___
+        \__ \/ -_) '_\ V / -_) '_|___| _| || / -_)
+        |___/\___|_|  \_/\___|_|     |___\_, \___|
+                                        |__/
+    getting current Server-Eye version... done
+    current version: 808
+    downloading ServerEye.Vendor... done
+    downloading ServerEye.Core... done
+
+    .LINK 
+    https://api.server-eye.de/docs/2/
 
 #>
 function Get-Installer {
 
     [CmdletBinding()]
-	Param (
-		[string]
-		$Path
+    Param (
+        [string]
+        $Path
     )
     
-    if ($Path -eq "")
-{
-	$Path = (Resolve-Path .\).Path
-}
+    if ($Path -eq "") {
+        $Path = (Resolve-Path .\).Path
+    }
 
 
     
-        $SE_baseDownloadUrl = "https://occ.server-eye.de/download"
-        $SE_cloudIdentifier = "se"
-        $SE_vendor = "Vendor.ServerEye"
+    $SE_baseDownloadUrl = "https://occ.server-eye.de/download"
+    $SE_cloudIdentifier = "se"
+    $SE_vendor = "Vendor.ServerEye"
         
-        $oldBack = $host.privatedata.ProgressBackgroundColor;
-        $oldFore = $host.privatedata.ProgressForegroundColor;
+    $oldBack = $host.privatedata.ProgressBackgroundColor;
+    $oldFore = $host.privatedata.ProgressForegroundColor;
     
-        $host.privatedata.ProgressForegroundColor = "DarkGray";
-        $host.privatedata.ProgressBackgroundColor = "Gray";
+    $host.privatedata.ProgressForegroundColor = "DarkGray";
+    $host.privatedata.ProgressBackgroundColor = "Gray";
     
-          $AsciiArt_ServerEye = @"
+    $AsciiArt_ServerEye = @"
       ___                          ___         
      / __| ___ _ ___ _____ _ _ ___| __|  _ ___ 
      \__ \/ -_) '_\ V / -_) '_|___| _| || / -_)
      |___/\___|_|  \_/\___|_|     |___\_, \___|
                                       |__/     
 "@
-        Write-Host $AsciiArt_ServerEye -ForegroundColor DarkYellow
+    Write-Host $AsciiArt_ServerEye -ForegroundColor DarkYellow
 
-        Write-Host "  getting current Server-Eye version... " -NoNewLine
-        $wc = new-object system.net.webclient
-        $curVersion = $wc.DownloadString("$SE_baseDownloadUrl/$SE_cloudIdentifier/currentVersion")
-        Write-Host "done" -ForegroundColor Green
+    Write-Host "  getting current Server-Eye version... " -NoNewLine
+    $wc = new-object system.net.webclient
+    $curVersion = $wc.DownloadString("$SE_baseDownloadUrl/$SE_cloudIdentifier/currentVersion")
+    Write-Host "done" -ForegroundColor Green
 
-        Write-Host "  current version: " -NoNewLine
-        Write-Host "$curVersion" -ForegroundColor DarkGray
+    Write-Host "  current version: " -NoNewLine
+    Write-Host "$curVersion" -ForegroundColor DarkGray
     
-        Write-Host "  downloading ServerEye.Vendor... " -NoNewline
-        DownloadSEFile "$SE_baseDownloadUrl/vendor/$SE_vendor/Vendor.msi"  "$Path/Vendor.msi"
-        Write-Host "done" -ForegroundColor Green
+    Write-Host "  downloading ServerEye.Vendor... " -NoNewline
+    DownloadSEFile "$SE_baseDownloadUrl/vendor/$SE_vendor/Vendor.msi"  "$Path/Vendor.msi"
+    Write-Host "done" -ForegroundColor Green
     
-        Write-Host "  downloading ServerEye.Core... " -NoNewline
-        DownloadSEFile "$SE_baseDownloadUrl/$curVersion/ServerEye.msi" "$Path/ServerEye.msi"
-        Write-Host "done" -ForegroundColor Green
+    Write-Host "  downloading ServerEye.Core... " -NoNewline
+    DownloadSEFile "$SE_baseDownloadUrl/$curVersion/ServerEye.msi" "$Path/ServerEye.msi"
+    Write-Host "done" -ForegroundColor Green
     
-    }
+}
 
-      function DownloadSEFile {
-          [CmdletBinding()]
-          Param (
-              [string]
-              $Url,
+function DownloadSEFile {
+    [CmdletBinding()]
+    Param (
+        [string]
+        $Url,
           
-              [string]
-              $TargetFile
-          )
+        [string]
+        $TargetFile
+    )
       
-          try
-          {
-              $uri = New-Object "System.Uri" "$url"
-              $request = [System.Net.HttpWebRequest]::Create($uri)
-              $request.set_Timeout(15000) #15 second timeout
-              $response = $request.GetResponse()
-              $totalLength = [System.Math]::Floor($response.get_ContentLength()/1024)
-              $responseStream = $response.GetResponseStream()
-              $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
-              $buffer = new-object byte[] 10KB
-              $count = $responseStream.Read($buffer, 0, $buffer.length)
-              $downloadedBytes = $count
+    try {
+        $uri = New-Object "System.Uri" "$url"
+        $request = [System.Net.HttpWebRequest]::Create($uri)
+        $request.set_Timeout(15000) #15 second timeout
+        $response = $request.GetResponse()
+        $totalLength = [System.Math]::Floor($response.get_ContentLength() / 1024)
+        $responseStream = $response.GetResponseStream()
+        $targetStream = New-Object -TypeName System.IO.FileStream -ArgumentList $targetFile, Create
+        $buffer = new-object byte[] 10KB
+        $count = $responseStream.Read($buffer, 0, $buffer.length)
+        $downloadedBytes = $count
           
-              while ($count -gt 0)
-              {
-                  $targetStream.Write($buffer, 0, $count)
-                  $count = $responseStream.Read($buffer, 0, $buffer.length)
-                  $downloadedBytes = $downloadedBytes + $count
-                  Write-Progress -activity "Downloading file '$($url.split('/') | Select-Object -Last 1)'" -status "Downloaded ($([System.Math]::Floor($downloadedBytes/1024))K of $($totalLength)K): " -PercentComplete ((([System.Math]::Floor($downloadedBytes/1024)) / $totalLength) * 100)
-              }
+        while ($count -gt 0) {
+            $targetStream.Write($buffer, 0, $count)
+            $count = $responseStream.Read($buffer, 0, $buffer.length)
+            $downloadedBytes = $downloadedBytes + $count
+            Write-Progress -activity "Downloading file '$($url.split('/') | Select-Object -Last 1)'" -status "Downloaded ($([System.Math]::Floor($downloadedBytes/1024))K of $($totalLength)K): " -PercentComplete ((([System.Math]::Floor($downloadedBytes / 1024)) / $totalLength) * 100)
+        }
           
-              Write-Progress -activity "Finished downloading file '$($url.split('/') | Select-Object -Last 1)'" -Status "Done" -Completed
+        Write-Progress -activity "Finished downloading file '$($url.split('/') | Select-Object -Last 1)'" -Status "Done" -Completed
           
-              $targetStream.Flush()
-              $targetStream.Close()
-              $targetStream.Dispose()
-              $responseStream.Dispose()
+        $targetStream.Flush()
+        $targetStream.Close()
+        $targetStream.Dispose()
+        $responseStream.Dispose()
           
-          }
-          catch
-          {
+    }
+    catch {
           
-              Write-Host -Message "Error downloading: $Url - Interrupting execution - $($_.Exception.Message)" -EventID 666 -EntryType Error
-          }
-      } 
+        Write-Host -Message "Error downloading: $Url - Interrupting execution - $($_.Exception.Message)" -EventID 666 -EntryType Error
+    }
+} 

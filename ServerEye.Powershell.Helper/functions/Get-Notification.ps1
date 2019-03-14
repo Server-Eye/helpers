@@ -15,7 +15,7 @@
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE
-    Get-SENotification $SensorId=12345-6789-ABCDE
+    Get-SENotification -SensorId = "12345-6789-ABCDE
 
     Name           : Andreas Behr
     Email          : andy@server-eye.de
