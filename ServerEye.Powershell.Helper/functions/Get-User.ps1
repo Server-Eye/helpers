@@ -18,7 +18,6 @@ function Get-User {
 
     )
     Begin{
-        Update-SEHelper
         $AuthToken = Test-Auth -AuthToken $AuthToken
     }
     
