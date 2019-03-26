@@ -12,8 +12,8 @@ function Test-Auth{
     } elseif ($Global:ServerEyeGlobalSession) {
         return $Global:ServerEyeGlobalSession
     } else {
-        Write-Error "Cannot find a Server-Eye session to use."
-        #ThrowError -ExceptionMessage "Cannot find a Server-Eye session to use." -ExceptionName "NoSession" -errorId 1 -errorCategory PermissionDenied
+        Write-Host -Message "Error: Cannot find a Server-Eye session to use. Please provide one in the request below." -ForegroundColor Red
+        Connect-SESession -persist
     }
 
 }
