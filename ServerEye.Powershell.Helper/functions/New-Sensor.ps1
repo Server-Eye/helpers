@@ -47,7 +47,7 @@ function New-Sensor {
     }
 
     Process {
-             $newsensor = New-SeApiAgent -AuthToken $authse -Type $type -ParentId $sensorhubid -Name $name
+             $newsensor = New-SeApiAgent -AuthToken $AuthToken -Type $type -ParentId $sensorhubid -Name $name
              $sensor = Get-SESensor -SensorId $newsensor.aid
 
                 [PSCustomObject]@{
