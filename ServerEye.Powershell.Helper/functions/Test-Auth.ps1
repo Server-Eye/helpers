@@ -13,7 +13,7 @@ function Test-Auth{
         return $Global:ServerEyeGlobalSession
     } else {
         Write-Host -Message "Error: Cannot find a Server-Eye session to use. Please provide one in the request below." -ForegroundColor Red
-        Connect-SESession -persist
+        $AuthToken = Connect-SESession -persist
     }
 
 }
