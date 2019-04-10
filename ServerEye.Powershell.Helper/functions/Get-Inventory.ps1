@@ -14,17 +14,18 @@
     .EXAMPLE 
     Get-SECustomer -Filter "*Support" | Get-SESensorhub | Get-SEInventory
 
-    Customer      : Server-Eye Support
-    OCC Connector : kraemerit.de
-    Sensorhub     : NB-RT-NEW
-    CPU           : Core i5-7300U
-    RAM           : 8117
-    HDD Name      : C
-    HDD Kap.      : 241958
-    HDD Free      : 158953
-    OS            : Windows 10
-    OS Procuktkey : *****************************
-
+    Customer          : SE Landheim
+    OCC Connector     : SE Landheim (OCC-Connector: NUC-SE3)
+    Sensorhub         : NUC-SE3
+    CPU               : Core i3-4010U
+    RAM               : 4021
+    HDD Name          : {C, D}
+    HDD Capacity (GB) : {235,48, 931,32}
+    HDD Free (GB)     : {176,95, 595,91}
+    OS                : Windows 10
+    OS Procuktkey     : **************************
+    Office            :
+    Office Key        :
 
     .LINK 
     https://api.server-eye.de/docs/2/
@@ -39,10 +40,10 @@ function Get-Inventory {
         [Parameter(Mandatory = $false)]
         $AuthToken
     )
-    Begin{
-    $AuthToken = Test-SEAuth -AuthToken $AuthToken
+    Begin {
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
-    Process{
+    Process {
         if ($SensorhubId) {
             formatInvetoryBySensorhub -SensorhubID $SensorhubId -Auth $AuthToken
         }
@@ -55,18 +56,20 @@ function Get-Inventory {
 
 
 function formatInvetoryBySensorhub ($SensorhubId, $auth) {
-    $inventory      = Get-SeApiContainerInventory -AuthToken $Auth -CId $SensorhubId -Format json
-    $sensorhub      = Get-SESensorhub -SensorhubID $Sensorhubid
+    $inventory = Get-SeApiContainerInventory -AuthToken $Auth -CId $SensorhubId -Format json
+    $sensorhub = Get-SESensorhub -SensorhubID $Sensorhubid
     [PSCustomObject]@{
         Customer        = $sensorhub.Customer
         "OCC Connector" = $sensorhub."OCC-Connector"
         Sensorhub       = $sensorhub.name
         CPU             = $inventory.cpu.CPUName
         RAM             = $inventory.Memory.PHYSICALTOTAL 
-        "HDD Name"      = $(if ($inventory.disk.FILESYSTEM -eq "NTFS") {$inventory.disk.Disk})
-        "HDD Capacity."      = $(if (($inventory.disk.FILESYSTEM) -eq "NTFS") {$inventory.disk.Capacity}) 
-        "HDD Free"      = $(if (($inventory.disk.FILESYSTEM) -eq "NTFS") {$inventory.disk.Freespace})
+        "HDD Name"      = ($inventory.DISK | Where-Object {$_.Filesystem -eq "NTFS"}).Disk
+        "HDD Capacity (GB)" = ($inventory.DISK | Where-Object {$_.Filesystem -eq "NTFS"}) | ForEach-Object -Process {[math]::round(([int]($_.Capacity)/1024),2)}
+        "HDD Free (GB)" = ($inventory.DISK | Where-Object {$_.Filesystem -eq "NTFS"}) | ForEach-Object -Process {[math]::round(([int]($_.FREESPACE)/1024),2)}
         OS              = $inventory.Os.OSname
         "OS Procuktkey" = $inventory.OS.PRODUCTKEY
+        Office          = ($inventory.PROGRAMS | Where-Object { $_.Produkt -like "Microsoft Office*" -and $_.Produkt -notlike "Microsoft Office Configuration Analyzer Tool 2.0" }).produkt
+        "Office Key "   = ($inventory.PROGRAMS | Where-Object { $_.Produkt -like "Microsoft Office*" -and $_.Produkt -notlike "Microsoft Office Configuration Analyzer Tool 2.0" }).LIZENZKEY 
     }
 }
