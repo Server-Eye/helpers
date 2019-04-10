@@ -1,31 +1,10 @@
 # ContainerInventory.ps1
 
-Creates an excel file with a report of the inventory of each sensorhub of each customer or a specific customer.
+This script has been deprecated. 
 
-Displayed Values:
-Kunde	
-OCC-Connector	
-Sensorhub	
-CPU	
-RAM	
-HDD Name	
-HDD Kap.	
-HDD Free	
-System	
-Betriebssystem	
-Betriebssystem-Key	
-Office Version
-Office-Key
+Please use the Helper function ```Get-SEInventory``` instead. 
 
-### With an API Key
-```powershell
-ContainerInventory.ps1 -apiKey "yourApiKey" -custID "specificCustomerID"
-```
-
-### Via Login
-```powershell
-Connect-SESession | ContainerInventory.ps1 -custID "specificCustomerID"
-```
+# ProgrammInventory.ps1
 
 ### With an API Key
 ```powershell
