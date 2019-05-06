@@ -1,46 +1,50 @@
  <#
     .SYNOPSIS
-    Get a list of all Tags from a Sensor.
+    Get a list of all Tags from a Sensorhub.
 
     .DESCRIPTION
-    Get a list of all Tags.
+    List a container's tags.
 
-    .PARAMETER SenorId
-    The id of a specifc senor. Only this sensor will be show.
+    .PARAMETER SensorhubId
+    The id of the container.
 
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE 
-    Get-SESensortag -SensorId 15996915-ca36-408d-a685-8b84943188a7
+    Get-SESensorhubtag -SensorhubId cea93445-1330-4598-8d8c-075baf3c3f09
 
-
-    Sensorname    : Backupstatus für Veeam Endpoint Backup®
-    SensorId      : 15996915-ca36-408d-a685-8b84943188a7
     Sensorhub     : NB-RT-NEW
+    SensorhubId   : cea93445-1330-4598-8d8c-075baf3c3f09
     OCC-Connector : kraemerit.de
     Customer      : Server-Eye Support
-    Tag           : {backup, Wartungsvertrag}
+    Tag           : {workstation, RT, ThirdParty, Demo...}
 
 
     .EXAMPLE 
-    Get-SECustomer -Filter "Server-Eye*"| Get-SESensorhub | Get-SESensor | Get-SESensortag
+    Get-SECustomer -Filter "Server-Eye*"| Get-SESensorhub | Get-SESensorhubtag
 
-    Sensorname    : Backupstatus für Veeam Endpoint Backup®
-    SensorId      : 15996915-ca36-408d-a685-8b84943188a7
     Sensorhub     : NB-RT-NEW
+    SensorhubId   : cea93445-1330-4598-8d8c-075baf3c3f09
     OCC-Connector : kraemerit.de
     Customer      : Server-Eye Support
-    Tag           : {backup, Wartungsvertrag}
+    Tag           : {workstation, RT, ThirdParty, Demo...}
+
+    Sensorhub     : NBTW-Surface
+    SensorhubId   : c8b8e041-f99d-4544-8375-a0f4fbee70c2
+    OCC-Connector : landheim.server-eye.de
+    Customer      : Server-Eye Support
+    Tag           : {workstation, TestSensoren, ThirdParty, Demo...}
 
     .LINK 
     https://api.server-eye.de/docs/2/
+    
 #>
-function Get-Sensortag {
+function Get-Sensorhubtag {
     [CmdletBinding(DefaultParameterSetName='byFilter')]
     Param(
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
-        $SensorId,
+        $SensorhubId,
         [Parameter(Mandatory=$false)]
         $AuthToken
     )
@@ -49,14 +53,12 @@ function Get-Sensortag {
     }
 
     Process {
-            $Tags = Get-SeApiAgentTagList -AId $SensorId -AuthToken $authtoken
-            $Sensor = Get-SeApiAgent -AId $sensorId -AuthToken $AuthToken
-            $sensorhub = Get-SESensorhub -SensorhubId $Sensor.parentId -AuthToken $AuthToken
+            $Tags = Get-SeApiContainerTagList -cid $SensorhubId -AuthToken $authtoken
+            $sensorhub = Get-SESensorhub -SensorhubId $SensorhubId -AuthToken $AuthToken
         
                 [PSCustomObject]@{
-                    Sensorname = $sensor.Name
-                    SensorId = $sensor.aId
                     Sensorhub = $sensorhub.name
+                    SensorhubId = $sensorhub.SensorhubId
                     'OCC-Connector' = $sensorhub.'OCC-Connector'
                     Customer = $sensorhub.customer
                     Tag = $tags.Name
