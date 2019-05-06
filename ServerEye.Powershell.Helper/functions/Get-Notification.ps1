@@ -47,6 +47,7 @@ function Get-Notification {
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensor')]
         $SensorId,
         [parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensorhub')]
+        [Alias("ConnectorID")]
         $SensorhubId,
         [Parameter(Mandatory=$false,ParameterSetName='ofSensorhub')]
         [Parameter(Mandatory=$false,ParameterSetName='ofSensor')]
