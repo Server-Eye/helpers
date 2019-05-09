@@ -2,6 +2,7 @@
 .Synopsis
    SetSystemUserProxy-v3.ps1 - This script sets a Proxy for the local SYSTEM user
     Author: Lukas Raunheimer, nexcon-it GmbH; lr@nexcon-it.de
+    Author: Rene Thulke, Server-Eye, support@server-eye.de
 .DESCRIPTION
    Setting a Proxy for the local SYSTEM user is necessary for Server Eye
    Patch Management in environments using a web proxy
@@ -17,18 +18,19 @@
  
    How to add possible proxys to probe for in your environment
    add a member to $proxyArray (see below)
-   Syntax = @("ProxyURL",ProxyPort)
+   Syntax = ("ProxyURL:ProxyPort")
 #>
  
 $ErrorActionPreference = "Stop"
  
-$proxyArray = @(
 
+
+$proxyArray = @(
     <#
-    for example @("IP/Name of the Proxy","Proxy Port")
-    @("10.50.2.30",8080),
-    @("proxy.services.datevnet.de",8880),
-    @("192.168.71.240",8080)
+    for example ("IP/Name of the Proxy:Proxy Port")
+    ("10.50.2.30:8080"),
+    ("proxy.services.datevnet.de:8880"),
+    ("192.168.71.240":8080")
     #>
    
 )
@@ -55,7 +57,8 @@ Function OSWeiche() {
  
 Function FindAndSetProxy() {
  
-    foreach ($proxy in $proxyArray) {
+    foreach ($entrie in $proxyArray) {
+        $proxy = $entrie.split(":")
         $proxyURL=$proxy[0]
         $proxyPort=$proxy[1]
         Write-Host -ForegroundColor Yellow "Info: Suche nach Proxy" $proxyURL "mit Port" $proxyPort"."
