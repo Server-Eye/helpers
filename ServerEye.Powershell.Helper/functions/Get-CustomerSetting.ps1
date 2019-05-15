@@ -58,7 +58,7 @@ function getSettingByCustomer ($customerId, $auth) {
         TANSSURL        = $settings.TANSSURL
         TANSSVersion    = $settings.TANSSVersion
         defaultLanguage = $settings.defaultLanguage
-        pcvSupporterId  = $senttings.pcvSupporterId
+        pcvSupporterId  = $settings.pcvSupporterId
         timezone        = $settings.timezone
 
     
