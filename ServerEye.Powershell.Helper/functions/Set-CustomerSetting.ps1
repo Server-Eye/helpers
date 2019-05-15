@@ -72,8 +72,14 @@ function Set-CustomerSetting {
     }
     
     Process {
+        if (!$tanssUrl -and !$defaultLanguage -and !$timezone) {
+            Write-Error -Message "No Parameter to change was given. Please provide on of the following Parameters tanssUrl, defaultLanguage or timezone" -ErrorAction Stop -Category InvalidArgument
+
+        }else{
+            SetSettingByCustomer -customerId $CustomerId -auth $AuthToken -tanssUrl $tanssUrl -defaultLanguage $defaultLanguage -timezone $timezone
+        }
    
-        SetSettingByCustomer -customerId $CustomerId -auth $AuthToken -tanssUrl $tanssUrl -defaultLanguage $defaultLanguage -timezone $timezone
+        
     }
 
     End {
