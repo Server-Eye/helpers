@@ -58,7 +58,7 @@ function Get-Sensorcount {
     Process {
         $Customer = Get-SECustomer -CustomerId $CustomerId
         $Sensors = Get-SESensorhub -CustomerId $CustomerId | Get-SESensor
-        if (!$Sensors.Count) {
+        if ((!$Sensors.Count) -and ($Sensors.Count -ne 0)) {
             $Count = 1
         }else {
             $Count = $Sensors.Count
