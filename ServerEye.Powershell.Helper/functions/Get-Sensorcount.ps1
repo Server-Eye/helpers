@@ -58,9 +58,15 @@ function Get-Sensorcount {
     Process {
         $Customer = Get-SECustomer -CustomerId $CustomerId
         $Sensors = Get-SESensorhub -CustomerId $CustomerId | Get-SESensor
+        if (!$Sensors.Count) {
+            $Count = 1
+        }else {
+            $Count = $Sensors.Count
+        }
+
             [PSCustomObject]@{
                 Customer = $Customer.Name
-                "Sensor Count" = $Sensors.Count
+                "Sensor Count" = $Count
             }
         }
     End{
