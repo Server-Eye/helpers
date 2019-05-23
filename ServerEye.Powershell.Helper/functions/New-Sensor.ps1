@@ -8,7 +8,7 @@
     .PARAMETER Sensorhubid
     The id of the parent container.
 
-    .PARAMETER type
+    .PARAMETER typeID
     What type does the agent have? Use Get-SEAgentType to list all valid agent types.
 
     .PARAMETER Name
@@ -18,7 +18,7 @@
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE 
-    New-Sensor -sensorhubid "cea93445-1330-4598-8d8c-075baf3c3f09" -type "0000CBF2-63AA-4911-B26D-924C9FC7ABA6" -Name "Test"
+    New-Sensor -sensorhubid "cea93445-1330-4598-8d8c-075baf3c3f09" -typeID "0000CBF2-63AA-4911-B26D-924C9FC7ABA6" -Name "Test"
 
     Name          : Test
     SensorType    : Managed Windows Defender
@@ -35,7 +35,8 @@ function New-Sensor {
         [Parameter(Mandatory=$true,ValueFromPipelineByPropertyName)]
         [string]$sensorhubid,
         [Parameter(Mandatory=$true)]
-        [string]$type,
+        [alias("type")]
+        [string]$typeID,
         [Parameter(Mandatory=$false)]
         [string]$Name,
         [Parameter()]
@@ -47,7 +48,7 @@ function New-Sensor {
     }
 
     Process {
-             $newsensor = New-SeApiAgent -AuthToken $AuthToken -Type $type -ParentId $sensorhubid -Name $name
+             $newsensor = New-SeApiAgent -AuthToken $AuthToken -TypeID $type -ParentId $sensorhubid -Name $name
              $sensor = Get-SESensor -SensorId $newsensor.aid
 
                 [PSCustomObject]@{
