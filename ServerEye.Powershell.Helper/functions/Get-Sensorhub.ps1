@@ -14,7 +14,55 @@
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
     
+    .EXAMPLE 
+    Get-SECustomer -Filter "Server*" | Get-SESensorhub
+
+    Name                : NB-RT-NEW
+    IsServer            : False
+    IsVM                : False
+    OCC-Connector       : kraemerit.de
+    Customer            : Server-Eye Support
+    SensorhubId         : cea93445-1330-4598-8d8c-075baf3c3f09
+    Hostname            : NB-RT-NEW
+    OsName              : Microsoft Windows 10 Pro
+    OsVersion           : 10.0.17763
+    OsServicepack       : 0.0
+    Architecture        : 64
+    Ip                  : {fe80::4899:aa80:ba7:3a05%25, 10.105.10.186}
+    PublicIp            : 24.134.40.153
+    LastBootTime        : 28.05.2019 06:13:50
+    LastRebootInfo      : @{Reason=Anderer Grund (nicht geplant); Action=Ausschalten; Comment=; User=KRAEMERIT\rene.thulke}
+    NumberOfProcessors  : 1
+    TotalRam            : 8118
+    maxHeartbeatTimeout : 20
+    alertOffline        : False
+    alertShutdown       : False
+
+    .EXAMPLE
+    Get-Sensorhub -SensorhubId "cea93445-1330-4598-8d8c-075baf3c3f09"
+
+    Name                : NB-RT-NEW
+    IsServer            : False
+    IsVM                : False
+    OCC-Connector       : kraemerit.de
+    Customer            : Server-Eye Support
+    SensorhubId         : cea93445-1330-4598-8d8c-075baf3c3f09
+    Hostname            : NB-RT-NEW
+    OsName              : Microsoft Windows 10 Pro
+    OsVersion           : 10.0.17763
+    OsServicepack       : 0.0
+    Architecture        : 64
+    Ip                  : {fe80::4899:aa80:ba7:3a05%25, 10.105.10.186}
+    PublicIp            : 24.134.40.153
+    LastBootTime        : 28.05.2019 06:13:50
+    LastRebootInfo      : @{Reason=Anderer Grund (nicht geplant); Action=Ausschalten; Comment=; User=KRAEMERIT\rene.thulke}
+    NumberOfProcessors  : 1
+    TotalRam            : 8118
+    maxHeartbeatTimeout : 20
+    alertOffline        : False
+    alertShutdown       : False
 #>
+
 function Get-Sensorhub {
     [CmdletBinding(DefaultParameterSetName="byCustomer")]
     Param(
@@ -32,7 +80,7 @@ function Get-Sensorhub {
     )
 
     Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
@@ -54,7 +102,7 @@ function Get-Sensorhub {
 function getSensorhubById($sensorhubId, $auth) {
     $sensorhub = Get-SeApiContainer -CId $sensorhubId -AuthToken $auth
     $occConnector = Get-SeApiContainer -CId $sensorhub.parentId -AuthToken $auth
-    $customer = Get-Customer -customerId $sensorhub.customerId
+    $customer = Get-SECustomer -customerId $sensorhub.customerId
 
     [PSCustomObject]@{
         Name = $sensorhub.name
@@ -63,6 +111,7 @@ function getSensorhubById($sensorhubId, $auth) {
         'OCC-Connector' = $occConnector.name
         Customer = $customer.name
         SensorhubId = $sensorhub.cId
+        Hostname = $sensorhub.machineName
         OsName = $sensorhub.osName
         OsVersion = $sensorhub.osVersion
         OsServicepack = $sensorhub.osServicePack
@@ -97,17 +146,6 @@ function getSensorhubByCustomer ($customerId, $filter, $filterByConnector, $auth
                     }
                 }
             }
-
-        #                 [PSCustomObject]@{
-        #                     Name = $sensorhub.name
-        #                     IsServer = $sensorhub.isServer
-        #                     'OCC-Connector' = $container.name
-        #                     Customer = $customer.name
-        #                     SensorhubId = $sensorhub.id
-        #                 }
-        #             }
-        #         }
-        #     }
          }
     }
 }

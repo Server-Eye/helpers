@@ -30,6 +30,7 @@ function New-Notification {
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensor')]
         $SensorId,
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName='ofSensorhub')]
+        [Alias("ConnectorID")]
         $SensorhubId,
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
         $UserId,
