@@ -69,7 +69,7 @@ function formatInvetoryBySensorhub ($SensorhubId, $auth) {
         "HDD Free (GB)" = ($inventory.DISK | Where-Object {$_.Filesystem -eq "NTFS"}) | ForEach-Object -Process {[math]::round(([int]($_.FREESPACE)/1024),2)}
         OS              = $inventory.Os.OSname
         "OS Procuktkey" = $inventory.OS.PRODUCTKEY
-        Office          = ($inventory.PROGRAMS | Where-Object { $_.Produkt -like "Microsoft Office*" -and $_.Produkt -notlike "Microsoft Office Configuration Analyzer Tool 2.0" }).produkt
-        "Office Key "   = ($inventory.PROGRAMS | Where-Object { $_.Produkt -like "Microsoft Office*" -and $_.Produkt -notlike "Microsoft Office Configuration Analyzer Tool 2.0" }).LIZENZKEY 
+        Office          = ($inventory.MSPRODUKT | Where-Object { $_.ProduktName -like "Microsoft Office*"} | Select-Object -Unique).produktName
+        "Office Key "   = ($inventory.MSPRODUKT | Where-Object { $_.ProduktName -like "Microsoft Office*"} | Select-Object -Unique).PRODUKTKEY
     }
 }
