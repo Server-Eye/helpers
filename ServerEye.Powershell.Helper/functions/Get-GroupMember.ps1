@@ -55,7 +55,7 @@ function Get-GroupMember {
             formatNoUser -user $User -group $Group
         }else {
             foreach ($user in $users){
-                formatUser -user $user -group $group
+                formatGroupUser -user $user -group $group
             }
         }
     }        
@@ -64,7 +64,7 @@ function Get-GroupMember {
     }
 }
 
-function formatUser($user, $group) {
+function formatGroupUser($user, $group) {
     [PSCustomObject]@{
         Group = $group.Username
         Username = ("$($user.prename) $($user.surname)".Trim())
