@@ -49,10 +49,14 @@ function Get-GroupMember {
     }
     
     Process {
-        $users = Get-SeApiGroupUserList -AuthToken $AuthToken -gid $GroupID
+        $users = Get-SeApiGroupUserList -AuthToken $AuthToken -gid $GroupID | Where-Object checked -eq $true
         $Group = Get-SEUser | Where-Object UserID -EQ $GroupID
-        foreach ($user in $users){
-            formatUser -user $user -group $group
+        if (!$users) {
+            formatNoUser -user $User -group $Group
+        }else {
+            foreach ($user in $users){
+                formatUser -user $user -group $group
+            }
         }
     }        
     
@@ -66,5 +70,15 @@ function formatUser($user, $group) {
         Username = ("$($user.prename) $($user.surname)".Trim())
         EMail = $user.email
         UserID = $user.uId
+        GroupID = $group.UserID
+    }
+}
+function formatNoUser($user, $group) {
+    [PSCustomObject]@{
+        Group = $group.Username
+        Username = "No User in Group"
+        EMail = ""
+        UserID = ""
+        GroupID = $group.UserID
     }
 }
