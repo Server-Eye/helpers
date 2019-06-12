@@ -1,63 +1,10 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2019-03-12T12:55:40.979Z
+DATE: 2019-06-11T13:30:44.898Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
-
-    <#
-    .SYNOPSIS
-    Query the actionlog.
-
-    
-        .PARAMETER $Of
-        A comma separated list of ids. This can be any ids in any combination, e.g. id of a container or id of a user. You will receive the complete history behind any of these ids.
-        
-        .PARAMETER $Type
-        You can reduce the result to a specific change type. For a list of change types, please query the action log and pick one form the change object.
-        
-        .PARAMETER $Limit
-        How many entries of the actionlog do you need? Max value is 100.
-        
-        .PARAMETER $Start
-        The number of entries that you want to skip.
-        
-        .PARAMETER $MessageFormat
-        If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
-        
-        .PARAMETER $IncludeRawData
-        If the entry should contain the raw data. This includes the change object and additional information, if available, in each resulting entry.
-        
-    #>
-    function Get-ActionlogList {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$false)]
-$Of,
-[Parameter(Mandatory=$false)]
-$Type,
-[Parameter(Mandatory=$false)]
-$Limit,
-[Parameter(Mandatory=$false)]
-$Start,
-[Parameter(Mandatory=$false)]
-[ValidateSet('none','md','html')]
-$MessageFormat,
-[Parameter(Mandatory=$false)]
-$IncludeRawData,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/actionlog?of=$Of&type=$Type&limit=$Limit&start=$Start&messageFormat=$MessageFormat&includeRawData=$IncludeRawData" -authtoken $AuthToken
-        }
-    }
-    
 
     <#
     .SYNOPSIS
@@ -3559,6 +3506,69 @@ $SubstitudeId,
     
     <#
     .SYNOPSIS
+    Query the actionlog.
+
+    
+        .PARAMETER $Of
+        A comma separated list of ids or an Array of ids. This can be any ids in any combination, e.g. id of a container or id of a user. You will receive the complete history behind any of these ids.
+        
+        .PARAMETER $Type
+        You can reduce the result to a specific change type. For a list of change types, please query the action log and pick one form the change object.
+        
+        .PARAMETER $Limit
+        How many entries of the actionlog do you need? Max value is 100.
+        
+        .PARAMETER $Start
+        The number of entries that you want to skip.
+        
+        .PARAMETER $MessageFormat
+        If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
+        
+        .PARAMETER $IncludeRawData
+        If the entry should contain the raw data. This includes the change object and additional information, if available, in each resulting entry.
+        
+    #>
+    function Get-ActionlogList {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$Of,
+[Parameter(Mandatory=$false)]
+$Type,
+[Parameter(Mandatory=$false)]
+$Limit,
+[Parameter(Mandatory=$false)]
+$Start,
+[Parameter(Mandatory=$false)]
+[ValidateSet('none','md','html')]
+$MessageFormat,
+[Parameter(Mandatory=$false)]
+$IncludeRawData,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'of' = $Of
+            'type' = $Type
+            'limit' = $Limit
+            'start' = $Start
+            'messageFormat' = $MessageFormat
+            'includeRawData' = $IncludeRawData
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/actionlog" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     The same as <code>GET /agent/:id/state</code>, but aId can be a comma seperated list or an array of agent ids. The result will be an object of state arrays with agent id as keys.
 
     
@@ -4658,7 +4668,7 @@ $Geo,
 
     
         .PARAMETER $Handle
-        The Android or iOS push handle.
+        The Android, Firebase or iOS push handle.
         
         .PARAMETER $Type
         What kind of device do you want to register?
@@ -4671,7 +4681,7 @@ $Geo,
 [Parameter(Mandatory=$true)]
 $Handle,
 [Parameter(Mandatory=$true)]
-[ValidateSet('GCM','APNS')]
+[ValidateSet('GCM','FCM','APNS')]
 $Type,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
