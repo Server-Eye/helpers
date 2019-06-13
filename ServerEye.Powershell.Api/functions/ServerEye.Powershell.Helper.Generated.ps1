@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2019-06-11T13:30:44.898Z
+DATE: 2019-06-12T13:42:58.324Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -3562,7 +3562,7 @@ $IncludeRawData,
             'includeRawData' = $IncludeRawData
             }
 
-            return Intern-PostJson -url "https://api.server-eye.de/2/actionlog" -authtoken $AuthToken -body $reqBody
+            return Intern-PostJson -url "https://api.server-eye.de/2/search/actionlog" -authtoken $AuthToken -body $reqBody
         }
     }
     
