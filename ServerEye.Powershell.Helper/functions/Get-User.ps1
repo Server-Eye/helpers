@@ -18,11 +18,11 @@ function Get-User {
 
     )
     Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
-        $users = Get-SeApiUserList -AuthToken $AuthToken |
+        $users = Get-SeApiUserList -AuthToken $AuthToken
         foreach ($user in $users){
 
             if ($roles.IsPresent -eq $false){
