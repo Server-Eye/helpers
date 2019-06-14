@@ -52,7 +52,7 @@ function formatUser($user) {
         else  {
             $user.uid
         } 
-        IsGroup = if ($user.isGroup -eq $true){"true"}else{"false"}
+        IsGroup = if ($user.isGroup -eq $true){$true}else{$false}
     }
 }
 function formatRoles($user) {
@@ -70,7 +70,7 @@ function formatRoles($user) {
         else  {
             $user.uid
         } 
-        IsGroup = if ($user.isGroup -eq $true){"true"}else{"false"}
+        IsGroup = if ($user.isGroup -eq $true){$true}else{$false}
         Roles = $user.roles
     }
 }
