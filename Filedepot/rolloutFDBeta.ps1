@@ -12,7 +12,7 @@ Param(
 )
 
 $downloadpath = $env:ProgramData + "\ServerEye3\downloads"
-$downloaduri = "http://share.server-eye.de/download/f7e0139ead7611db0db948dd144fedbf"
+$downloaduri = "https://kits.saar-storage.de/s/8lmpM09PKsP4so9/download"
 
 
 function Test-64Bit
@@ -116,7 +116,7 @@ function Get-SEFile
 	{
 		
 		Write-Host "Cant Download the Data."
-		Stop-Execution
+		Exit
 	}
 }
 
@@ -126,9 +126,9 @@ Write-Host "Stopping Server-Eye Services `n"
 Stop-Service -Name SE3Recovery -ErrorAction Stop
 Stop-Service -Name MACService -ErrorAction Stop
 Write-Host "Change Mac Config `n"
-$mac = Get-Content -Path ($seconfig+"\se3_mac.conf") | Select-String "filedepotUpdateDisable=true"
+$mac = Get-Content -Path ($seconfig+"\se3_mac.conf") | Select-String -CaseSensitive "filedepotUpdateDisable=true"
 if (!$mac) {
-	Add-Content -Path ($seconfig+"\se3_mac.conf") -Value "filedepotUpdateDisable=true" -ErrorAction Stop
+	Add-Content -Path ($seconfig+"\se3_mac.conf") -Value "`n filedepotUpdateDisable=true" -ErrorAction Stop
 }
 Write-Host "Copy Filedepot EXE `n"
 $processold = get-process -Name ServerEye.Filedepot -ErrorAction SilentlyContinue
