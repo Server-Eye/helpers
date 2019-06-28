@@ -128,7 +128,7 @@ Stop-Service -Name MACService -ErrorAction Stop
 Write-Host "Change Mac Config `n"
 $mac = Get-Content -Path ($seconfig+"\se3_mac.conf") | Select-String -CaseSensitive "filedepotUpdateDisable=true"
 if (!$mac) {
-	Add-Content -Path ($seconfig+"\se3_mac.conf") -Value "`n filedepotUpdateDisable=true" -ErrorAction Stop
+	Add-Content -Path ($seconfig+"\se3_mac.conf") -Value "filedepotUpdateDisable=true" -ErrorAction Stop
 }
 Write-Host "Copy Filedepot EXE `n"
 $processold = get-process -Name ServerEye.Filedepot -ErrorAction SilentlyContinue
