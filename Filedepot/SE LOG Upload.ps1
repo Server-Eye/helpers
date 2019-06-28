@@ -1,4 +1,4 @@
-#Pfad f�r tempor�re ZIP
+#Pfad fuer temporaere ZIP
 $zippath = "c:\temp"
 #Absender Email Adresse
 $from = ""
