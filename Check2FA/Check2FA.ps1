@@ -75,14 +75,14 @@ foreach ($user in $users){
             UserName = $user.Username
             Email = $user.EMail
             Customer = $user.Company
-            "Status 2FA" = ("Deaktiverit am "+ $timedeactive.tostring())
+            "Status 2FA" = ("Deaktiviert am "+ $timedeactive.tostring())
         }
     }if ($tsp -gt 0) {
         [PSCustomObject]@{
             UserName = $user.Username
             Email = $user.EMail
             Customer = $user.Company
-            "Status 2FA" = ("Aktiverit am " + $timeactive.tostring())
+            "Status 2FA" = ("Aktiviert am " + $timeactive.tostring())
         }
     }
     }
