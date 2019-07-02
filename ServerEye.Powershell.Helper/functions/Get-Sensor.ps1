@@ -68,11 +68,7 @@ function cacheSensorTypes ($auth) {
     $pmType | Add-Member -type NoteProperty -name agentType -value "9537CBB5-9023-4248-AFF3-F1ACCC0CE7A4"
     $pmType | Add-Member -type NoteProperty -name defaultName -value "Patchmanagement"
     $Global:SensorTypes.add($pmType.agentType, $pmType)
-
-    $sutype = New-Object System.Object
-    $suType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
-    $suType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
-    $Global:SensorTypes.add($suType.agentType, $suType)
+    
 }
 
 function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
