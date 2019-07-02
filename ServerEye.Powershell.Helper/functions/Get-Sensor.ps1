@@ -71,7 +71,7 @@ function cacheSensorTypes ($auth) {
 
     $sutype = New-Object System.Object
     $suType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
-    $suType | Add-Member -type NoteProperty -name defaultName -value "Smart Update"
+    $suType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
     $Global:SensorTypes.add($suType.agentType, $suType)
 }
 
