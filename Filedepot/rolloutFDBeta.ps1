@@ -131,15 +131,10 @@ if (!$mac) {
 	Add-Content -Path ($seconfig+"\se3_mac.conf") -Value "filedepotUpdateDisable=true" -ErrorAction Stop
 }
 Write-Host "Copy Filedepot EXE `n"
-$processold = get-process -Name ServerEye.Filedepot -ErrorAction SilentlyContinue
-$processnew = get-process -Name FileDepot.core -ErrorAction SilentlyContinue
-if($processold){
-	Stop-Process -Name $processold.processname -Force
-	Wait-Process -Name $processold.processname
-	Copy-Item -Path $downloadpath\ServerEye.Filedepot.exe -Destination $servicepath\ServerEye.Filedepot.exe -ErrorAction Stop -Force
-}elseif ($processnew) {
-	Stop-Process -Name $processnew.processname -Force
-	Wait-Process -Name $processnew.processname
+$process = get-process -Name ServerEye.Filedepot -ErrorAction SilentlyContinue
+if($process){
+	Stop-Process -Name $process.processname -Force
+	Wait-Process -Name $process.processname
 	Copy-Item -Path $downloadpath\ServerEye.Filedepot.exe -Destination $servicepath\ServerEye.Filedepot.exe -ErrorAction Stop -Force
 }else{
 	Copy-Item -Path $downloadpath\ServerEye.Filedepot.exe -Destination $servicepath\ServerEye.Filedepot.exe -ErrorAction Stop -Force
