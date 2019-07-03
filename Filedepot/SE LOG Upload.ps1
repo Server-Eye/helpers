@@ -3,7 +3,7 @@ $zippath = "c:\temp"
 #Absender Email Adresse
 $from = ""
 #Mail Betreff
-$subject = ""
+$subject = "Filedepot Beta Logs for System: $env:computername"
 #SMTP-Server
 $smtp = ""
 
