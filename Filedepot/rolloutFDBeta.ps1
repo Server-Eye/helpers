@@ -114,8 +114,7 @@ function Get-SEFile
 	}
 	catch
 	{
-		
-		Write-Host "Cant Download the Data."
+		Write-Host -Message "Error downloading: $Url - Interrupting execution - $($_.Exception.Message)"
 		Exit
 	}
 }
