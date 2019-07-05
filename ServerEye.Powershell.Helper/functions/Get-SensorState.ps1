@@ -35,8 +35,11 @@ function Get-SensorState {
             $withRawData = 'true'
         }
         $state = Get-SeApiAgentStateList -Aid $SensorId -AuthToken $AuthToken -Limit 1 -IncludeRawData $withRawData
+        $sensor = Get-SESensor -SensorID $SensorId
 
         [PSCustomObject]@{
+                    Name = $sensor.Name
+                    SensorType = $Sensor.SensorType
                     SensorId = $state.aId
                     StateId = $state.sId
                     Date = $state.date
