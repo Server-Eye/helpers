@@ -6,6 +6,13 @@ Please use the Helper function ```Get-SEInventory``` instead.
 
 # ProgrammInventory.ps1
 
+## Download
+
+You can download the helper script with following powershell command:
+```
+iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/ContainerInventory/ProgrammInventory.ps1" -OutFile ProgrammInventory.ps1
+```
+
 ### With an API Key
 ```powershell
 ProgrammInventory.ps1 -apiKey "yourApiKey" -custID "specificCustomerID"
