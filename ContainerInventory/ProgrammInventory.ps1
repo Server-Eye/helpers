@@ -3,7 +3,8 @@ Param(
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken,
-    [string]
+    [Parameter(ValueFromPipelineByPropertyName)]
+    [alias("CustomerId")]
     $custID
 )
 
