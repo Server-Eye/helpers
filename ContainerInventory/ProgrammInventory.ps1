@@ -1,6 +1,6 @@
 [CmdletBinding()]
 Param(
-    [Parameter(ValueFromPipeline = $true)]
+    [Parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
     [alias("ApiKey", "Session")]
     $AuthToken,
     [Parameter(ValueFromPipelineByPropertyName)]
