@@ -29,13 +29,26 @@ function New-Customer {
     [CmdletBinding()]
     Param(
         [Parameter(Mandatory=$true)]
-        [string]$companyName,
+        $companyName,
         [Parameter(Mandatory=$true)]
-        [string]$zipCode,
+        $zipCode,
         [Parameter(Mandatory=$true)]
-        [string]$city,
+        $city,
         [Parameter(Mandatory=$true)]
-        [string]$country,
+        $country,
+        [Parameter(Mandatory=$false)]
+        $Street,
+        [Parameter(Mandatory=$false)]
+        $StreetNumber,
+        [Parameter(Mandatory=$false)]
+        $Email,
+        [Parameter(Mandatory=$false)]
+        $Phone,
+        [Parameter(Mandatory=$false)]
+        [ValidateSet('en','de')]
+        $Language,
+        [Parameter(Mandatory=$false)]
+        $Timezone,
         [Parameter()]
         [alias("ApiKey","Session")]
         $AuthToken
@@ -45,7 +58,7 @@ function New-Customer {
     }
 
     Process {
-                $customer = New-SeApiCustomer -AuthToken $AuthToken -companyName $companyName -zipCode $zipCode -city $city -country $country
+                $customer = New-SeApiCustomer -AuthToken $AuthToken -companyName $companyName -zipCode $zipCode -city $city -country $country -Street $Street -StreetNumber $StreetNumber -Email $Email -Phone $Phone -Language $Language -Timezone $Timezone
                 [PSCustomObject]@{
                     Name = $customer.companyName
                     CustomerId = $customer.customer_id

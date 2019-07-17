@@ -12,7 +12,7 @@
 RootModule = 'ServerEye.Powershell.Helper.psm1'
 
 # Version number of this module.
-ModuleVersion = '2.13.4'
+ModuleVersion = '2.13.5'
 
 # Supported PSEditions
 # CompatiblePSEditions = @()
