@@ -32,6 +32,7 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
     Import-Module ServerEye.Powershell.Helper
 }
 
+$LastActiveDays = "14"
 $culture = [Globalization.cultureinfo]::GetCultureInfo("de-DE")
 $format = "yyyy-MM-ddHH:mm:ss"
 $messageen = "Connection available"
@@ -72,7 +73,7 @@ foreach ($customer in $customers) {
                 Message       = "Last Message: " + $container.message
             }
         }
-        if ($container.subtype -eq "0" -and $tsp.TotalDays -gt 14 -and $container.message -ne $shutdownde){
+        if ($container.subtype -eq "0" -and $tsp.TotalDays -gt $LastActiveDays -and $container.message -ne $shutdownde){
             [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $container.name
@@ -92,7 +93,7 @@ foreach ($customer in $customers) {
                 Message       = "Last Message: " + $container.message
             } 
         }      
-        If ($container.subtype -eq "2" -and $tsp.TotalDays -gt 14 -and $container.message -ne $shutdownde) {
+        If ($container.subtype -eq "2" -and $tsp.TotalDays -gt $LastActiveDays  -and $container.message -ne $shutdownde) {
             $occ = ""
             $occ = Get-SeApiContainer -AuthToken $AuthToken -CId $container.parentId
             [PSCustomObject]@{
