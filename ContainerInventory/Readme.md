@@ -24,7 +24,9 @@ Connect-SESession | ProgrammInventory.ps1 -custID "specificCustomerID"
 ```
 
 ### When Export to Excel use this Call
+```powershell
 .\ProgrammInventory.ps1 -custID "specificCustomerID" | Select-Object Sensorhub,Software | Select-Object -Property Sensorhub -ExpandProperty Software | Export-Excel -Path "Filename or Path "-AutoSize -NoNumberConversion Version
+```
 
 ## Parameters
 
