@@ -34,8 +34,6 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 
 $LastActiveDays = "14"
-$culture = [Globalization.cultureinfo]::GetCultureInfo("de-DE")
-$format = "yyyy-MM-ddHH:mm:ss"
 $messageen = "Connection available"
 $messagede = "Verbindung vorhanden"
 $shutdownde = "Dienst oder Server wurde heruntergefahren."
@@ -43,13 +41,6 @@ $shutdownen = ""
 $now = Get-Date
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
-Function Get-LocalTime($UTC)
-{
-$strCurrentTimeZone = (Get-TimeZone).id
-$TZ = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
-$LocalTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($UTC, $TZ)
-Return $LocalTime
-}
 
 $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 foreach ($customer in $customers) {
@@ -57,9 +48,7 @@ foreach ($customer in $customers) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
-        $date = ($container.lastDate -replace ("[a-zA-Z]", "")).Remove(18)
-        $utc = [datetime]::ParseExact($date, $format, $culture)
-        $time = Get-LocalTime $utc
+        $time = Convert-SEDBTime -date $container.lastDate
         $tsp = New-TimeSpan -start $time -End $now
 
         Write-Debug $container
