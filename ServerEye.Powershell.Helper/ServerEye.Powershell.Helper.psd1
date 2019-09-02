@@ -76,7 +76,7 @@ FunctionsToExport = 'Connect-Session', 'Disconnect-Session', "Get-Customer", "Ge
     "Get-Installer", "Get-SensorInvoice","New-Customer","Get-Tag","Set-Sensortag","New-Group","Set-Notification","Get-OCCConnector",
     "Get-CustomerSetting","Get-SensorhubProposal","Remove-Tag", "Set-Tag", "Get-Sensortag","Get-CustomerapiKey","Set-Template","Set-Sensor",
     "Get-Note","New-Note","Remove-Note","Get-CustomerSecret","Get-Inventory","New-Sensor","Remove-Sensor","Get-Sensorhubtag","Get-Sensorcount",
-    "Set-CustomerSetting","Get-GroupMember"
+    "Set-CustomerSetting","Get-GroupMember","Convert-DBtime"
 
 # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
 CmdletsToExport = @()
