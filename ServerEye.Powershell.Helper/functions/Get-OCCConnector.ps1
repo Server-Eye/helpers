@@ -70,7 +70,7 @@ function Get-OCCConnector {
         }
         elseif ($ConnectorId) {
 
-            getOCCConnectorById -ConnectorId $ConnectorId -auth $AuthToken
+            Get-SEContainer -containerid $ConnectorId
 
         }
         else {
@@ -84,30 +84,13 @@ function Get-OCCConnector {
     }
 }
 
-function getOCCConnectorById($ConnectorId, $auth) {
-    $connector = Get-SeApiContainer -CId $ConnectorId -AuthToken $auth
-    $customer = Get-SECustomer -customerId $connector.customerId
-
-    [PSCustomObject]@{
-        Customer    = $customer.name
-        Name        = $connector.name
-        ConnectorID = $connector.cId
-        MachineName = $connector.machineName
-    }
-}
 function getOCCConnectorByCustomer ($customerId, $filter, $auth) {
 
-    $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId
+    $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId | Where-Object { $_.Subtype -eq 0 }
 
     foreach ($Connector in $containers) {
-
-        if ($Connector.subtype -eq "0") {
-
-            if ((-not $filter) -or ($Connector.name -like $filter)) {
-
-                getOCCConnectorById -ConnectorId $Connector.id -Auth $auth
-
-            }
+        if ((-not $filter) -or ($Connector.name -like $filter)) {
+            Get-SEContainer -containerid $Connector.id
         }
     }
 }
