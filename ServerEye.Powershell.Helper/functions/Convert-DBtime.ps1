@@ -16,6 +16,7 @@ Convert-SEDBTime -Date $Date
 function Convert-DBTime {
     [CmdletBinding()]
     param (
+        [Parameter(Mandatory = $true, Position = 0)]
         $date
     )
     
@@ -35,7 +36,7 @@ function Convert-DBTime {
         $realdate = ($date -replace ("[a-zA-Z]", "")).Remove(18)
         $utc = [datetime]::ParseExact($realdate, $format, $culture)
         $time = Get-LocalTime $utc
-        Write-Host $time
+        Write-Output $time
     }
     
     end {
