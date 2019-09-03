@@ -11,6 +11,10 @@
     .PARAMETER days 
     Days until the Certifikat should expire.
 #>
+<#
+<version>2</version>
+<description>This script will check if the given Certifikat is valid.</description>
+#>
 
 [CmdletBinding()]
 Param(
