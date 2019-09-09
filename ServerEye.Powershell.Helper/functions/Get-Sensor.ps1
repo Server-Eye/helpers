@@ -69,9 +69,9 @@ function cacheSensorTypes ($auth) {
     $pmType | Add-Member -type NoteProperty -name defaultName -value "Patchmanagement"
     $Global:SensorTypes.add($pmType.agentType, $pmType)
 
-    $pmType = New-Object System.Object
-    $pmType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
-    $pmType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
+    $suType = New-Object System.Object
+    $suType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
+    $suType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
     $Global:SensorTypes.add($suType.agentType, $suType)
     
 }
