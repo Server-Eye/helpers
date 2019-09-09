@@ -68,12 +68,17 @@ function cacheSensorTypes ($auth) {
     $pmType | Add-Member -type NoteProperty -name agentType -value "9537CBB5-9023-4248-AFF3-F1ACCC0CE7A4"
     $pmType | Add-Member -type NoteProperty -name defaultName -value "Patchmanagement"
     $Global:SensorTypes.add($pmType.agentType, $pmType)
+
+    $pmType = New-Object System.Object
+    $pmType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
+    $pmType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
+    $Global:SensorTypes.add($suType.agentType, $suType)
     
 }
 
 function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
     $agents = Get-SeApiContainerAgentList -AuthToken $auth -CId $sensorhubId 
-    $sensorhub = Get-Sensorhub -SensorhubId $sensorhubId -AuthToken $auth
+    $sensorhub = Get-SESensorhub -SensorhubId $sensorhubId -AuthToken $auth
 
 
     foreach ($sensor in $agents) {
@@ -89,7 +94,7 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-SeApiAgent -AId $sensorId -AuthToken $auth
 
-    $sensorhub = Get-Sensorhub -SensorhubId $sensor.parentId -AuthToken $auth
+    $sensorhub = Get-SESensorhub -SensorhubId $sensor.parentId -AuthToken $auth
     
     $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
     
@@ -99,6 +104,7 @@ function getSensorById ($sensorId, $auth) {
 
         Name = $sensor.name
         SensorType = $type.defaultName
+        SensorTypeID = $type.agentType
         SensorId = $sensor.aId
         Interval = $sensor.interval
         Error = $state.state -or $state.forceFailed
@@ -120,6 +126,7 @@ function formatSensor($sensor, $sensorhub, $auth) {
 
         Name = $sensor.name
         SensorType = $type.defaultName
+        SensorTypeID = $type.agentType
         SensorId = $sensor.Id
         Interval = $sensorDetails.interval
         Error = $sensor.state -or $sensor.forceFailed
