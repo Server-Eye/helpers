@@ -27,18 +27,28 @@ foreach ($sensorhub in $containers) {
 
     if ($sensorhub.subtype -eq "2") {
 
-        $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction Stop -ErrorVariable x
-        [PSCustomObject]@{
-            Sensorhub = $sensorhub.name
-            Status    = "Online"
-            Software  = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
-                [PSCustomObject]@{
-                    Pos     = ($i + 1)
-                    Produkt = $inventory.PROGRAMS[$i].Produkt
-                    Version = $inventory.PROGRAMS[$i].SWVERSION
+        try {
+            $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction SilentlyContinue -ErrorVariable x
+            [PSCustomObject]@{
+                Sensorhub = $sensorhub.name
+                Status    = "Online"
+                Software  = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
+                    [PSCustomObject]@{
+                        Pos     = ($i + 1)
+                        Produkt = $inventory.PROGRAMS[$i].Produkt
+                        Version = $inventory.PROGRAMS[$i].SWVERSION
+                    }
                 }
             }
         }
+        catch {
+            [PSCustomObject]@{
+                Sensorhub = $sensorhub.name
+                Status    = "Offline"
 
+            }
+       
+
+        }
     }
 }
