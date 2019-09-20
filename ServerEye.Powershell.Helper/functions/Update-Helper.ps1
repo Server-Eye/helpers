@@ -10,10 +10,10 @@ function Update-Helper {
 
     )
 
-    $SEModules = @("Servereye.powershell.helper", "Servereye.powershell.api")
+    $SEModules = @("Servereye.powershell.helper")
     foreach ($SEModule in $SEModules) {
         $SEmod = Get-Module -ListAvailable -Name $SEModule
-        $online = Find-Module -Name $SEMod -Repository PSGallery -ErrorAction Stop
+        $online = Find-Module -Name $SEModule -Repository PSGallery -ErrorAction Stop
         if ($SEmod.Version.ToString() -ne $online.Version) {
             Update-Module -Name $SEMod -force
             Remove-Module -Name $SEMod
