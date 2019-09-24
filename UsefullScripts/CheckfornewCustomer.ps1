@@ -36,6 +36,7 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 #Define the exit Code
 $exitCode = -1
 
+#APIKey needed for the Checks
 $AuthToken = "ApiKey"
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
@@ -46,6 +47,7 @@ if (!$path) {
     $exitCode = 5
     $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
 }
+#Check if CSV file existed
 elseif (!(Test-Path -Path $path)) {
     $msg.AppendLine("CSV File not Found, maybe first Run will create a new CSV")
     $exitCode = 1
@@ -57,12 +59,14 @@ else {
         if ($result) {
             #Create Variable with all Data for new Customer
             $newcustomer = $currentcustomer | Where-Object { $_.CustomerNumber -in $result.CustomerNumber } | Out-String
+            #Export the current Customers to the CSV
             $currentcustomer | Export-Csv -Path $CSVFile -Delimiter ";"
             $msg.AppendLine($newcustomer)
             $exitCode = 6
             $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
         }
         else {
+            #No new Customers so all is fine
             $msg.AppendLine("No new Customer Found")
             $exitCode = 0
             $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::OK) 
