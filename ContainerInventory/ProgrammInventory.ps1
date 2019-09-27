@@ -31,6 +31,7 @@ foreach ($sensorhub in $containers) {
             $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $sensorhub.id -ErrorAction SilentlyContinue -ErrorVariable x
             [PSCustomObject]@{
                 Sensorhub = $sensorhub.name
+                Customer = (Get-SECustomer | Where-Object {$_.CustomerID -eq $sensorhub.CustomerId}).Name
                 Status    = "Online"
                 Software  = for ($i = 0; $i -lt $inventory.PROGRAMS.Count; $i++) {
                     [PSCustomObject]@{
