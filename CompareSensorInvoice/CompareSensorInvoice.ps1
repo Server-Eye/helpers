@@ -34,8 +34,8 @@ $authtoken = Test-SEAuth -authtoken $authtoken
 $date = Get-Date
 $lastmonth = $date.AddMonths(-1)
 
-$currentInvoice = Get-SESensorInvoice -Year $date.Year -Month $date.Month | Select-Object  -Property * -ExcludeProperty Server, Workstation
-$lastMonthInvoice = Get-SESensorInvoice -Year $lastmonth.Year -Month $lastmonth.Month | Select-Object -Property * -ExcludeProperty Server, Workstation
+$currentInvoice = Get-SESensorInvoice -Year $date.Year -Month $date.Month -AuthToken $AuthToken| Select-Object  -Property * -ExcludeProperty Server, Workstation
+$lastMonthInvoice = Get-SESensorInvoice -Year $lastmonth.Year -Month $lastmonth.Month -AuthToken $AuthToken| Select-Object -Property * -ExcludeProperty Server, Workstation
 $objprops = $currentInvoice | Get-Member -MemberType Property,NoteProperty | Where-Object Name -NotLike "CustomerName" | ForEach-Object Name
 $result = @()
 
