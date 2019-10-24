@@ -15,6 +15,8 @@
 
 [CmdletBinding()]
 Param(
+    [Parameter()]
+    $LastActiveDays = "14",
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken
@@ -32,7 +34,6 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
     Import-Module ServerEye.Powershell.Helper
 }
 
-$LastActiveDays = "14"
 $messageen = "Connection available"
 $messagede = "Verbindung vorhanden"
 $shutdownde = "Dienst oder Server wurde heruntergefahren."
