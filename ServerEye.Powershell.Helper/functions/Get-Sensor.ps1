@@ -83,7 +83,7 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 
     foreach ($sensor in $agents) {
         $count++
-        if ((-not $filter) -or ($sensor.name -like $filter) -or ($sensor.SensorTypeID -like $filter)) {
+        if ((-not $filter) -or ($sensor.name -like $filter) -or ($sensor.agentType -like $filter)) {
             formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
         }
     }
