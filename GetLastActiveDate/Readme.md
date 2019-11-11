@@ -18,7 +18,7 @@ Connect-SESession | GetLastActiveDate.ps1
 
 ## Call with API Key
 ```
-GetLastActiveDate.ps1 -apiKey yourApiKey
+.\GetLastActiveDate.ps1 -apiKey yourApiKey
 ```
 
 ## Parameters
@@ -47,7 +47,7 @@ Connect-SESession | GetLastActiveDatewithShutdown.ps1
 
 ## Call with API Key
 ```
-GetLastActiveDatewithShutdown.ps1 -apiKey yourApiKey
+.\GetLastActiveDatewithShutdown.ps1 -apiKey yourApiKey
 ```
 
 ## Parameters
