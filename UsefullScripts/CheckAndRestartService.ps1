@@ -1,7 +1,8 @@
 <#
 .SYNOPSIS
   Name: CheckAndRestartService.ps1
-  The purpose of this script is to restart in combination with the Server-Eye PowerShell Sensor
+  The purpose of this script is to restart a Service if needed in combination with the Server-Eye PowerShell Sensor
+
 #>
 
 <#
