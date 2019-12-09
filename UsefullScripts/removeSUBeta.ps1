@@ -6,6 +6,9 @@
     Checks and remove all leftover SU Beta things
 #>
 
+#Requires -Version 5.0
+#Requires -RunAsAdministrator
+
 $PSINIFilePAth = "C:\Windows\System32\GroupPolicy\Machine\Scripts"
 $PSINIFileName = "psscripts.ini"
 
