@@ -12,6 +12,8 @@
     .PARAMETER SensorId
     This neccessary agent ID, representing the agent you want to be monitored.You can find the ID in the settings panel of an agent (OCC)
 #>
+
+#Requires -Version 5.0
  
 Param(
     [Parameter(Mandatory=$true)] 
