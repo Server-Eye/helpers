@@ -14,6 +14,9 @@
     .PARAMETER NotificationId
     The id of the notification that should be changed.
 
+    .PARAMETER userId
+    The id of the user or group that should receive a notification.
+
     .PARAMETER SendEmail
     Should the alarm be sent via email.
     
@@ -39,6 +42,9 @@ function Set-Notification {
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensorhub')]
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true,ParameterSetName='ofSensor')]
         $NotificationId,
+        #[Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensorhub')]
+        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensor')]
+        $userId,
         [Parameter(Mandatory=$false,ParameterSetName='ofSensorhub')]
         [Parameter(Mandatory=$false,ParameterSetName='ofSensor')]
         [switch]$SendEmail,
@@ -62,7 +68,7 @@ function Set-Notification {
     
     Process {
         if ($SensorId) {
-            setNotificationofSensor -AuthToken $AuthToken -SensorID $SensorId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+            setNotificationofSensor -AuthToken $AuthToken -SensorID $SensorId -NotificationId $NotificationId -userid $userId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } elseif ($SensorhubId) {
             SetNotificationofContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } else {
@@ -84,6 +90,8 @@ function setNotificationofSensor {
     [Parameter(Mandatory=$true)]
     $NotificationId,
     [Parameter(Mandatory=$false)]
+    $userId,
+    [Parameter(Mandatory=$false)]
     $SendEmail,
     [Parameter(Mandatory=$false)]
     $SendTextmessage,
@@ -94,7 +102,7 @@ function setNotificationofSensor {
     [Parameter(Mandatory=$true)]
     $authtoken
     )
-    $noti = Set-SeApiAgentNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
+    $noti = Set-SeApiAgentNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -userId $userId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
     formatSensorNotificationset -notiID $noti.nid -authoken $authtoken -sensorid $noti.aid
 }
 
