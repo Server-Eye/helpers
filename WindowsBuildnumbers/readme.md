@@ -16,19 +16,15 @@ This script needs the Server-Eye Powershell helper. Please see https://github.co
 
 You can download the helper script with following powershell command:
 ```
-iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/UsefullScripts/WindowsBuildnumbers/CheckWin10BuildNumber.ps1" -OutFile CheckWin10BuildNumber.ps1
+iwr "https://raw.githubusercontent.com/Server-Eye/helpers/master/WindowsBuildnumbers/CheckWin10BuildNumber.ps1" -OutFile CheckWin10BuildNumber.ps1
 ```
 
 ## Execute
 
-### With an API Key
-```powershell
-CheckWin10BuildNumber.ps1 -ApiKey yourApiKey 
-```
-
 ### Via Login
 ```powershell
-Connect-SESession | CheckWin10BuildNumber.ps1
+Connect-SESession -Persist
+.\CheckWin10BuildNumber.ps1
 ```
 
 ## Output
@@ -37,6 +33,7 @@ The output is a standard PowerShell table and can be processed with any compatib
 # You only need to install the module once.
 Install-Module -Name ImportExcel -Scope CurrentUser
 
-# Show all sensors without a notification and save the result as Excel sheet
-Connect-SESession | CheckWin10BuildNumber.ps1 | Export-Excel -Path "CheckWin10BuildNumber.xlsx" -Now
+#Call the script
+Connect-SESession -Persist
+.\CheckWin10BuildNumber.ps1 | Export-Excel -Path "CheckWin10BuildNumber.xlsx" -Now
 ```
