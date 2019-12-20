@@ -12,7 +12,7 @@
     RootModule             = 'ServerEye.Powershell.Api.psm1'
 
     # Version number of this module.
-    ModuleVersion          = '2.2.1'
+    ModuleVersion          = '2.3.1'
 
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -77,8 +77,10 @@
     "Get-AgentNotificationList",
     "Get-AgentRemoteSetting",
     "Get-AgentSettingList",
+    "Get-AgentState",
     "Get-AgentStateList",
     "Get-AgentTagList",
+    "Get-AgentTypeFaqList",
     "Get-AgentTypeList",
     "Get-AgentTypeSettingList",
     "Get-ComplianceCheck",
@@ -93,6 +95,7 @@
     "Get-ContainerNotificationList",
     "Get-ContainerProposalList",
     "Get-ContainerProposalSettingList",
+    "Get-ContainerState",
     "Get-ContainerStateList",
     "Get-ContainerTagList",
     "Get-Customer",
@@ -102,6 +105,7 @@
     "Get-CustomerBucketUserList",
     "Get-CustomerContainerList",
     "Get-CustomerDispatchtimeList",
+    "Get-CustomerLicenseList",
     "Get-CustomerList",
     "Get-CustomerLocation",
     "Get-CustomerManagerList",
@@ -136,6 +140,7 @@
     "Get-ReportingCustomReportList",
     "Get-ReportingTemplate",
     "Get-ReportingTemplateList",
+    "Get-Reset",
     "Get-RoleList",
     "Get-User",
     "Get-UserGroupList",
@@ -165,6 +170,7 @@
     "Set-Group",
     "Set-GroupUser",
     "Set-MyNotification",
+    "Set-MyPassword",
     "Set-MySetting",
     "Set-ReportingTemplate",
     "Set-User",
@@ -190,6 +196,7 @@
     "New-CustomerBucket",
     "New-CustomerCoupon",
     "New-CustomerDispatchtime",
+    "New-CustomerLicense",
     "New-CustomerLocation",
     "New-CustomerProperty",
     "New-CustomerTag",
@@ -228,6 +235,7 @@
     "Remove-CustomerBucket",
     "Remove-CustomerBucketUser",
     "Remove-CustomerDispatchtime",
+    "Remove-CustomerLicense",
     "Remove-CustomerManager",
     "Remove-CustomerProperty",
     "Remove-CustomerTag",

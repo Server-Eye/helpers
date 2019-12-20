@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2019-06-12T13:42:58.324Z
+DATE: 2019-12-16T11:19:03.747Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -260,6 +260,59 @@ $AId,
 
     <#
     .SYNOPSIS
+    Request a specific state of an agent.
+
+    
+        .PARAMETER $AId
+        The id of the agent.
+        
+        .PARAMETER $SId
+        The id of the state.
+        
+        .PARAMETER $IncludeHints
+        Include user hints?
+        
+        .PARAMETER $IncludeMessage
+        Include the status message?
+        
+        .PARAMETER $IncludeRawData
+        Include the status' raw data if available?
+        
+        .PARAMETER $Format
+        In which format do you want the message to be rendered?
+        
+    #>
+    function Get-AgentState {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$AId,
+[Parameter(Mandatory=$true)]
+$SId,
+[Parameter(Mandatory=$false)]
+$IncludeHints,
+[Parameter(Mandatory=$false)]
+$IncludeMessage,
+[Parameter(Mandatory=$false)]
+$IncludeRawData,
+[Parameter(Mandatory=$false)]
+[ValidateSet('html','plain','text','text_short','mail','markdown')]
+$Format,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId/state/$SId?includeHints=$IncludeHints&includeMessage=$IncludeMessage&includeRawData=$IncludeRawData&format=$Format" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Get the current state or a state history of this agent.
 
     
@@ -307,7 +360,7 @@ $IncludeMessage,
 [Parameter(Mandatory=$false)]
 $IncludeRawData,
 [Parameter(Mandatory=$false)]
-[ValidateSet('plain','html')]
+[ValidateSet('html','plain','text','text_short','mail','markdown')]
 $Format,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -344,6 +397,33 @@ $AId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId/tag" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Get the known FAQ's for an agent type
+
+    
+        .PARAMETER $AkId
+        The id of the agent type.
+        
+    #>
+    function Get-AgentTypeFaqList {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$AkId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/agent/type/$AkId/faq" -authtoken $AuthToken
         }
     }
     
@@ -780,6 +860,48 @@ $PId,
 
     <#
     .SYNOPSIS
+    A specific of this container.
+
+    
+        .PARAMETER $CId
+        The id of the container.
+        
+        .PARAMETER $SId
+        The id of the state.
+        
+        .PARAMETER $IncludeHints
+        Include user hints?
+        
+        .PARAMETER $IncludeMessage
+        Include the status message?
+        
+    #>
+    function Get-ContainerState {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+$SId,
+[Parameter(Mandatory=$false)]
+$IncludeHints,
+[Parameter(Mandatory=$false)]
+$IncludeMessage,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/container/$CId/state/$SId?includeHints=$IncludeHints&includeMessage=$IncludeMessage" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Get the current state or a state history of this container.
 
     
@@ -1032,6 +1154,33 @@ $CId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/customer/dispatchTime" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Returns all licenses of a customer.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+    #>
+    function Get-CustomerLicenseList {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/customer/$CId/license" -authtoken $AuthToken
         }
     }
     
@@ -1967,6 +2116,38 @@ $RtId,
 
     <#
     .SYNOPSIS
+    Generate a code and send it by email to reset the password. This code is valid for 24 hours
+
+    
+        .PARAMETER $Email
+        The mail address, to reset the password
+        
+        .PARAMETER $Code
+        The code for the user (two-factor or received sms code)
+        
+    #>
+    function Get-Reset {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$Email,
+[Parameter(Mandatory=$false)]
+$Code,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-GetJson -url "https://api.server-eye.de/2/auth/reset?email=$Email&code=$Code" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Get all users with this specific role.
 
     
@@ -2568,6 +2749,9 @@ $MaxHeartbeatTimeout,
         .PARAMETER $NId
         The id of the notification.
         
+        .PARAMETER $UserId
+        The id of the user or group that should receive a notification.
+        
         .PARAMETER $Email
         Send an email as notification.
         
@@ -2590,6 +2774,8 @@ $CId,
 [Parameter(Mandatory=$true)]
 $NId,
 [Parameter(Mandatory=$false)]
+$UserId,
+[Parameter(Mandatory=$false)]
 $Email,
 [Parameter(Mandatory=$false)]
 $Phone,
@@ -2608,6 +2794,7 @@ $DeferId,
             
             'cId' = $CId
             'nId' = $NId
+            'userId' = $UserId
             'email' = $Email
             'phone' = $Phone
             'ticket' = $Ticket
@@ -3181,6 +3368,50 @@ $DeferId,
 
     <#
     .SYNOPSIS
+    Change my password
+
+    
+        .PARAMETER $ValidationPassword
+        The current password
+        
+        .PARAMETER $Password
+        The desired new password. Must be at least 5 signs long.
+        
+        .PARAMETER $Passwordre
+        Repeat of the desired password.
+        
+    #>
+    function Set-MyPassword {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$ValidationPassword,
+[Parameter(Mandatory=$true)]
+$Password,
+[Parameter(Mandatory=$true)]
+$Passwordre,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'validationPassword' = $ValidationPassword
+            'password' = $Password
+            'passwordre' = $Passwordre
+            }
+
+            return Intern-PutJson -url "https://api.server-eye.de/2/me/password" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Updates settings of your user. Any parameter of <code>GET /me/setting</code> is valid.
 
     
@@ -3513,7 +3744,16 @@ $SubstitudeId,
         A comma separated list of ids or an Array of ids. This can be any ids in any combination, e.g. id of a container or id of a user. You will receive the complete history behind any of these ids.
         
         .PARAMETER $Type
-        You can reduce the result to a specific change type. For a list of change types, please query the action log and pick one form the change object.
+        A comma seperated list or an Array of types. You can reduce the result to specific change typess.
+        
+        .PARAMETER $ChangeKey
+        The key which specifies the change
+        
+        .PARAMETER $NewValue
+        The new value which is set for the made change
+        
+        .PARAMETER $OldValue
+        The old value, which was set before the change was made
         
         .PARAMETER $Limit
         How many entries of the actionlog do you need? Max value is 100.
@@ -3537,6 +3777,12 @@ $Of,
 [Parameter(Mandatory=$false)]
 $Type,
 [Parameter(Mandatory=$false)]
+$ChangeKey,
+[Parameter(Mandatory=$false)]
+$NewValue,
+[Parameter(Mandatory=$false)]
+$OldValue,
+[Parameter(Mandatory=$false)]
 $Limit,
 [Parameter(Mandatory=$false)]
 $Start,
@@ -3556,6 +3802,9 @@ $IncludeRawData,
             
             'of' = $Of
             'type' = $Type
+            'changeKey' = $ChangeKey
+            'newValue' = $NewValue
+            'oldValue' = $OldValue
             'limit' = $Limit
             'start' = $Start
             'messageFormat' = $MessageFormat
@@ -4374,6 +4623,45 @@ $Defer,
 
     <#
     .SYNOPSIS
+    Add a license to a customer.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+        .PARAMETER $Name
+        The license that you want to add.
+        
+    #>
+    function New-CustomerLicense {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('trayicon')]
+$Name,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'cId' = $CId
+            'name' = $Name
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/customer/$CId/license" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Update a customers location.
 
     
@@ -4422,7 +4710,7 @@ $AddressObject,
 
     
         .PARAMETER $CId
-        The id of the user.
+        The id of the customer.
         
         .PARAMETER $Key
         The name of your custom property.
@@ -5003,24 +5291,29 @@ $Widgets,
 
     
         .PARAMETER $Email
-        undefined
+        The mail address of the user.
         
-        .PARAMETER $Phone
-        undefined
+        .PARAMETER $New_password
+        The new password for the account.
+        
+        .PARAMETER $New_password_confirmation
+        The confirmation of the new password.
         
         .PARAMETER $Code
-        undefined
+        The code, which was created in step one.
         
     #>
     function New-Reset {
         [CmdletBinding()]
         Param(
             
-[Parameter(Mandatory=$false)]
+[Parameter(Mandatory=$true)]
 $Email,
-[Parameter(Mandatory=$false)]
-$Phone,
-[Parameter(Mandatory=$false)]
+[Parameter(Mandatory=$true)]
+$New_password,
+[Parameter(Mandatory=$true)]
+$New_password_confirmation,
+[Parameter(Mandatory=$true)]
 $Code,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -5032,7 +5325,8 @@ $Code,
             $reqBody = @{
             
             'email' = $Email
-            'phone' = $Phone
+            'new_password' = $New_password
+            'new_password_confirmation' = $New_password_confirmation
             'code' = $Code
             }
 
@@ -5814,6 +6108,39 @@ $DtId,
         
         Process {
             return Intern-DeleteJson -url "https://api.server-eye.de/2/customer/dispatchTime/$DtId" -authtoken $AuthToken
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
+    Deactivate a license of a customer.
+
+    
+        .PARAMETER $CId
+        The id of the customer.
+        
+        .PARAMETER $Name
+        The name of the license that you want to deactivate.
+        
+    #>
+    function Remove-CustomerLicense {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$CId,
+[Parameter(Mandatory=$true)]
+[ValidateSet('trayicon')]
+$Name,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            return Intern-DeleteJson -url "https://api.server-eye.de/2/customer/$CId/license/$Name" -authtoken $AuthToken
         }
     }
     
