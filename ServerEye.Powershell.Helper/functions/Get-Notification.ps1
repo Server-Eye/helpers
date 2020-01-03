@@ -114,7 +114,7 @@ function getNotificationBySensor ($sensorId, $auth) {
     }
 
 }
-
+deferId
 function formatSensorNotification($notify, $auth, $sensor){
     [PSCustomObject]@{
         Name = $displayName
@@ -122,10 +122,20 @@ function formatSensorNotification($notify, $auth, $sensor){
         byEmail = $notify.email
         byTextmessage = $notify.phone
         byTicket = $notify.ticket
+        DelayName = if ($notify.deferName) {
+            $notify.deferName
+        } else {
+            ""
+        }
         Delay = if ($notify.deferTime) {
             $notify.deferTime
         } else {
             "0"
+        }
+        DelayID = if ($notify.deferId) {
+            $notify.deferId
+        } else {
+            ""
         }
         NotificationId = $notify.nId
         Sensor = $sensor.name
@@ -143,10 +153,20 @@ function formatContainerNotification($notify, $auth){
         byEmail = $notify.email
         byTextmessage = $notify.phone
         byTicket = $notify.ticket
+        DelayName = if ($notify.deferName) {
+            $notify.deferName
+        } else {
+            ""
+        }
         Delay = if ($notify.deferTime) {
             $notify.deferTime
         } else {
             "0"
+        }
+        DelayID = if ($notify.deferId) {
+            $notify.deferId
+        } else {
+            ""
         }
         NotificationId = $notify.nId
         Sensorhub = $sensorhubName
