@@ -16,6 +16,7 @@ foreach($Sensorhub in $Sensorhubs){
         "OCC-Connector" = $Sensorhub.'OCC-Connector'
         OSName = $Sensorhub.OsName
         Version = $myrelase.Version
+        'Servicing option' = $myrelase.'Servicing option'
         "End of Service Home or Pro" = if ($myrelase.'End of service: Home; Pro; Pro Education; Pro for Workstations and IoT Core' -eq "") {$myrelase."Mainstream support end date"}else {$myrelase.'End of service: Home; Pro; Pro Education; Pro for Workstations and IoT Core'}
         "End of Service Enterprise/Extendent Support" = if ($myrelase."End of service: Enterprise; Education and IoT Enterprise" -eq "") { $myrelase."Extended support end date"} else{$myrelase.'End of service: Enterprise; Education and IoT Enterprise'}
     }
