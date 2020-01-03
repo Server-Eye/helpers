@@ -1,6 +1,6 @@
 #Get the Release info from Github and shorten the Buildnumber to a usefull format
 #Example from 18363.535 to 18363
-$releaseCSV = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Server-Eye/helpers/master/WindowsBuildnumbers/Windows10ReleaseInformation.csv' | ConvertFrom-Csv -Delimiter "," | ForEach-Object -Process {$_."OS Build" = ($_."OS Build").Remove(5);$_}
+$releaseCSV = Invoke-WebRequest -Uri 'https://raw.githubusercontent.com/Server-Eye/helpers/master/WindowsBuildnumbers/Windows10Release.csv' | ConvertFrom-Csv -Delimiter "," | ForEach-Object -Process {$_."OS Build" = ($_."OS Build").Remove(5);$_}
 #Get all Windows 10 System form all Customers and shorten the Buildnumber to a usefull format
 #Example form 10.0.18363 to 18363
 $Sensorhubs = Get-SECustomer | Get-SESensorhub | Where-object {$_.OSName -like "*10*" -and $_.IsServer -eq $false} | ForEach-Object -Process {$_.OsVersion = ($_.OsVersion).Remove(0,5);$_}
