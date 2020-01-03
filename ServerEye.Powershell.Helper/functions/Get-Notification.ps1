@@ -114,7 +114,6 @@ function getNotificationBySensor ($sensorId, $auth) {
     }
 
 }
-deferId
 function formatSensorNotification($notify, $auth, $sensor){
     [PSCustomObject]@{
         Name = $displayName
