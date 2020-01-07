@@ -41,7 +41,7 @@ if(!$ServiceNames){
         #Get all given Services
         $Services = Get-Service -Name $ServiceNames -ErrorAction Stop 
         #Check if all Services are running
-        $ServicesToStart =  $Services | Where-Object {($_.Status -eq "Stopped")}
+        $ServicesToStart =  $Services | Where-Object {($_.Status -eq "Stopped") -and ($_.StartType -eq "Automatic")}
         #Check if no Service is stopped
         if (!$ServicesToStart) {
             $msg.AppendLine("No Service need a Restart.")
