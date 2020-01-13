@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get the current state of this container.
     
@@ -48,57 +48,76 @@
 function Get-ContainerState {
     [CmdletBinding()]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
-        [Alias("ConnectorID","SensorhubId")]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
+        [Alias("ConnectorID", "SensorhubId")]
         $containerid,
-        [Parameter(Mandatory=$false)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
+        $Limit = 1,
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
+        $start,
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
+        $end,
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
 
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
+
     }
     
     Process {
         $container = Get-SEContainer -containerid $containerid
-        $state = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -Limit 1
-        if ($container.ConnectorID) {
-            formatOCCConnectorState -container $container -state $state
+        
+        if ($start -and $end) {
+            $states = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -IncludeHints "true" -IncludeMessage "true" -Start ([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds() -End ([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds()
         }
-        if ($container.SensorhubId) {
-            formatSensorhubState -container $container -state $state
+        else {
+            $states = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -Limit $Limit -IncludeHints "true" -IncludeMessage "true"
         }
+        foreach ($state in $states) {
+            if ($container.ConnectorID) {
+                forea
+                formatOCCConnectorState -container $container -state $state
+            }
+            if ($container.SensorhubId) {
+                formatSensorhubState -container $container -state $state
+            }
+        }
+
     }
 
-    End{
+    End {
 
     }
 }
 
 function formatOCCConnectorState($container, $state) {
     [PSCustomObject]@{
-        Customer    = $container.Customer
-        Name        = $container.name
-        ConnectorID = $container.ConnectorID
-        StateId = $state.sId
-        Date = (Convert-SEDBTime -date ($state.Date))
-        LastDate = (Convert-SEDBTime -date ($state.lastDate))
-        Error = $state.state -or $state.forceFailed
-        Resolved = $state.resolved
-        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else{(Convert-SEDBTime -date ($state.silencedUntil)) }
+        Customer      = $container.Customer
+        Name          = $container.name
+        ConnectorID   = $container.ConnectorID
+        StateId       = $state.sId
+        Date          = (Convert-SEDBTime -date ($state.Date))
+        LastDate      = (Convert-SEDBTime -date ($state.lastDate))
+        Error         = $state.state -or $state.forceFailed
+        Message       = $state.message
+        Resolved      = $state.resolved
+        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else { (Convert-SEDBTime -date ($state.silencedUntil)) }
     }
 }
 function formatSensorhubState($container, $state) {
     [PSCustomObject]@{
-        Customer    = $container.Customer
-        Name        = $container.name
-        Connector = $container."OCC-Connector"
-        SensorhubID = $container.SensorhubId
-        StateId = $state.sId
-        Date = (Convert-SEDBTime -date ($state.Date))
-        LastDate = (Convert-SEDBTime -date ($state.lastDate))
-        Error = $state.state -or $state.forceFailed
-        Resolved = $state.resolved
-        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else{(Convert-SEDBTime -date ($state.silencedUntil)) }
+        Customer      = $container.Customer
+        Name          = $container.name
+        Connector     = $container."OCC-Connector"
+        SensorhubID   = $container.SensorhubId
+        StateId       = $state.sId
+        Date          = (Convert-SEDBTime -date ($state.Date))
+        LastDate      = (Convert-SEDBTime -date ($state.lastDate))
+        Error         = $state.state -or $state.forceFailed
+        Message       = $state.message
+        Resolved      = $state.resolved
+        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else { (Convert-SEDBTime -date ($state.silencedUntil)) }
     }
 }
