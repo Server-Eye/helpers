@@ -69,7 +69,10 @@ function Connect-Session {
                 } else {
                     return Connect-Session -Credentials $Credentials -Code $secondFactor
                 }
-            } else {
+            } elseif($_.Exception.Response.StatusCode.Value__ -eq 401){
+                throw "Please check username or password."
+                return
+            }else {
                 Write-Output $_
                 return
             }
