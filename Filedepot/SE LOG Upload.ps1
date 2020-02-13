@@ -7,7 +7,7 @@ $subject = "Filedepot Beta Logs for System: $env:computername"
 #SMTP-Server
 $smtp = ""
 
-if ((Test-Path C:\Temp) -eq $false ){
+if ((Test-Path $zippath) -eq $false ){
     New-Item -Path C:\ -Name "Temp" -ItemType Directory
 }
 
