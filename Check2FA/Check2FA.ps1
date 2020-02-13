@@ -31,60 +31,63 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 $authtoken = Test-SEAuth -authtoken $authtoken
 
-$users = Get-SEUser | Where-Object IsGroup -eq $false
+$users = Get-SEUser | Where-Object { ($_.IsGroup -eq $false) }
 
 $activ = "502"
 $deactiv = "503"
+$activchangekey = "create"
+$deactivchangekey = "delete"
 
 $culture = [Globalization.cultureinfo]::GetCultureInfo("de-DE")
 $format = "yyyy-MM-ddHH:mm:ss"
 
-Function Get-LocalTime($UTC)
-{
-$strCurrentTimeZone = (Get-TimeZone).id
-$TZ = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
-$LocalTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($UTC, $TZ)
-Return $LocalTime
+Function Get-LocalTime($UTC) {
+    $strCurrentTimeZone = (Get-TimeZone).id
+    $TZ = [System.TimeZoneInfo]::FindSystemTimeZoneById($strCurrentTimeZone)
+    $LocalTime = [System.TimeZoneInfo]::ConvertTimeFromUtc($UTC, $TZ)
+    Return $LocalTime
 }
 
 
 
-foreach ($user in $users){
-    $2faactive = Get-SeApiActionlogList -Of $user.UserID -AuthToken $authtoken -IncludeRawData $true | Where-Object {($_.change.type -eq $activ)} | Select-Object -First 1
-    $2fadeactive = Get-SeApiActionlogList -Of $user.UserID -AuthToken $authtoken -IncludeRawData $true | Where-Object {($_.change.type -eq $deactiv)} | Select-Object -First 1
+foreach ($user in $users) {
+    $2faactive = Get-SeApiActionlogList -Of $user.UserID -AuthToken $authtoken -IncludeRawData $true -ChangeKey $activchangekey -Type $activ | Select-Object -First 1
+    $2fadeactive = Get-SeApiActionlogList -Of $user.UserID -AuthToken $authtoken -IncludeRawData $true -ChangeKey $deactivchangekey -Type $deactiv | Select-Object -First 1
+    Write-Debug $user
     if (!$2faactive) {
         [PSCustomObject]@{
-            UserName = $user.Username
-            Email = $user.EMail
-            Customer = $user.Company
+            UserName     = $user.Username
+            Email        = $user.EMail
+            Customer     = $user.Company
             "Status 2FA" = "Niemals aktivert"
         }
 
-    }elseif ($2fadeactive) {
-    $dateactive = ($2faactive.changeDate -replace ("[a-zA-Z]", "")).Remove(18)
-    $utcactive = [datetime]::ParseExact($dateactive, $format, $culture)
-    $timeactive = Get-LocalTime $utcactive
-
-    $datedeactive = ($2fadeactive.changeDate -replace ("[a-zA-Z]", "")).Remove(18)
-    $utcdeactive = [datetime]::ParseExact($datedeactive, $format, $culture)
-    $timedeactive = Get-LocalTime $utcdeactive
-
-    $tsp = New-TimeSpan -start $timedeactive -End $timeactive
-    if ($tsp -lt 0) {
-        [PSCustomObject]@{
-            UserName = $user.Username
-            Email = $user.EMail
-            Customer = $user.Company
-            "Status 2FA" = ("Deaktiviert am "+ $timedeactive.tostring())
-        }
-    }if ($tsp -gt 0) {
-        [PSCustomObject]@{
-            UserName = $user.Username
-            Email = $user.EMail
-            Customer = $user.Company
-            "Status 2FA" = ("Aktiviert am " + $timeactive.tostring())
-        }
     }
+    elseif ($2fadeactive) {
+        $dateactive = ($2faactive.changeDate -replace ("[a-zA-Z]", "")).Remove(18)
+        $utcactive = [datetime]::ParseExact($dateactive, $format, $culture)
+        $timeactive = Get-LocalTime $utcactive
+
+        $datedeactive = ($2fadeactive.changeDate -replace ("[a-zA-Z]", "")).Remove(18)
+        $utcdeactive = [datetime]::ParseExact($datedeactive, $format, $culture)
+        $timedeactive = Get-LocalTime $utcdeactive
+
+        $tsp = New-TimeSpan -start $timedeactive -End $timeactive
+        if ($tsp -lt 0) {
+            [PSCustomObject]@{
+                UserName     = $user.Username
+                Email        = $user.EMail
+                Customer     = $user.Company
+                "Status 2FA" = ("Deaktiviert am " + $timedeactive.tostring())
+            }
+        }if ($tsp -gt 0) {
+            [PSCustomObject]@{
+                UserName     = $user.Username
+                Email        = $user.EMail
+                Customer     = $user.Company
+                "Status 2FA" = ("Aktiviert am " + $timeactive.tostring())
+            }
+        }
     }
 
 }
