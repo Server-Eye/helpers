@@ -9,6 +9,11 @@
 <description>Checks the if a Shadow Copie was made in the Last 24 Hours on every Volume</description>
 #>
 
+Param ( 
+    [Parameter()] 
+    $OlderThan
+)
+
 #region LoadScript
 #load the libraries from the Server Eye directory
 
@@ -54,7 +59,7 @@ if ((!$volumes)) {
     $withoutShadow = $volumes | Where-Object {($ShadowCopies.VolumeName -notcontains $_.DeviceID)}
 
     #Get shadow Copies created in the last 24 hours on Volumes with Shadow Copies
-    $shadow24 = $ShadowCopies | Where-Object {($withShadow.DeviceID -contains $_.VolumeName) -and ($_.InstallDate -gt (Get-Date).AddHours(-24))}
+    $shadow24 = $ShadowCopies | Where-Object {($withShadow.DeviceID -contains $_.VolumeName) -and ($_.InstallDate -gt (Get-Date).AddHours($OlderThan))}
 
     #Check if one Volume have no Shadow Copie
     if(($withoutShadow | Measure-Object).Count -gt 0){
