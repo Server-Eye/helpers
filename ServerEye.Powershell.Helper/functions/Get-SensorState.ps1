@@ -42,8 +42,8 @@ function Get-SensorState {
                     SensorType = $Sensor.SensorType
                     SensorId = $state.aId
                     StateId = $state.sId
-                    Date = $state.date
-                    LastDate = $state.lastDate
+                    Date = (Convert-SEDBTime -date ($state.Date))
+                    LastDate = (Convert-SEDBTime -date ($state.lastDate))
                     Error = $state.state -or $state.forceFailed
                     Resolved = $state.resolved
                     SilencedUntil = $state.silencedUntil
