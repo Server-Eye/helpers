@@ -1,3 +1,4 @@
+#Requires -RunAsAdministrator
 <# 
     .SYNOPSIS
     Uninstall Server-Eye
