@@ -1,6 +1,6 @@
-﻿ #Requires -Version 5.0
- #Requires -Modules ServerEye.PowerShell.Helper
- <# 
+﻿#Requires -Version 5.0
+#Requires -Modules ServerEye.PowerShell.Helper
+<# 
     .SYNOPSIS
     Executes an user defined action based on the condition of a given agent.
 
@@ -18,26 +18,25 @@
 
  
 Param(
-    [Parameter(Mandatory=$true)] 
+    [Parameter(Mandatory = $true)] 
     $AuthToken,
 
-    [Parameter(Mandatory=$true)] 
+    [Parameter(Mandatory = $true)] 
     $SensorId
- )
+)
 
-Begin{
-     $AuthToken = Test-SEAuth -AuthToken $AuthToken
+Begin {
+    $AuthToken = Test-SEAuth -AuthToken $AuthToken
 }
 
 Process {
 
-    if($requirementsFullfilled){
-        try{
-            $sensorData = Get-SESensorState -AuthToken $apiKey -SensorId $SensorId
+    try {
+        $sensorData = Get-SESensorState -AuthToken $apiKey -SensorId $SensorId
      
-            if($sensorData.Error){
-                Write-Host "Sensor state is ERROR..executing user defined option"
-                 <# specify option you want to do! 
+        if ($sensorData.Error) {
+            Write-Host "Sensor state is ERROR..executing user defined option"
+            <# specify option you want to do! 
                      Examples are 
                      Stop-Service "Servicename"
                      Restart-Service "Servicename"
@@ -51,19 +50,20 @@ Process {
                      Anything you want to do
                  #>
      
-                Restart-Service wmiApSrv
-                $exitCode = 0
+            Restart-Service wmiApSrv
+            $exitCode = 0
     
-            }else{  
-                $exitCode = 0
-                Write-Host "Sensor state is OK"
-            }
+        }
+        else {  
+            $exitCode = 0
+            Write-Host "Sensor state is OK"
+        }
      
-        }catch{ 
-            Write-Error "Could not receive sensor state: $_."
-            $exitCode = -4             
-         }
-     }
+    }
+    catch { 
+        Write-Error "Could not receive sensor state: $_."
+        $exitCode = -4             
+    }
      
     exit $exitCode
- }
+}
