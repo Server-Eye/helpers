@@ -59,7 +59,7 @@ Process {
 
     if($requirementsFullfilled){
         try{
-            $sensorData = Get-SESensorState -AuthToken $apiKey -SensorId $agentID
+            $sensorData = Get-SESensorState -AuthToken $apiKey -SensorId $SensorId
      
             if($sensorData.Error){
                 Write-Host "Sensor state is ERROR..executing user defined option"
