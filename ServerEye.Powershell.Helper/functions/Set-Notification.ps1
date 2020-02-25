@@ -149,7 +149,7 @@ function SetNotificationofContainer {
         [Parameter(Mandatory=$true)]
         $authtoken
         )
-    $noti = Set-SeApiContainerNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -userId $userId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
+    $noti = Set-SeApiContainerNotification -AuthToken $authtoken -CId $SensorhubID -NId $NotificationId -userId $userId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
     $container = Get-SeApiContainer -AuthToken $authtoken -CId $SensorhubID
 
     $sensorhubName = ""
