@@ -70,7 +70,7 @@ function Set-Notification {
         if ($SensorId) {
             setNotificationofSensor -AuthToken $AuthToken -SensorID $SensorId -NotificationId $NotificationId -userid $userId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } elseif ($SensorhubId) {
-            SetNotificationofContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -NotificationId $NotificationId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
+            SetNotificationofContainer -AuthToken $AuthToken -SensorHubID $SensorhubId -NotificationId $NotificationId -userId $userId -SendEmail $SendEmail.IsPresent -SendTextmessage $SendTextmessage.IsPresent -SendTicket $SendTicket.IsPresent -deferid $deferid
         } else {
             Write-Error "Unsupported input"
         }
@@ -137,6 +137,8 @@ function SetNotificationofContainer {
         [Parameter(Mandatory=$true)]
         $NotificationId,
         [Parameter(Mandatory=$false)]
+        $userId,
+        [Parameter(Mandatory=$false)]
         $SendEmail,
         [Parameter(Mandatory=$false)]
         $SendTextmessage,
@@ -147,7 +149,7 @@ function SetNotificationofContainer {
         [Parameter(Mandatory=$true)]
         $authtoken
         )
-    $noti = Set-SeApiContainerNotification -AuthToken $authtoken -CId $SensorhubID -NId $NotificationId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
+    $noti = Set-SeApiContainerNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -userId $userId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
     $container = Get-SeApiContainer -AuthToken $authtoken -CId $SensorhubID
 
     $sensorhubName = ""
