@@ -26,13 +26,14 @@ Param(
 )
 
 Begin {
+    Connect-SESession -apikey $AuthToken
     $AuthToken = Test-SEAuth -AuthToken $AuthToken
 }
 
 Process {
 
     try {
-        $sensorData = Get-SESensorState -AuthToken $apiKey -SensorId $SensorId
+        $sensorData = Get-SESensorState -AuthToken $AuthToken -SensorId $SensorId
      
         if ($sensorData.Error) {
             Write-Host "Sensor state is ERROR..executing user defined option"
@@ -66,4 +67,7 @@ Process {
     }
      
     exit $exitCode
+}
+end{
+
 }
