@@ -1,19 +1,27 @@
 #Requires -Module ServerEye.PowerShell.helper
  <#
     .SYNOPSIS
-    Setzt die Einstellungen 
+    Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
     
     .DESCRIPTION
-    Outputs a list of all Agentypes in Server-Eye.
+     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
 
-    .PARAMETER path
-    Path to the file with the Pathes to whitelist
+    .PARAMETER CustomerId
+    ID des Kunden bei dem die Einstellungen geändert werden sollen.
+
+    .PARAMETER UpdateDelay
+    Tage für die Update Verzögerung.
+
+    .PARAMETER installDelay
+    Tage für die Installation
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
-    .LINK 
-    https://api.server-eye.de/docs/2/
+    .EXAMPLE 
+    # Shows a Sensorhub. 
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation"
+
 
 #>
 Param ( 
