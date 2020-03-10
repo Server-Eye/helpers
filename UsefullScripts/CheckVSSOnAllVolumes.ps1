@@ -70,14 +70,14 @@ if ((!$volumes)) {
     
     #Check if there are Shadow Copies in the last 24 Hours on all Volumes
     }elseif(!$shadow24){
-    $message = "No Shadows found in the last 24 Hours on all Volumes"
+    $message = "No Shadows found in the last $($OlderThan) Hours on all Volumes"
     $msg.AppendLine($message)
     $exitCode = 8
     $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
 
     #Check if there are Shadow Copies in the last 24 Hours on one Volumes
     }elseif($shadow24.count -ne $volumes.Count){
-        $message = "No Shadows found in the last 24 Hours on Volumes " + ($volumes | Where-Object {$shadow24.VolumeName -ne $_.DeviceID}).Driveletter
+        $message = "No Shadows found in the last $($OlderThan) Hours on Volumes " + ($volumes | Where-Object {$shadow24.VolumeName -ne $_.DeviceID}).Driveletter
         $msg.AppendLine($message)
         $exitCode = 9
         $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
@@ -85,7 +85,7 @@ if ((!$volumes)) {
 
         #All Volumes have Shadow Copies from the Last 24 Hours.
     }else{
-        $msg.AppendLine("Shadows found on all Volumes in the last 24 Hours.")
+        $msg.AppendLine("Shadows found on all Volumes in the last $($OlderThan) Hours.")
         $exitCode = 0
         $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::OK) 
     }
