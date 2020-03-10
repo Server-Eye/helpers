@@ -1,3 +1,4 @@
+#Requires -Module ServerEye.Powershell.Helper
 param (
     [Parameter(Mandatory=$true)][string]$ApiKey,
     [Parameter(Mandatory=$false)][string]$CustomerID
@@ -26,9 +27,6 @@ function status{
         Write-Progress -Activity $activity -PercentComplete $percentcomplete -status $status -id $id
     }
 }
-
-#install-module servereye.powershell.helper -Force
-Import-Module ServerEye.Powershell.Helper
 
 if (!$customerid){
     $customers = Get-SECustomer -AuthToken $apikey
