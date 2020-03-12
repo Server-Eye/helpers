@@ -42,7 +42,7 @@ $set = get-content $path
 
 #Region MainFuction
 #Alle Defender Sensoren suchen
-$defenders = Get-SECustomer | Get-SESensorhub -filter "NB-SF" | Get-SESensor -filter $sensortype
+$defenders = Get-SECustomer | Get-SESensorhub | Get-SESensor -filter $sensortype
 #endRegion MainFuction
 
 # Daten aus $path ergänzt durch | 
