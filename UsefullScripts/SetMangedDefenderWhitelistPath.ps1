@@ -34,6 +34,9 @@ $sensortype = "0000CBF2-63AA-4911-B26D-924C9FC7ABA6"
 
 #Region read external Variable
 #Check if Login is there
+if ($authtoken -is [string]) {
+    Connect-SESession -Apikey $AuthToken
+}
 $authtoken = test-seauth $authtoken
 
 #Get the Content of the Whitelist File
@@ -42,11 +45,11 @@ $set = get-content $path
 
 #Region MainFuction
 #Alle Defender Sensoren suchen
-$defenders = Get-SECustomer | Get-SESensorhub | Get-SESensor -filter $sensortype
+$defenders = Get-SECustomer -AuthToken $AuthToken | Get-SESensorhub -AuthToken $AuthToken | Get-SESensor -filter $sensortype -AuthToken $AuthToken
 #endRegion MainFuction
 
 # Daten aus $path ergänzt durch | 
 $sensorinput = [string]::Join('|,|', $set)
 foreach ($defender in $defenders) { 
-    Set-SESensorSetting -Key $einstellung -SensorId $defender.sensorid -Value $sensorinput
+    Set-SESensorSetting -Key $einstellung -SensorId $defender.sensorid -Value $sensorinput -AuthToken $AuthToken
 }
