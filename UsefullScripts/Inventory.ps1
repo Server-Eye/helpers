@@ -1,4 +1,6 @@
 #Requires -Module ServerEye.Powershell.Helper
+#Requires -Module importExcel
+
 param (
     [Parameter(Mandatory=$true)][string]$ApiKey,
     [Parameter(Mandatory=$false)][string]$CustomerID
