@@ -44,7 +44,7 @@ function New-Customer {
         $Email,
         [Parameter(Mandatory=$false)]
         $Phone,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory=$true)]
         [ValidateSet('en','de')]
         $Language,
         [Parameter(Mandatory=$false)]
