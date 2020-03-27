@@ -35,8 +35,8 @@ Param(
     [Parameter()]
     $AuthToken
 )
-
-$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
+$scriptDir = 'C:\Program Files (x86)\Server-Eye\service\934'
+#$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
 
 $pathToApi = $scriptDir + "\ServerEye.PowerShell.API.dll"
 $pathToJson = $scriptDir + "\Newtonsoft.Json.dll"
@@ -58,7 +58,32 @@ $now = Get-Date
 #region MainFuntion
 
 #Search for Customer
-$Customer = Get-SECustomer -Filter $CustomerName -AuthToken $AuthToken
+try {
+    $Customer = Get-SECustomer -Filter $CustomerName -AuthToken $AuthToken -ErrorAction Stop
+}
+catch {
+    if ($_.Exception.Response.StatusCode -eq "AUnauthorized") {
+        $msg.AppendLine("Unauthorized please review Login or APIKey")
+        $exitCode = 4
+        $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
+    }else{
+        $msg.AppendLine("Unknown Error: $($_.Exception)")
+        $exitCode = 4
+        $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
+    }
+
+}
+
+#endregion MainFuntion
+
+#region Output
+#api adding 
+$api.setMessage($msg)  
+
+#write our api stuff to the console. 
+Write-Host $api.toJson() 
+exit $exitCode
+#endregion Output
 
 #Check if Customer is found
 if ((!$Customer)) {
