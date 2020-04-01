@@ -1,10 +1,7 @@
 #Requires -Modules ServerEye.PowerShell.Helper
 <#
     .SYNOPSIS
-    Checks if Customer has more Sensor added 
-    
-    .DESCRIPTION
-    Checks if Customer exceed max Agent Count
+    The purpose of this script is to compare the given Customer Property with the Agent Count.
     
     .PARAMETER NameoftheCustomerProperty
     name of the Agent Count Property
@@ -14,12 +11,6 @@
 
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.    
-#>
-
-<#
-.SYNOPSIS
-  Name: CheckMaxSensorsforCustomer.ps1
-  The purpose of this script is to compare the given Customer Property with the Agent Count.
 #>
 <#
 <version>2</version>
