@@ -1,14 +1,4 @@
-# Check if module ServerEye Helper is installed, if not install it
-if (!(Get-Module -ListAvailable -Name "ServerEye.Powershell.Helper")) {
-    Write-Host "ServerEye PowerShell Module is not installed. Installing it..." -ForegroundColor Red
-    Install-Module "ServerEye.Powershell.Helper" -Scope CurrentUser -Force
-}
-
-# Check if module is loaded, if not load it
-if (!(Get-Module "ServerEye.Powershell.Helper")) {
-    Import-Module ServerEye.Powershell.Helper
-}
-
+#Requires -Module ServerEye.Powershell.helper
 try {
     # Check for existing session
     $AuthToken = Test-SEAuth -AuthToken $AuthToken
