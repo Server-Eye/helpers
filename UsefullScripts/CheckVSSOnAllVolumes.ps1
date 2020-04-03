@@ -33,10 +33,26 @@ $exitCode = -1
 
 #region MainFuntion
 #Get all ShadowCopies on the System
-$ShadowCopies = Get-CimInstance Win32_ShadowCopy
+try {
+    $ShadowCopies = Get-CimInstance Win32_ShadowCopy -ErrorAction Stop
+}
+catch {
+    $msg.AppendLine("Error getting Shadows: $($_)")
+    $exitCode = 10
+    $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
+}
+ne
 
 #Get all Volumes with Driveletter and form Drivetype 3 (Local Disk)
-$volumes = Get-CimInstance win32_volume | Where-Object {($_.DriveLetter -ne $null) -and ($_.DriveType -eq "3")}
+try {
+    $volumes = Get-CimInstance win32_volume | Where-Object {($_.DriveLetter -ne $null) -and ($_.DriveType -eq "3")} -ErrorAction Stop
+}
+catch {
+    $msg.AppendLine("Error getting volumes: $($_)")
+    $exitCode = 11
+    $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
+}
+
 
 #Check if there is a Volume to Use
 if ((!$volumes)) {
@@ -76,7 +92,7 @@ if ((!$volumes)) {
     $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
 
     #Check if there are Shadow Copies in the last 24 Hours on one Volumes
-    }elseif($shadow24.count -ne $volumes.Count){
+    }elseif(($shadow24 | Select-Object VolumeName -Unique).Count -ne $volumes.Count){
         $message = "No Shadows found in the last $($OlderThan) Hours on Volumes " + ($volumes | Where-Object {$shadow24.VolumeName -ne $_.DeviceID}).Driveletter
         $msg.AppendLine($message)
         $exitCode = 9
