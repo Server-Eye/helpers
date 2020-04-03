@@ -26,8 +26,7 @@ Param(
     [Parameter()]
     $AuthToken
 )
-$scriptDir = 'C:\Program Files (x86)\Server-Eye\service\934'
-#$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
+$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
 
 $pathToApi = $scriptDir + "\ServerEye.PowerShell.API.dll"
 $pathToJson = $scriptDir + "\Newtonsoft.Json.dll"
