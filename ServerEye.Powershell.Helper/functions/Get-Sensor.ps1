@@ -32,7 +32,7 @@ function Get-Sensor {
     )
 
     Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
         cacheSensorTypes -auth $AuthToken
     }
     
@@ -79,10 +79,7 @@ function cacheSensorTypes ($auth) {
 function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
     $agents = Get-SeApiContainerAgentList -AuthToken $auth -CId $sensorhubId 
     $sensorhub = Get-SESensorhub -SensorhubId $sensorhubId -AuthToken $auth
-
-
     foreach ($sensor in $agents) {
-        $count++
         if ((-not $filter) -or ($sensor.name -like $filter) -or ($sensor.subtype -like $filter)) {
             formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
         }
@@ -93,12 +90,10 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-SeApiAgent -AId $sensorId -AuthToken $auth
-
-    $sensorhub = Get-SESensorhub -SensorhubId $sensor.parentId -AuthToken $auth
-    
+    $sensorhub = Get-SESensorhub -SensorhubId $sensor.parentId -AuthToken $auth 
     $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
-    
     $type = $Global:SensorTypes.Get_Item($sensor.type)
+    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
     
     [PSCustomObject]@{
 
@@ -108,6 +103,7 @@ function getSensorById ($sensorId, $auth) {
         SensorId = $sensor.aId
         Interval = $sensor.interval
         Error = $state.state -or $state.forceFailed
+        HasNotification = $notification.hasNotification
         Sensorhub = $sensorhub.name
         'OCC-Connector' = $sensorhub.'OCC-Connector'
         Customer = $sensorhub.customer
@@ -117,19 +113,18 @@ function getSensorById ($sensorId, $auth) {
     
 }
 
-function formatSensor($sensor, $sensorhub, $auth) {
+function formatSensor($sensor, $sensorhub, $auth,$notification) {
     $sensorDetails = Get-SeApiAgent -AuthToken $auth -AId $sensor.id
-
     $type = $Global:SensorTypes.Get_Item($sensorDetails.type)
-
+    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.Id}
     [PSCustomObject]@{
-
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType
         SensorId = $sensor.Id
         Interval = $sensorDetails.interval
         Error = $sensor.state -or $sensor.forceFailed
+        HasNotification = $notification.hasNotification
         Sensorhub = $sensorhub.name
         'OCC-Connector' = $sensorhub.'OCC-Connector'
         Customer = $sensorhub.customer

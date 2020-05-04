@@ -66,10 +66,10 @@ function Get-Container {
         $container = Get-SeApiContainer -cId $containerid -AuthToken $AuthToken
 
         if ($container.type -eq 0) {
-            getOCCConnector -container $container
+            getOCCConnector -container $container -auth $AuthToken
         }
         if ($container.type -eq 2) {
-            getSensorhub -container $container
+            getSensorhub -container $container -auth $AuthToken
         }
   
 
@@ -80,21 +80,23 @@ function Get-Container {
     }
 }
 
-function getOCCConnector($container) {
+function getOCCConnector($container,$auth) {
     $customer = Get-SECustomer -customerId $container.customerId
+    $notification = Get-SeApiMyNodesList -Filter container -AuthToken $auth | Where-Object {$_.id -eq $container.cId}
 
     [PSCustomObject]@{
         Customer    = $customer.name
         Name        = $container.name
         ConnectorID = $container.cId
         MachineName = $container.machineName
+        HasNotification = $notification.hasNotification
     }
 }
 
 function getSensorhub($container, $auth) {
     $occConnector = Get-SEOCCConnector -ConnectorId $container.parentId
     $customer = Get-SECustomer -customerId $container.customerId
-
+    $notification = Get-SeApiMyNodesList -Filter container -AuthToken $auth | Where-Object {$_.id -eq $container.cId}
     [PSCustomObject]@{
         Name = $container.name
         IsServer = $container.isServer
@@ -102,6 +104,7 @@ function getSensorhub($container, $auth) {
         'OCC-Connector' = $occConnector.name
         Customer = $customer.name
         SensorhubId = $container.cId
+        HasNotification = $notification.hasNotification
         Hostname = $container.machineName
         OsName = $container.osName
         OsVersion = $container.osVersion
