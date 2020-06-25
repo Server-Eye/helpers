@@ -47,12 +47,13 @@
     
 #>
 function Get-Customer {
+    [OutputType("ServerEye.Customer")]
     [CmdletBinding(DefaultParameterSetName = 'byFilter')]
     Param(
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter', Position = 0)]
         [string]$Filter,
         [Parameter(Mandatory = $false, ParameterSetName = 'byCustomerId')]
-        [string]$CustomerId,
+        [guid]$CustomerId,
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
         [switch]$all,
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
@@ -62,43 +63,75 @@ function Get-Customer {
     )
     Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
+        if (!(Get-Typedata "ServerEye.Customer")) {
+            $SECustomerTypeData = @{
+                TypeName                  = "ServerEye.Customer"
+                DefaultDisplayPropertySet = "Name", "CustomerId", "CustomerNumber"
+    
+            }
+            Update-TypeData @SECustomerTypeData
+        }
+
     }
 
     Process {
         if ($all.IsPresent -eq $true) {
-            $customers = Get-SeApiCustomerList -AuthToken $AuthToken
-            foreach ($customer in $customers) {
+            $Listcustomers = Get-SeApiCustomerList -AuthToken $AuthToken
+            foreach ($ListCustomer in $ListCustomers) {
+                
                 [PSCustomObject]@{
-                    Name           = $customer.companyName
-                    CustomerId     = $customer.cId
-                    CustomerNumber = $customer.customerNumberExtern
+                    PSTypeName     = "ServerEye.Customer"
+                    Name           = $ListCustomer.companyName
+                    CustomerId     = $ListCustomer.cId
+                    CustomerNumber = $ListCustomer.customerNumberExtern
+                    Street         = $ListCustomer.street
+                    StreetNumber   = $ListCustomer.streetNumber
+                    ZipCode        = $ListCustomer.zipCode
+                    City           = $ListCustomer.city
+                    country        = $Listcustomer.country
                 }
             }
         }
-
         elseif ($CustomerId) {
-
-            $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
-            [PSCustomObject]@{
-                Name           = $customer.companyName
-                CustomerId     = $customer.cId
-                CustomerNumber = $customer.customerNumberExtern
-            }
-
+            Format-Customer -CustomerId $CustomerId -AuthToken $AuthToken
         }
         else {
-            $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
-            foreach ($customer in $customers) {
-    
-                if ((-not $Filter) -or ($customer.name -like $Filter)) {
-                    [PSCustomObject]@{
-                        Name           = $customer.name
-                        CustomerId     = $customer.id
-                        CustomerNumber = $customer.customerNumberExtern
-                    }
-                }
+            $Nodecustomers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
+            foreach ($Nodecustomer in $Nodecustomers) {
+                Format-Customer -CustomerId $Nodecustomer.id -AuthToken $AuthToken
             }
         }
     }
 }
 
+function Format-Customer {
+    param (
+        $CustomerId,
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
+        [alias("ApiKey", "Session")]
+        $AuthToken
+    )
+
+        $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
+    Write-Debug $customer
+    [PSCustomObject]@{
+        PSTypeName             = "ServerEye.Customer"
+        Name                   = $customer.companyName
+        CustomerId             = $customer.cId
+        CustomerNumber         = $customer.customerNumberExtern
+        customerNumberIntern   = $customer.customerNumberIntern
+        Street                 = $customer.street
+        StreetNumber           = $customer.streetNumber
+        ZipCode                = $customer.zipCode
+        City                   = $customer.city
+        country                = $customer.country
+        email                  = $customer.email
+        phone                  = $customer.phone
+        distributor            = $customer.distributor
+        distributorInformation = $customer.distributorInformation
+        customData             = $customer.customData
+        properties             = $customer.properties
+        licenses               = $customer.licenses
+    }
+
+}
