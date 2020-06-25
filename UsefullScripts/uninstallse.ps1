@@ -1,13 +1,20 @@
+#Requires -Version 5.0
 #Requires -RunAsAdministrator
+
 <# 
     .SYNOPSIS
     Uninstall Server-Eye
 
     .DESCRIPTION
-    This Script will Uninstall Server-Eye and deletes all Server-Eye Data form the System.
+    This Script will Uninstall Server-Eye and deletes all Server-Eye Data from the System.
 
     
 #>
+
+Param ( 
+    [Parameter()] 
+    [String]$Apikey 
+)
 
 $services = Get-Service -DisplayName Server-Eye* | Where-Object Status -EQ "Running"
 
@@ -17,13 +24,24 @@ if ($services) {
 
 
 if ((Test-Path "C:\Program Files (x86)\Server-Eye") -eq $true) {
-    Write-Host "Server-Eye is installed on the System"
+    $CId = (Get-Content 'C:\Program Files (x86)\Server-Eye\config\se3_cc.conf' | Select-String -Pattern "\bguid=\b").ToString().Replace("guid=","")
+    if ($Apikey) {
+        try {
+            Invoke-RestMethod -Uri "https://api.server-eye.de/2/container/$CId" -Method Delete -Headers @{"x-api-key"=$Apikey}
+            Write-Output "Sensorhub was removed" 
+        }
+        catch {
+            Write-Output "Error: $_"
+        }
+        
+    }
+    Write-Output "Server-Eye is installed on the System"
     $progs = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\*
     $sesetup = $progs | Where-Object { ($_.Displayname -eq "Server-Eye") -and ($_.QuietUninstallString -like '"C:\ProgramData\Package Cache\*\ServerEyeSetup.exe" /uninstall /quiet') }
     $sevendors = $progs | Where-Object { ($_.Displayname -eq "Server-Eye Vendor Package") }
     $seservereye = $progs | Where-Object { ($_.Displayname -eq "Server-Eye") }
     if ($sesetup) {
-        Write-Host "Performing uninstallation of Server-Eye via Setup"
+        Write-Output "Performing uninstallation of Server-Eye via Setup"
         Start-Process -FilePath $sesetup.BundleCachePath -Wait -ArgumentList "/uninstall /quiet"
         Remove-Item -Path "C:\ProgramData\ServerEye3" -Recurse
     }
@@ -39,14 +57,19 @@ if ((Test-Path "C:\Program Files (x86)\Server-Eye") -eq $true) {
     }
 }
 elseif (((Test-Path "C:\ProgramData\ServerEye3") -eq $true)) {
-    Write-Host "Server-Eye Data on the System, will be deleted."
+    if ($Apikey) {
+        try {
+            Invoke-RestMethod -Uri "https://api.server-eye.de/2/container/$CId" -Method Delete -Headers @{"x-api-key"=$Apikey}
+            Write-Output "Sensorhub was removed"
+        }
+        catch {
+            Write-Output "Error: $_"
+        }
+        
+    }    
+    Write-Output "Server-Eye Data on the System, will be deleted."
     Remove-Item -Path "C:\ProgramData\ServerEye3" -Recurse
 }
 else {
-    Write-Host "No Server-Eye Installation was found"
+    Write-Output "No Server-Eye Installation was found"
 }
-
-
-
-
-
