@@ -9,31 +9,51 @@
     .PARAMETER CustomerId
     ID des Kunden bei dem die Einstellungen geändert werden sollen.
 
+    .PARAMETER ViewfilterName
+    Name der Gruppe die geändert werden soll
+
     .PARAMETER UpdateDelay
     Tage für die Update Verzögerung.
 
     .PARAMETER installDelay
     Tage für die Installation
+
+    .PARAMETER categories
+    Kategorie die in einer Gruppe enthalten sein soll
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE 
-    # Shows a Sensorhub. 
     .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation"
+
+    .EXAMPLE 
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation" -categories MICROSOFT
+
+    .EXAMPLE 
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation" -ViewfilterName "Name einer Gruppe"
+
+    .EXAMPLE 
+    Get-SECustomer -AuthToken $authtoken| %{.\ChangeSUSettings.ps1 -AuthToken $authtoken -CustomerId $_.CustomerID -ViewfilterName "ThirdParty Server" -UpdateDelay 30 -installDelay 7}
 
 
 #>
 Param ( 
-    [Parameter()]
+    [Parameter(Mandatory = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken,
-    [parameter(ValueFromPipelineByPropertyName)]
+    [parameter(ValueFromPipelineByPropertyName,Mandatory = $true)]
     $CustomerId,
+    [Parameter(Mandatory = $false)]
+    $ViewfilterName,
+    [Parameter(Mandatory = $true)]
     [ValidateRange(0, 30)]
     $UpdateDelay,
+    [Parameter(Mandatory = $true)]
     [ValidateRange(1, 60)]
-    $installDelay
+    $installDelay,
+    [ValidateSet("DOT_NET_FRAMEWORK_3_5","DOT_NET_FRAMEWORK_4_0","DOT_NET_FRAMEWORK_4_5","DOT_NET_FRAMEWORK_4_6","DOT_NET_FRAMEWORK_4_7","ADOBE_AIR","ADOBE_FLASH_PLAYER","ADOBE_READER","ADOBE_SHOCKWAVE_PLAYER","CD_BURNER_XP","GOOGLE_CHROME","GPL_GHOSTSCRIPT","INTERNET_EXPLORER","IPHONE_CONFIGURATION_UTILITY","ITUNES","KEEPASS","LIBREOFFICE","MOZILLA_FIREFOX","MOZILLA_THUNDERBIRD","NOTEPAD_PLUS_PLUS","OFFICE_VIEWER","OPEN_OFFICE","OPERA","PDF_ARCHITECT","QUICKTIME","SILVER_LIGHT","SKYPE","VIRTUALBOX","VISUAL_C_PLUS_PLUS_REDISTRIBUTABLE","VLC","VMWARE_VSPHERE_CLIENT","WINDOWS_AIK","WINRAR","WINSCP","FILEZILLA","MICROSOFT")]
+    $categories
 )
 
 function Get-SEViewFilters {
@@ -70,8 +90,9 @@ function Get-SEViewFilterSettings {
     param (
         $AuthToken,
         $CustomerID,
-        $ViewFilterID
+        $ViewFilter
     )
+    $vi
     $GetCustomerViewFilterSettingURL = "https://pm.server-eye.de/patch/$($customerId)/viewFilter/$($ViewFilterID)/settings"
     if ($authtoken -is [string]) {
         try {
@@ -131,12 +152,24 @@ function Set-SEViewFilterSetting {
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
+if ($ViewfilterName) {
+    $Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID | Where-Object {$_.name -eq $ViewfilterName}
+}else {
+    $Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID
+}
 
-$Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID
 
 foreach ($Group in $Groups) {
-
+    Write-Debug "$categories before If"
+    if ($categories) {
+    Write-Debug "$categories in IF"
+    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilterID $Group.vfid | Where-Object {$_.categories.ID -contains $categories}
+    Write-Debug "$GroupSettings categories"
+    }else {
     $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilterID $Group.vfid
+    Write-Debug "$GroupSettings not categories"
+    }
+    
     foreach ($GroupSetting in $GroupSettings) {
 
         Set-SEViewFilterSetting -AuthToken $AuthToken -ViewFilterSetting $GroupSetting -UpdateDelay $UpdateDelay -installDelay $installDelay
