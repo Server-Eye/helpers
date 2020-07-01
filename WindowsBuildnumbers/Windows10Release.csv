@@ -1,4 +1,5 @@
 Version,Servicing option,Availability date,OS build,Latest revision date,End of service: Home; Pro; Pro Education; Pro for Workstations and IoT Core,End of service: Enterprise; Education and IoT Enterprise,Mainstream support end date,Extended support end date
+2004,Semi-Annual Channel,27.05.2020,19041.331,18.06.2020,14.12.2021,14.12.2021,,
 1909,Semi-Annual Channel,12.11.2019,18363.535,12.11.2019,11.05.2021,10.05.2022,,
 1903,Semi-Annual Channel,21.05.2019,18362.535,12.11.2019,08.12.2020,08.12.2020,,
 1809,Semi-Annual Channel or Targeted,28.03.2019,17763.914,12.11.2019,12.05.2020,11.05.2021,,
@@ -7,3 +8,4 @@ Version,Servicing option,Availability date,OS build,Latest revision date,End of 
 1809,Long-Term Servicing Channel (LTSC),13.11.2018,17763.914,10.12.2019,,,09.01.2024,09.01.2029
 1607,Long-Term Servicing Branch (LTSB),02.08.2016,14393.3384,10.12.2019,,,12.10.2021,13.10.2026
 1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,10240.18427,10.12.2019,,,13.10.2020,14.10.2025
+
