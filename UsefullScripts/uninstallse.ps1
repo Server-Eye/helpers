@@ -24,9 +24,9 @@ if ($services) {
 
 
 if ((Test-Path "C:\Program Files (x86)\Server-Eye") -eq $true) {
-    $CId = (Get-Content 'C:\Program Files (x86)\Server-Eye\config\se3_cc.conf' | Select-String -Pattern "\bguid=\b").ToString().Replace("guid=","")
     if ($Apikey) {
         try {
+            $CId = (Get-Content 'C:\Program Files (x86)\Server-Eye\config\se3_cc.conf' | Select-String -Pattern "\bguid=\b").ToString().Replace("guid=","")
             Invoke-RestMethod -Uri "https://api.server-eye.de/2/container/$CId" -Method Delete -Headers @{"x-api-key"=$Apikey}
             Write-Output "Sensorhub was removed" 
         }
@@ -59,6 +59,7 @@ if ((Test-Path "C:\Program Files (x86)\Server-Eye") -eq $true) {
 elseif (((Test-Path "C:\ProgramData\ServerEye3") -eq $true)) {
     if ($Apikey) {
         try {
+            $CId = (Get-Content 'C:\ProgramData\ServerEye3\se3_cc.conf'| Select-String -Pattern "\bguid=\b").ToString().Replace("guid=","")
             Invoke-RestMethod -Uri "https://api.server-eye.de/2/container/$CId" -Method Delete -Headers @{"x-api-key"=$Apikey}
             Write-Output "Sensorhub was removed"
         }
