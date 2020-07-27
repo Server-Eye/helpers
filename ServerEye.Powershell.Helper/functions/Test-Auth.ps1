@@ -5,8 +5,7 @@ function Test-Auth{
     if ($AuthToken) {
         return $AuthToken
     }elseif($Global:ServerEyeGlobalApiKey){
-        $AuthToken = $Global:ServerEyeGlobalApiKey
-        return $AuthToken
+        return $Global:ServerEyeGlobalApiKey
     } elseif ($Script:ServerEyeLocalSession) {
         return $Script:ServerEyeLocalSession
     } elseif ($Global:ServerEyeGlobalSession) {

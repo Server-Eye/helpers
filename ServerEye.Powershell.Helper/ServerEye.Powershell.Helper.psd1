@@ -12,7 +12,7 @@
     RootModule = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion = '2.15.0'
+    ModuleVersion = '2.15.1'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,15 +69,69 @@
     # NestedModules = @()
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport = 'Connect-Session', 'Disconnect-Session', "Get-Customer", "Get-Sensorhub", "Get-Sensor", 
-        "Get-Notification", "New-Notification", "Get-SensorSetting", "Set-SensorSetting", "Restart-Sensorhub", 
-        "Get-SensorState", "Test-Auth", "Get-CustomerManager", "Get-User", "Get-Dispatchtime", "Get-Agenttype",
-        "Set-Manager", "Remove-Notification","Get-Template","Remove-Manager", "Update-Helper","Get-CustomerProperties",
-        "Get-Installer", "Get-SensorInvoice","New-Customer","Get-Tag","Set-Sensortag","New-Group","Set-Notification","Get-OCCConnector",
-        "Get-CustomerSetting","Get-SensorhubProposal","Remove-Tag", "Set-Tag", "Get-Sensortag","Get-CustomerapiKey","Set-Template","Set-Sensor",
-        "Get-Note","New-Note","Remove-Note","Get-CustomerSecret","Get-Inventory","New-Sensor","Remove-Sensor","Get-Sensorhubtag","Get-Sensorcount",
-        "Set-CustomerSetting","Get-GroupMember","Convert-DBtime","Get-Container","Get-ContainerState","Get-SensorhubState","Remove-Container",
-        "Remove-Connector","Remove-Sensorhub","New-Tag","New-CustomerProperty","Get-ContainerInventory","Set-SensorState"
+    FunctionsToExport = 
+    'Connect-Session',
+    'Disconnect-Session',
+    "Get-Customer",
+    "Get-Sensorhub",
+    "Get-Sensor",
+    "Get-Notification",
+    "New-Notification",
+    "Get-SensorSetting",
+    "Set-SensorSetting",
+    "Restart-Sensorhub",
+    "Restart-OCCConnector",
+    "Restart-Container",
+    "Get-SensorState", 
+    "Test-Auth", 
+    "Get-CustomerManager", 
+    "Get-User", 
+    "Get-Dispatchtime",
+    "Get-Agenttype",
+    "Set-Manager", 
+    "Remove-Notification",
+    "Get-Template",
+    "Remove-Manager",
+    "Update-Helper",
+    "Get-CustomerProperties",
+    "Get-Installer", 
+    "Get-SensorInvoice",
+    "New-Customer",
+    "Get-Tag",
+    "Set-Sensortag",
+    "New-Group",
+    "Set-Notification",
+    "Get-OCCConnector",
+    "Get-CustomerSetting",
+    "Get-SensorhubProposal",
+    "Remove-Tag",
+    "Set-Tag",
+    "Get-Sensortag",
+    "Get-CustomerapiKey",
+    "Set-Template",
+    "Set-Sensor",
+    "Get-Note",
+    "New-Note",
+    "Remove-Note",
+    "Get-CustomerSecret",
+    "Get-Inventory",
+    "New-Sensor",
+    "Remove-Sensor",
+    "Get-Sensorhubtag",
+    "Get-Sensorcount",
+    "Set-CustomerSetting",
+    "Get-GroupMember",
+    "Convert-DBtime",
+    "Get-Container",
+    "Get-ContainerState",
+    "Get-SensorhubState",
+    "Remove-Container",
+    "Remove-Connector",
+    "Remove-Sensorhub",
+    "New-Tag",
+    "New-CustomerProperty",
+    "Get-ContainerInventory",
+    "Set-SensorState"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @()
