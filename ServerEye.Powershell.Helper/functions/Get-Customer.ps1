@@ -53,7 +53,7 @@ function Get-Customer {
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter', Position = 0)]
         [string]$Filter,
         [Parameter(Mandatory = $false, ParameterSetName = 'byCustomerId')]
-        [guid]$CustomerId,
+        [string]$CustomerId,
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
         [switch]$all,
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
@@ -113,8 +113,8 @@ function Format-Customer {
     )
 
         $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
-    Write-Debug $customer
-    [PSCustomObject]@{
+        Write-Debug $customer
+        [PSCustomObject]@{
         PSTypeName             = "ServerEye.Customer"
         Name                   = $customer.companyName
         CustomerId             = $customer.cId
