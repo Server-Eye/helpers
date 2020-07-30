@@ -54,10 +54,11 @@ function Get-Customer {
         [string]$Filter,
         [Parameter(Mandatory = $false, ParameterSetName = 'byCustomerId')]
         [string]$CustomerId,
-        [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'All')]
         [switch]$all,
         [Parameter(Mandatory = $false, ParameterSetName = 'byFilter')]
         [Parameter(ValueFromPipelineByPropertyName, Mandatory = $false, ParameterSetName = 'byCustomerId')]
+        [Parameter(Mandatory = $false, ParameterSetName = 'All')]
         [alias("ApiKey", "Session")]
         $AuthToken
     )
@@ -98,7 +99,9 @@ function Get-Customer {
         else {
             $Nodecustomers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
             foreach ($Nodecustomer in $Nodecustomers) {
+                if ((-not $Filter) -or ($Nodecustomer.name -like $Filter)) {
                 Format-Customer -CustomerId $Nodecustomer.id -AuthToken $AuthToken
+                }
             }
         }
     }
