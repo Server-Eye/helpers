@@ -13,12 +13,6 @@
 
     .PARAMETER NotificationId
     The id of the Notification that should be removed.
-
-    .PARAMETER Name
-    The Fullname (Prename and Surname) of the User in the Notification.
-
-    .PARAMETER Email
-    The Email of the User in the Notification.
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
@@ -34,12 +28,6 @@ function Remove-Notification {
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensorHub')]
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensor')]
         $NotificationId,
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensorHub')]
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensor')]
-        $Name,
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensorHub')]
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensor')]
-        $Email,
         [Parameter(Mandatory=$false,ParameterSetName='ofSensorHub')]
         [Parameter(Mandatory=$false,ParameterSetName='ofSensor')]
         $AuthToken
