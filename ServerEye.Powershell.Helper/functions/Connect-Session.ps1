@@ -26,20 +26,27 @@ https://api.server-eye.de/docs/2/
 
 #>
 function Connect-Session {
-    [CmdletBinding()]
+    [CmdletBinding(DefaultParameterSetName = "Credential")]
     Param(
-        [Parameter(Mandatory=$false)] 
-        $Apikey,
+        [Parameter(Mandatory = $true,
+            ParameterSetName = "APIKey",
+            HelpMessage = "A valid API key. If this is provided, any other parameter is ignored!")] 
+        [string]$Apikey,
 
-        [Parameter(Mandatory=$false)] 
-        $Credentials,
+        [Parameter(Mandatory = $false,
+            ParameterSetName = "Credential",
+            HelpMessage = "Email address and Password of the user to logincls.")] 
+        [pscredential] $Credentials = (Get-Credential -Message 'Server-Eye Login'),
 
-        [Parameter(Mandatory=$false)] 
+        [Parameter(Mandatory = $false,
+            ParameterSetName = "Credential",
+            HelpMessage = "If the user has two-factor enabled you have to send the 6-digit code during the auth process. The HTTP code 420 will tell you that two-factor is enabled.")] 
         [string] $Code,
 
-        [Parameter(Mandatory=$false)] 
-        [switch] $Persist
-        
+        [Parameter(Mandatory = $false,
+            ParameterSetName = "Credential",
+            HelpMessage = "This will store the session in the global variable ServerEyeGlobalSession.")] 
+        [switch] $Persist       
 
     )
 
@@ -48,38 +55,38 @@ function Connect-Session {
             $Global:ServerEyeGlobalApiKey = $Apikey
             Return
         }
-
-        if (-not $Credentials) {
-            $Credentials = Get-Credential -Message 'Server-Eye Login'
-        }
         $reqBody = @{
-            'email' = $Credentials.UserName
+            'email'    = $Credentials.UserName
             'password' = $Credentials.GetNetworkCredential().Password
-            'code' = $Code
+            'code'     = $Code
         } | ConvertTo-Json
         try {
             $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-            -ContentType "application/json" -Method Post -SessionVariable session
+                -ContentType "application/json" -Method Post -SessionVariable session
 
-        } catch {
+        }
+        catch {
             if ($_.Exception.Response.StatusCode.Value__ -eq 420) {
                 $secondFactor = Read-Host -Prompt "Second Factor"
                 if ($Persist) {
                     return Connect-Session -Credentials $Credentials -Code $secondFactor -Persist
-                } else {
+                }
+                else {
                     return Connect-Session -Credentials $Credentials -Code $secondFactor
                 }
-            } elseif($_.Exception.Response.StatusCode.Value__ -eq 401){
+            }
+            elseif ($_.Exception.Response.StatusCode.Value__ -eq 401) {
                 throw "Please check username or password."
                 return
-            }else {
+            }
+            else {
                 Write-Output $_
                 return
             }
         }
         if ($Persist) {
             Write-Output "The session has been stored in this Powershell. It will remain active until you close it!"
-            $Global:ServerEyeGlobalSession=$session
+            $Global:ServerEyeGlobalSession = $session
             return
         }
         return $session
