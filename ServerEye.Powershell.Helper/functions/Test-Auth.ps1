@@ -11,7 +11,7 @@ function Test-Auth{
     } elseif ($Global:ServerEyeGlobalSession) {
         return $Global:ServerEyeGlobalSession
     } else {
-        Write-Host -Message "Error: Cannot find a Server-Eye session to use. Please provide one with the CmdLet Connect-SESession." -ForegroundColor Red
+        throw "Cannot find a Server-Eye session to use. Please provide one with the CmdLet Connect-SESession."
     }
 
 }
