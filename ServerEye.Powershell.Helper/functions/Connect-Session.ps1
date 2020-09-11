@@ -35,8 +35,8 @@ function Connect-Session {
 
         [Parameter(Mandatory = $false,
             ParameterSetName = "Credential",
-            HelpMessage = "Email address and Password of the user to logincls.")] 
-        [pscredential] $Credentials = (Get-Credential -Message 'Server-Eye Login'),
+            HelpMessage = "Email address and Password of the user to login.")] 
+        [pscredential] $Credentials,
 
         [Parameter(Mandatory = $false,
             ParameterSetName = "Credential",
@@ -54,6 +54,9 @@ function Connect-Session {
         if ($Apikey) {
             $Global:ServerEyeGlobalApiKey = $Apikey
             Return
+        }
+        if (!$Credentials) {
+            $Credentials = Get-Credential -Message 'Server-Eye Login'
         }
         $reqBody = @{
             'email'    = $Credentials.UserName
