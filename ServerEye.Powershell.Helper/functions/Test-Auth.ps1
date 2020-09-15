@@ -1,16 +1,21 @@
-function Test-Auth{
+function Test-Auth {
     Param(
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
     if ($AuthToken) {
         return $AuthToken
-    }elseif($Global:ServerEyeGlobalApiKey){
+    }
+    elseif ($Global:ServerEyeGlobalApiKey) {
         return $Global:ServerEyeGlobalApiKey
-    } elseif ($Script:ServerEyeLocalSession) {
+    }
+    elseif ($Script:ServerEyeLocalSession) {
         return $Script:ServerEyeLocalSession
-    } elseif ($Global:ServerEyeGlobalSession) {
+    }
+    elseif ($Global:ServerEyeGlobalSession) {
         return $Global:ServerEyeGlobalSession
-    } else {
+    }
+    else {
         throw "Cannot find a Server-Eye session to use. Please provide one with the CmdLet Connect-SESession."
     }
 
