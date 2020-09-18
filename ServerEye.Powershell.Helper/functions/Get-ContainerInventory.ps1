@@ -42,7 +42,7 @@ function Get-ContainerInventory {
 
 function formatInvetoryOfContainer ($ContainerID, $AuthToken) {
     $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $ContainerID -Format json -ErrorAction SilentlyContinue
-    $Container = Get-SEContainer -containerid $ContainerID
+    $Container = Get-SEContainer -containerid $ContainerID -AuthToken $AuthToken
     if ($Container.ConnectorID) {
         [PSCustomObject]@{
             Customer        = $Container.Customer
