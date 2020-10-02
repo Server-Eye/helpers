@@ -49,7 +49,7 @@ function New-Sensor {
 
     Process {
              $newsensor = New-SeApiAgent -AuthToken $AuthToken -Type $typeID -ParentId $sensorhubid -Name $name
-             $sensor = Get-SESensor -SensorId $newsensor.aid
+             $sensor = Get-SESensor -SensorId $newsensor.aid -AuthToken $AuthToken
 
                 [PSCustomObject]@{
                     Name          = $sensor.Name

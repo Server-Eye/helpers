@@ -84,7 +84,7 @@ function Get-SensorState {
             HelpMessage = "The id of the agent/Sensor.")]
         [ValidateNotNullOrEmpty()]
         [Alias("aid")]
-        [guid]
+        [string]
         $SensorId,
 
         [parameter(Mandatory = $false,
@@ -153,7 +153,7 @@ function Get-SensorState {
 
         }
         Write-Debug "Get Sensor Information for ID:$($SensorId)"
-        $sensor = Get-SESensor -SensorID $SensorId
+        $sensor = Get-Sensor -SensorID $SensorId -AuthToken $AuthToken
         Write-Debug "Sensor: $sensor"
         
         foreach ($state in $states) {

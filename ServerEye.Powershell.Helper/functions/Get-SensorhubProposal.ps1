@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get a container's proposals.
 
@@ -11,12 +11,12 @@
 #>
 function Get-SensorhubProposal {
     Param(
-        [parameter(Mandatory=$true,ValueFromPipelineByPropertyName)]
+        [parameter(Mandatory = $true, ValueFromPipelineByPropertyName)]
         $SensorhubId,
         $AuthToken
     )
 
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
@@ -24,16 +24,16 @@ function Get-SensorhubProposal {
         $props = Get-SeApiContainerProposalList -AuthToken $authtoken -CId $SensorhubId
 
         foreach ($prop in $props) {
-            $sensorhub = Get-SESensorhub -SensorhubId $SensorhubId
-        [PSCustomObject]@{
-            Name = $prop.Name
-            ProposalID = $prop.pid 
-            forFree = $prop.forfree
-            Beta = $prop.Beta
-            Sensorhub = $sensorhub.Name
-            "OCC-Connector" = $sensorhub."OCC-Connector"
-            Customer = $sensorhub.Customer
-        }
+            $sensorhub = Get-SESensorhub -SensorhubId $SensorhubId -AuthToken $AuthToken
+            [PSCustomObject]@{
+                Name            = $prop.Name
+                ProposalID      = $prop.pid 
+                forFree         = $prop.forfree
+                Beta            = $prop.Beta
+                Sensorhub       = $sensorhub.Name
+                "OCC-Connector" = $sensorhub."OCC-Connector"
+                Customer        = $sensorhub.Customer
+            }
         }
     }
 

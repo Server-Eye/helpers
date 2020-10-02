@@ -100,7 +100,7 @@ function SetSettingByCustomer ($customerId, $auth, $tanssUrl, $defaultLanguage, 
    }
 
     $setting = Set-SeApiCustomerSetting -cId $customerId -AuthToken $auth -tanssUrl $tanssUrl -defaultLanguage $defaultLanguage -timezone $timezone
-    $Customer = Get-SECustomer -CustomerId $customerId
+    $Customer = Get-SECustomer -CustomerId $customerId -AuthToken $auth
 
     [PSCustomObject]@{
         CustomerId      = $setting.cid

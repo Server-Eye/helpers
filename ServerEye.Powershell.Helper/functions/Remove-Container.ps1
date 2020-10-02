@@ -31,7 +31,7 @@ function Remove-Container {
     
     Process {
         if ($ContainerID) {
-            $Container = Get-SEContainer -containerid $ContainerID
+            $Container = Get-SEContainer -containerid $ContainerID -AuthToken $AuthToken
             if ($Container.ConnectorID) {
                 removeConnector -Container $Container -AuthToken $AuthToken
             }

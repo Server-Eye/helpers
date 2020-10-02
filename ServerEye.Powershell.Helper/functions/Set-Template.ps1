@@ -36,7 +36,7 @@ function Set-Template {
                     Write-host "Please check the SensorhubID, its not in den Database."
                 }
                 if ($x[0].ErrorRecord.ErrorDetails.Message -match ('"message":"unauthorized","requiredRole":["architect"]"')) {
-                    Write-host "The User needs the Role Achritect."
+                    Write-host "The User needs the Role Achritect to set the template."
                 }
             }        
     }

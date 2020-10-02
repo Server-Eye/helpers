@@ -67,7 +67,7 @@ function Get-ContainerState {
     }
     
     Process {
-        $container = Get-SEContainer -containerid $containerid
+        $container = Get-SEContainer -containerid $containerid -authtoken $AuthToken
         
         if ($start -and $end) {
             $states = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -IncludeHints "true" -IncludeMessage "true" -Start ([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds() -End ([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds()
@@ -77,7 +77,6 @@ function Get-ContainerState {
         }
         foreach ($state in $states) {
             if ($container.ConnectorID) {
-                forea
                 formatOCCConnectorState -container $container -state $state
             }
             if ($container.SensorhubId) {
@@ -98,12 +97,12 @@ function formatOCCConnectorState($container, $state) {
         Name          = $container.name
         ConnectorID   = $container.ConnectorID
         StateId       = $state.sId
-        Date          = (Convert-SEDBTime -date ($state.Date))
-        LastDate      = (Convert-SEDBTime -date ($state.lastDate))
+        Date          = $state.Date
+        LastDate      = $state.lastDate
         Error         = $state.state -or $state.forceFailed
         Message       = $state.message
         Resolved      = $state.resolved
-        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else { (Convert-SEDBTime -date ($state.silencedUntil)) }
+        SilencedUntil = $state.silencedUntil
     }
 }
 function formatSensorhubState($container, $state) {
@@ -113,11 +112,11 @@ function formatSensorhubState($container, $state) {
         Connector     = $container."OCC-Connector"
         SensorhubID   = $container.SensorhubId
         StateId       = $state.sId
-        Date          = (Convert-SEDBTime -date ($state.Date))
-        LastDate      = (Convert-SEDBTime -date ($state.lastDate))
+        Date          = $state.Date
+        LastDate      = $state.lastDate
         Error         = $state.state -or $state.forceFailed
         Message       = $state.message
         Resolved      = $state.resolved
-        SilencedUntil = if (!$state.silencedUntil) { $state.silencedUntil }else { (Convert-SEDBTime -date ($state.silencedUntil)) }
+        SilencedUntil = $state.silencedUntil
     }
 }

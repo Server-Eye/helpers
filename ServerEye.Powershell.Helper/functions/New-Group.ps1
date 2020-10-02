@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Creates a new Group in the OCC.
     
@@ -17,26 +17,26 @@
 function New-Group {
     [CmdletBinding()]
     Param(
-        [Parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [Parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         [string]$CustomerId,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         [string]$Name,
         [Parameter()]
-        [alias("ApiKey","Session")]
+        [alias("ApiKey", "Session")]
         $AuthToken
     )
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
 
     Process {
-                $Group = New-SeApiGroup -AuthToken $AuthToken -customerId $CustomerId -name $Name
-                [PSCustomObject]@{
-                    Name = $Group.Surname
-                    GroupId = $Group.gid
-                    CustomerID = $Group.customerId
-                }
-            }
+        $Group = New-SeApiGroup -AuthToken $AuthToken -customerId $CustomerId -name $Name
+        [PSCustomObject]@{
+            Name       = $Group.Surname
+            GroupId    = $Group.gid
+            CustomerID = $Group.customerId
+        }
+    }
 }
 
 

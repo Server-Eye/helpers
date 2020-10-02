@@ -36,7 +36,7 @@ function Get-CustomerSecret {
     }
 
     Process {
-        $Customer = Get-SECustomer -CustomerId $CustomerId
+        $Customer = Get-SECustomer -CustomerId $CustomerId -AuthToken $AuthToken
         $Secret = Get-SeApiCustomerSecret -cid $CustomerId -AuthToken $AuthToken
         [PSCustomObject]@{
             Name           = $customer.Name

@@ -12,7 +12,7 @@
 $PSINIFilePAth = "C:\Windows\System32\GroupPolicy\Machine\Scripts"
 $PSINIFileName = "psscripts.ini"
 
-$PSINIRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0"
+$PSINIRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0\*"
 
 if (Test-Path ($PSINIFilePAth + "\" + $PSINIFileName)) {
     Write-Output "Remove PSINI File"

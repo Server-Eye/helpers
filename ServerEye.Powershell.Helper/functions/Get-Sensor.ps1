@@ -38,8 +38,10 @@ function Get-Sensor {
     
     Process {
         if ($SensorhubId) {
+            Write-Debug "SensorhubID will be used $SensorhubId"
             getSensorBySensorhub -sensorhubId $SensorhubId -filter $Filter -auth $AuthToken
         } elseif ($SensorId) {
+            Write-Debug "SensorID will be used $SensorId"
             getSensorById -sensorId $SensorId -auth $AuthToken
         } else {
             Write-Error "Please provide a SensorhubId or a SensorId."
@@ -94,9 +96,7 @@ function getSensorById ($sensorId, $auth) {
     $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
     $type = $Global:SensorTypes.Get_Item($sensor.type)
     $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
-    
     [PSCustomObject]@{
-
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType

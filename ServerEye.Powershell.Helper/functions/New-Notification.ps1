@@ -84,8 +84,8 @@ function NewNotificationofSensor {
 }
 
 function formatSensorNotificationNew($notiID, $Authtoken, $SensorId, $deferid){
-    $n = Get-SENotification -SensorId  $SensorId | Where-Object {$_.NotificationId -eq $notiID}
-    $sensor = Get-SESensor -SensorId $SensorId
+    $n = Get-SENotification -SensorId  $SensorId -AuthToken $AuthToken | Where-Object {$_.NotificationId -eq $notiID}
+    $sensor = Get-SESensor -SensorId $SensorId -AuthToken $AuthToken
     [PSCustomObject]@{
         Name = $n.Name
         Email = $n.email
@@ -154,7 +154,7 @@ function NewNotificationofContainer {
 }
 
 function formatContainerNotificationNew($notiID, $authoken, $SensorhubID, $deferId){
-    $n = Get-SENotification -SensorhubId $SensorhubId | Where-Object {$_.NotificationId -eq $notiID}
+    $n = Get-SENotification -SensorhubId $SensorhubId -AuthToken $authoken | Where-Object {$_.NotificationId -eq $notiID}
     [PSCustomObject]@{
         Name = $n.Name
         Email = $n.email

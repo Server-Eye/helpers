@@ -86,7 +86,7 @@ function Get-Sensorhub {
             getSensorhubByCustomer -customerId $CustomerId -filter $Filter -auth $AuthToken
         }
         elseif ($SensorhubId) {
-            Get-SEContainer -containerid $SensorhubId
+            Get-SEContainer -containerid $SensorhubId -AuthToken $AuthToken
         }
         else {
             Write-Error "Please provide a SensorhubId or a CustomerId."

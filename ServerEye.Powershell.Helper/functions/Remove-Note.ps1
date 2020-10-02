@@ -53,8 +53,8 @@ function Remove-Note {
 }
 
 function removeNotefromSensorhub ($SensorhubId, $NoteID, $auth) {
-    $Sensorhub = Get-SESensorhub -Sensorhubid $SensorhubId
-    $note = Get-SENote -SensorhubId $SensorhubId | Where-Object {$_.NoteId -eq $noteID}
+    $Sensorhub = Get-SESensorhub -Sensorhubid $SensorhubId -AuthToken $auth
+    $note = Get-SENote -SensorhubId $SensorhubId -AuthToken $auth | Where-Object {$_.NoteId -eq $noteID}
     Remove-SeApiContainerNote -AuthToken $auth -nid $NoteID -cid $SensorhubId
     [PSCustomObject]@{
         NoteID = $NoteID
@@ -70,8 +70,8 @@ function removeNotefromSensorhub ($SensorhubId, $NoteID, $auth) {
 }
 
 function removeNotefromSensor ($SensorID, $NoteID, $auth) {
-    $Sensor = Get-SESensor -SensorId $SensorID
-    $note = Get-SENote -SensorId $SensorID | Where-Object {$_.NoteId -eq $noteID}
+    $Sensor = Get-SESensor -SensorId $SensorID -AuthToken $auth
+    $note = Get-SENote -SensorId $SensorID -AuthToken $auth | Where-Object {$_.NoteId -eq $noteID}
     Remove-SeApiAgentNote -AuthToken $auth -nid $noteID -aid $SensorID
     [PSCustomObject]@{
         NoteID = $NoteID

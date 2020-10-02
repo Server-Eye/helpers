@@ -46,7 +46,7 @@ function New-CustomerProperty {
     }
     Process {
         $Property = New-SeApiCustomerProperty -AuthToken $AuthToken -cId $CustomerID -Key $Key -Value $Value
-        $customer = Get-SECustomer -CustomerId $CustomerID          
+        $customer = Get-SECustomer -CustomerId $CustomerID -AuthToken $AuthToken         
         [PSCustomObject]@{
             Name = $customer.Name
             CustomerId = $customer.CustomerId

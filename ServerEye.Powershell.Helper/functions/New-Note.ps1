@@ -69,8 +69,8 @@ function newNoteforSensor {
 }
 
 function formatSensorNoteNew($noteID, $Authtoken, $SensorID){
-    $n = Get-SENote -SensorId  $SensorId | Where-Object {$_.NoteID -eq $noteID}
-    $sensor = Get-SESensor -SensorId $SensorId
+    $n = Get-SENote -SensorId  $SensorId -AuthToken $Authtoken | Where-Object {$_.NoteID -eq $noteID}
+    $sensor = Get-SESensor -SensorId $SensorId -AuthToken $Authtoken
     [PSCustomObject]@{
         Message = $n.message
         PostedOn  = $n.PostedOn
@@ -105,7 +105,7 @@ function newNoteforContainer {
     $customerName = ""
     
     if ($container.type -eq "0") {
-        $customer = Get-SECustomer -CustomerId $container.customerId
+        $customer = Get-SECustomer -CustomerId $container.customerId -AuthToken $Authtoken
         $connectorName = $container.Name
         $connectorID = $container.cid 
         $customerName = $customer.Name
@@ -123,7 +123,7 @@ function newNoteforContainer {
 }
 
 function formatSensorhubNoteNew($noteID, $authoken, $containerID) {
-    $n = Get-SENote -containerID $containerID | Where-Object {$_.NoteId -eq $noteID}
+    $n = Get-SENote -containerID $containerID -AuthToken $authoken | Where-Object {$_.NoteId -eq $noteID}
     [PSCustomObject]@{
         Message = $n.message
         PostedOn  = $n.PostedOn
@@ -137,7 +137,7 @@ function formatSensorhubNoteNew($noteID, $authoken, $containerID) {
     }
 }
 function formatConnectorNoteNew($noteID, $authoken, $containerID) {
-    $n = Get-SENote -containerID $containerID | Where-Object {$_.NoteId -eq $noteID}
+    $n = Get-SENote -containerID $containerID -AuthToken $authoken | Where-Object {$_.NoteId -eq $noteID}
     [PSCustomObject]@{
         Message = $note.Message 
         PostedOn = $note.postedOn

@@ -70,7 +70,7 @@ function Get-OCCConnector {
         }
         elseif ($ConnectorId) {
 
-            Get-SEContainer -containerid $ConnectorId
+            Get-SEContainer -containerid $ConnectorId -AuthToken $AuthToken
 
         }
         else {
@@ -90,7 +90,7 @@ function getOCCConnectorByCustomer ($customerId, $filter, $auth) {
 
     foreach ($Connector in $containers) {
         if ((-not $filter) -or ($Connector.name -like $filter)) {
-            Get-SEContainer -containerid $Connector.id
+            Get-SEContainer -containerid $Connector.id -AuthToken $auth
         }
     }
 }

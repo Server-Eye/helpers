@@ -57,7 +57,7 @@ function Get-Inventory {
 
 function formatInvetoryBySensorhub ($SensorhubId, $auth) {
     $inventory = Get-SeApiContainerInventory -AuthToken $Auth -CId $SensorhubId -Format json -ErrorAction SilentlyContinue -ErrorVariable x
-    $sensorhub = Get-SESensorhub -SensorhubID $Sensorhubid
+    $sensorhub = Get-SESensorhub -SensorhubID $Sensorhubid -AuthToken $Auth
     [PSCustomObject]@{
         Customer        = $sensorhub.Customer
         "OCC Connector" = $sensorhub."OCC-Connector"

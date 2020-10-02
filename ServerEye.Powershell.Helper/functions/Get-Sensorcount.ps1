@@ -45,7 +45,7 @@
 function Get-Sensorcount {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory = $false, Position = 0,ValueFromPipelineByPropertyName)]
+        [Parameter(Mandatory = $true, Position = 0, ValueFromPipelineByPropertyName)]
         [string]$CustomerId,
         [Parameter(ValueFromPipelineByPropertyName)]
         [alias("ApiKey", "Session")]
@@ -56,20 +56,23 @@ function Get-Sensorcount {
     }
 
     Process {
-        $Customer = Get-SECustomer -CustomerId $CustomerId
-        $Sensors = Get-SESensorhub -CustomerId $CustomerId | Get-SESensor
+        $Customer = Get-SECustomer -CustomerId $CustomerId -AuthToken $AuthToken
+        $Sensors = Get-SeApiMyNodesList -Filter agent -AuthToken $AuthToken | Where-Object { $_.customerId -eq $CustomerId }
+
         if ((!$Sensors.Count) -and ($Sensors.Count -ne 0)) {
             $Count = 1
-        }else {
+        }
+        else {
             $Count = $Sensors.Count
         }
-
-            [PSCustomObject]@{
-                Customer = $Customer.Name
-                "Sensor Count" = $Count
-            }
+        [PSCustomObject]@{
+            Customer       = $Customer.Name
+            "Sensor Count" = $Count
         }
-    End{
+
+
+    }
+    End {
 
     }
 }

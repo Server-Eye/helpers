@@ -123,7 +123,7 @@ function Set-SensorState {
     Process {
         $state = New-SeApiAgentStateHint -AId $SensorId -SId $StateId -Author $author -HintType $hintType -Message $message -AssignedUser $assignedUser -MentionedUsers $mentionedUsers -Private ($private.ToString()).ToLower() -Until $until -AuthToken $AuthToken
         Write-Debug "New State: $state"
-        $sensor = Get-SESensor -SensorID $SensorId
+        $sensor = Get-SESensor -SensorID $SensorId -AuthToken $AuthToken
         Write-Debug "Sensor: $sensor"
 
         [PSCustomObject]@{

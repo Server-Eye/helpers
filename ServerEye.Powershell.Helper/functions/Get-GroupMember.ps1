@@ -50,7 +50,7 @@ function Get-GroupMember {
     
     Process {
         $users = Get-SeApiGroupUserList -AuthToken $AuthToken -gid $GroupID | Where-Object checked -eq $true
-        $Group = Get-SEUser | Where-Object UserID -EQ $GroupID
+        $Group = Get-SEUser -AuthToken $AuthToken | Where-Object UserID -EQ $GroupID
         if (!$users) {
             formatNoUser -user $User -group $Group
         }else {
