@@ -123,8 +123,16 @@ function Set-SEViewFilterSetting {
         $UpdateDelay,
         $installDelay
     )
-    $ViewFilterSetting.installWindowInDays = $installDelay
-    $ViewFilterSetting.delayInstallByDays = $UpdateDelay
+    if ($installDelay) {
+        $ViewFilterSetting.installWindowInDays = $installDelay
+    }else {
+        $ViewFilterSetting.installWindowInDays = $ViewFilterSetting.installWindowInDays
+    }
+    if ($UpdateDelay) {
+        $ViewFilterSetting.delayInstallByDays = $UpdateDelay
+    }else {
+        $ViewFilterSetting.delayInstallByDays = $ViewFilterSetting.delayInstallByDays
+    }
     $body = $ViewFilterSetting | Select-Object -Property installWindowInDays, delayInstallByDays, categories, downloadStrategy, maxScanAgeInDays, enableRebootNotify, maxRebootNotifyIntervalInHours | ConvertTo-Json
 
     $SetCustomerViewFilterSettingURL = "https://pm.server-eye.de/patch/$($ViewFilterSetting.customerId)/viewFilter/$($ViewFilterSetting.vfId)/settings"
