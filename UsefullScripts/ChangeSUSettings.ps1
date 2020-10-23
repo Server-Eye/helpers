@@ -46,13 +46,14 @@ Param (
     $CustomerId,
     [Parameter(Mandatory = $false)]
     $ViewfilterName,
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [ValidateRange(0, 30)]
     $UpdateDelay,
-    [Parameter(Mandatory = $true)]
+    [Parameter(Mandatory = $false)]
     [ValidateRange(1, 60)]
     $installDelay,
-    [ValidateSet("DOT_NET_FRAMEWORK_3_5","DOT_NET_FRAMEWORK_4_0","DOT_NET_FRAMEWORK_4_5","DOT_NET_FRAMEWORK_4_6","DOT_NET_FRAMEWORK_4_7","ADOBE_AIR","ADOBE_FLASH_PLAYER","ADOBE_READER","ADOBE_SHOCKWAVE_PLAYER","CD_BURNER_XP","GOOGLE_CHROME","GPL_GHOSTSCRIPT","INTERNET_EXPLORER","IPHONE_CONFIGURATION_UTILITY","ITUNES","KEEPASS","LIBREOFFICE","MOZILLA_FIREFOX","MOZILLA_THUNDERBIRD","NOTEPAD_PLUS_PLUS","OFFICE_VIEWER","OPEN_OFFICE","OPERA","PDF_ARCHITECT","QUICKTIME","SILVER_LIGHT","SKYPE","VIRTUALBOX","VISUAL_C_PLUS_PLUS_REDISTRIBUTABLE","VLC","VMWARE_VSPHERE_CLIENT","WINDOWS_AIK","WINRAR","WINSCP","FILEZILLA","MICROSOFT")]
+    [Parameter(Mandatory = $false)]
+    [ValidateSet("DOT_NET_FRAMEWORK_3_5","DOT_NET_FRAMEWORK_4_0","DOT_NET_FRAMEWORK_4_5","DOT_NET_FRAMEWORK_4_6","DOT_NET_FRAMEWORK_4_7","ADOBE_AIR","ADOBE_FLASH_PLAYER","ADOBE_READER","ADOBE_SHOCKWAVE_PLAYER","CD_BURNER_XP","GOOGLE_CHROME","GPL_GHOSTSCRIPT","INTERNET_EXPLORER","IPHONE_CONFIGURATION_UTILITY","ITUNES","KEEPASS","LIBREOFFICE","MOZILLA_FIREFOX","MOZILLA_THUNDERBIRD","NOTEPAD_PLUS_PLUS","OFFICE_VIEWER","OPEN_OFFICE","OPERA","PDF_ARCHITECT","QUICKTIME","SILVER_LIGHT","SKYPE","VIRTUALBOX","VISUAL_C_PLUS_PLUS_REDISTRIBUTABLE","VLC","VMWARE_VSPHERE_CLIENT","WINDOWS_AIK","WINRAR","WINSCP","FILEZILLA","MICROSOFT","MICROSOFT_PRODUCT")]
     $categories
 )
 
@@ -65,18 +66,20 @@ function Get-SEViewFilters {
 
     if ($authtoken -is [string]) {
         try {
-            $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -Headers @{"x-api-key" = $authtoken }
-            return $ViewFilters
+            $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -Headers @{"x-api-key" = $authtoken } | Where-Object {$_.vfId -ne "all"}
+            $ViewFilters = $ViewFilters | Where-Object {$_.vfId -ne "all"}
+            return $ViewFilters 
         }
         catch {
             Write-Error "$_"
         }
-    
+
     }
     else {
         try {
             $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -WebSession $authtoken
-            return $ViewFilters
+            $ViewFilters = $ViewFilters | Where-Object {$_.vfId -ne "all"}
+            return $ViewFilters 
 
 
         }
@@ -92,8 +95,7 @@ function Get-SEViewFilterSettings {
         $CustomerID,
         $ViewFilter
     )
-    $vi
-    $GetCustomerViewFilterSettingURL = "https://pm.server-eye.de/patch/$($customerId)/viewFilter/$($ViewFilterID)/settings"
+    $GetCustomerViewFilterSettingURL = "https://pm.server-eye.de/patch/$($customerId)/viewFilter/$($ViewFilter.vfId)/settings"
     if ($authtoken -is [string]) {
         try {
             $ViewFilterSettings = Invoke-RestMethod -Uri $GetCustomerViewFilterSettingURL -Method Get -Headers @{"x-api-key" = $authtoken }
@@ -171,10 +173,10 @@ foreach ($Group in $Groups) {
     Write-Debug "$categories before If"
     if ($categories) {
     Write-Debug "$categories in IF"
-    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilterID $Group.vfid | Where-Object {$_.categories.ID -contains $categories}
+    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group | Where-Object {$_.categories.ID -contains $categories}
     Write-Debug "$GroupSettings categories"
     }else {
-    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilterID $Group.vfid
+    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group
     Write-Debug "$GroupSettings not categories"
     }
     
@@ -184,12 +186,3 @@ foreach ($Group in $Groups) {
   
     }
 }
-    
-
-
-
-
-
-
-
-
