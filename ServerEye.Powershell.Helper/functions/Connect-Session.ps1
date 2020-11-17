@@ -65,7 +65,7 @@ function Connect-Session {
         } | ConvertTo-Json
         try {
             $res = Invoke-WebRequest -Uri https://api.server-eye.de/2/auth/login -Body $reqBody `
-                -ContentType "application/json" -Method Post -SessionVariable session
+                -ContentType "application/json" -Method Post -SessionVariable session -UseBasicParsing
 
         }
         catch {

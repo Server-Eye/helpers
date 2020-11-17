@@ -58,6 +58,7 @@ function Get-DuplicatedSensorhub {
     Process {
         $customer = Get-SeApiCustomer -cId $CustomerId -AuthToken $AuthToken
         $Sensorhubs = Get-SeApiCustomerContainerList -AuthToken $AuthToken -cid $CustomerID | Where-Object { $_.subtype -eq 2 }
+        #Add check for no Sensorhubs
         $array = $Sensorhubs | Select-Object -Unique -Property Name
         $duplicates = Compare-Object -ReferenceObject $array -DifferenceObject $Sensorhubs -Property Name
         $sensorhubDup = $Sensorhubs | Where-Object { $_.Name -in $duplicates.Name }
