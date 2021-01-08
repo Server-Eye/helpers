@@ -1,4 +1,5 @@
-﻿<# 
+﻿#Requires -PSEdition Desktop
+<# 
     .SYNOPSIS
     Uninstall Avira Antivirus and the Avira Launcher.
 
@@ -33,7 +34,7 @@ Begin {
     $ExitCode = 0   
     # 0 = everything is ok
     #region Register Eventlog Source
-    try { New-EventLog -Source "Server-Eye-ManagedAntivirus" -LogName "Application" -ErrorAction Stop | Out-Null }
+    try { New-EventLog -Source "Server-EyeManagedAntivirus" -LogName "Application" -ErrorAction Stop | Out-Null }
     catch { }
     #endregion Register Eventlog Source
     Checkpoint-Computer -Description "Pre Server-Eye MAV Uninstall" -RestorePointType "APPLICATION_UNINSTALL"
@@ -85,20 +86,12 @@ Process {
                     }
                 
                 
-                }
-                catch {
-                    Write-Host "Something went wrong"
-                    Write-Host $_ # This prints the actual error
-                    Write-EventLog -LogName "Application" -Source "Server-Eye-ManagedAntivirus" -EventID 3002 -EntryType Error -Message "Something went wrong $_ "
-                    $ExitCode = 2 
-                }
-            
-            }
-            catch {
+                }            
+            }catch {
                 Write-Host "Something went wrong"
                 Write-Host $_ # This prints the actual error
                 Write-EventLog -LogName "Application" -Source "Server-Eye-ManagedAntivirus" -EventID 3002 -EntryType Error -Message "Something went wrong $_ "
-                $ExitCode = 1 
+                $ExitCode = 2 
             }
 
         }
