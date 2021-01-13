@@ -222,7 +222,7 @@ Process {
                 $avira = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object { ($_.Displayname -eq "Avira") -and ($_.QuietUninstallString -like '"C:\ProgramData\Package Cache\*\Avira.OE.Setup.Bundle.exe" /uninstall /quiet') }
                 Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Performing uninstallation of Avira Launcher"
                 Start-Process -FilePath $avira.BundleCachePath -Wait -ArgumentList "/uninstall /quiet" -ErrorAction Stop
-                Write-Log-Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Performing uninstallation of Avira Antivirus"
+                Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Performing uninstallation of Avira Antivirus"
                 Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Uninstallation of Avira successful."
                 $ExitCode = 1
        
