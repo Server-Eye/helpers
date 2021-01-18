@@ -26,6 +26,9 @@ function Get-Sensor {
         $SensorhubId,
         [parameter(ValueFromPipelineByPropertyName,ParameterSetName="bySensor")]
         $SensorId,
+        [parameter(Mandatory=$false,ValueFromPipelineByPropertyName,ParameterSetName="bySensor")]
+        [parameter(Mandatory=$false,ValueFromPipelineByPropertyName,ParameterSetName="bySensorhub")]
+        [switch]$ShowFree,
         [Parameter(Mandatory=$false,ParameterSetName="bySensor")]
         [Parameter(Mandatory=$false,ParameterSetName="bySensorhub")]
         $AuthToken
@@ -64,16 +67,19 @@ function cacheSensorTypes ($auth) {
     $avType = New-Object System.Object
     $avType | Add-Member -type NoteProperty -name agentType -value "72AC0BFD-0B0C-450C-92EB-354334B4DAAB"
     $avType | Add-Member -type NoteProperty -name defaultName -value "Managed Antivirus"
+    $avType | Add-Member -type NoteProperty -name forFree -value $true
     $Global:SensorTypes.add($avType.agentType, $avType)
 
     $pmType = New-Object System.Object
     $pmType | Add-Member -type NoteProperty -name agentType -value "9537CBB5-9023-4248-AFF3-F1ACCC0CE7A4"
     $pmType | Add-Member -type NoteProperty -name defaultName -value "Patchmanagement"
+    $pmType | Add-Member -type NoteProperty -name forFree -value $true
     $Global:SensorTypes.add($pmType.agentType, $pmType)
 
     $suType = New-Object System.Object
     $suType | Add-Member -type NoteProperty -name agentType -value "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"
     $suType | Add-Member -type NoteProperty -name defaultName -value "Smart Updates"
+    $suType | Add-Member -type NoteProperty -name forFree -value $true
     $Global:SensorTypes.add($suType.agentType, $suType)
     
 }
@@ -89,14 +95,13 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 
 
 }
-
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-SeApiAgent -AId $sensorId -AuthToken $auth
     $sensorhub = Get-SESensorhub -SensorhubId $sensor.parentId -AuthToken $auth 
     $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
     $type = $Global:SensorTypes.Get_Item($sensor.type)
     $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
-    [PSCustomObject]@{
+    $SESensor = [PSCustomObject]@{
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType
@@ -109,15 +114,17 @@ function getSensorById ($sensorId, $auth) {
         Customer = $sensorhub.customer
         Message = $state.message
     }
-
-    
+    if ($ShowFree) {
+        Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
+    }
+    Return $SESensor
+  
 }
-
 function formatSensor($sensor, $sensorhub, $auth,$notification) {
     $sensorDetails = Get-SeApiAgent -AuthToken $auth -AId $sensor.id
     $type = $Global:SensorTypes.Get_Item($sensorDetails.type)
     $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.Id}
-    [PSCustomObject]@{
+    $SESensor = [PSCustomObject]@{
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType
@@ -130,4 +137,8 @@ function formatSensor($sensor, $sensorhub, $auth,$notification) {
         Customer = $sensorhub.customer
         Message = $sensor.message
     }
+    if ($ShowFree) {
+        Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
+    }
+    Return $SESensor
 }

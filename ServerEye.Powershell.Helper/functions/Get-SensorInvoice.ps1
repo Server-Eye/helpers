@@ -29,7 +29,6 @@ function Get-SensorInvoice{
     )
 
     Begin{
-        Update-SEHelper
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
         Write-Warning "The count for server and workstation is evaluated now. It has no relation to the Month and Year given."
     }
@@ -51,6 +50,7 @@ function Get-SensorInvoice{
                 Subtotal = $usageCustomer.subtotal
                 Antivirus = $usageCustomer.antivir
                 Patchmanagement = $usageCustomer.patch
+                Smartupdates = $usageCustomer.Smartupdates
                 Remotecontrol = $usageCustomer.pcvisit
                 'Free Sensors' = $usageCustomer.free
                 Total = $usageCustomer.total
