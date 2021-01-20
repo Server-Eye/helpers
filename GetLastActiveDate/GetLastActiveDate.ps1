@@ -48,7 +48,7 @@ foreach ($customer in $customers) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
-        $time = Convert-SEDBTime -date $container.lastDate
+        $time = $container.lastDate
         $tsp = New-TimeSpan -start $time -End $now
 
         If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {

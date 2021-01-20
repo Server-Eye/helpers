@@ -50,7 +50,7 @@ foreach ($customer in $customers) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
-        $time = Convert-SEDBTime -date $container.lastDate
+        $time = $container.lastDate
         $tsp = New-TimeSpan -start $time -End $now
 
         Write-Debug $container
