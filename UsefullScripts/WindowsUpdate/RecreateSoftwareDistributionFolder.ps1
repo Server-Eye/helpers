@@ -36,8 +36,14 @@ Process {
             Write-Verbose "Stopping Windows Update Service"
             Stop-Service -ServiceName $wuauserv 
         }
-        Write-Verbose "Renaming SoftwareDistribution Folder to SoftwareDistribution_old"
-        Rename-Item -Path "C:\Windows\SoftwareDistribution" -NewName "C:\Windows\SoftwareDistribution_old"
+        Write-Output "Renaming SoftwareDistribution Folder to SoftwareDistribution_old"
+        if (Test-Path "C:\Windows\SoftwareDistribution_old") {
+            Write-Output "SoftwareDistribution_old Folder already existed, will delete it"
+            Remove-Item -Path "C:\Windows\SoftwareDistribution_old"
+            Rename-Item -Path "C:\Windows\SoftwareDistribution" -NewName "C:\Windows\SoftwareDistribution_old"
+        }else {
+        Rename-Item -Path "C:\Windows\SoftwareDistribution" -NewName "C:\Windows\SoftwareDistribution_old"   
+        }
         Write-Verbose "Starting Windows Update Service"
         Start-Service -ServiceName $wuauserv
 
