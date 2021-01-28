@@ -1,6 +1,12 @@
 # NewSensorhubsLastXDays.ps1
 
 Get a Excel File of all created Sensorhub and OCC-Connector in the last x Days.
+Required Modules "ServerEye.PowerShell.Helper" and "importexcel"
+
+Install in an elevated PowerShell:
+```powershell
+Install-Module -Name "ServerEye.powershell.helper","importexcel" -Scope AllUsers
+```
 
 ## Call
 ```powershell
