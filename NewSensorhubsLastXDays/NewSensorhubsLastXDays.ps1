@@ -2,10 +2,10 @@
 #Requires -Modules importexcel
 <# 
     .SYNOPSIS
-    Get a List of all created Sensorhub and OCC-Connector in the last x Days.
+    Get a Excel File of all created Sensorhub and OCC-Connector in the last x Days.
 
     .DESCRIPTION
-    Get a List of all created Sensorhub and OCC-Connector in the last x Days.
+    Get a Excel File of all created Sensorhub and OCC-Connector in the last x Days.
     Required Modules "ServerEye.PowerShell.Helper" and "importexcel"
     Install in an elevated PowerShell:
     Install-Module -Name "ServerEye.powershell.helper","importexcel" -Scope AllUsers

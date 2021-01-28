@@ -1,6 +1,6 @@
 # NewSensorhubsLastXDays.ps1
 
-Creates an excel file with a report of all Avira Sensors with status "Still not initialized" for all customers
+Get a Excel File of all created Sensorhub and OCC-Connector in the last x Days.
 
 ## Call
 ```powershell
