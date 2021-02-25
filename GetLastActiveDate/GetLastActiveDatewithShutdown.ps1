@@ -36,7 +36,8 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
 
 
 
-$messageen = "Connection available"
+$messageen = "CONNECTED"
+$messageen2 = "Connection available"
 $messagede = "Verbindung vorhanden"
 $shutdownde = "Dienst oder Server wurde heruntergefahren."
 $shutdownen = ""
@@ -56,7 +57,7 @@ foreach ($customer in $customers) {
         Write-Debug $container
 
 
-        If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messagede) {
+        If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede) {
             [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $container.name
@@ -74,7 +75,7 @@ foreach ($customer in $customers) {
                 Message       = "Last Message: " + $container.message
             }
         }     
-        If ($container.subtype -eq "2" -and $container.message -ne $messageen -and $container.message -ne $messagede) {
+        If ($container.subtype -eq "2" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede) {
             $occ = ""
             $occ = Get-SeApiContainer -AuthToken $AuthToken -CId $container.parentId
             [PSCustomObject]@{

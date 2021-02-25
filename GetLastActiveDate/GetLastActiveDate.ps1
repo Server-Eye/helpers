@@ -34,7 +34,8 @@ if (!(Get-Module "ServerEye.Powershell.Helper")) {
     Import-Module ServerEye.Powershell.Helper
 }
 
-$messageen = "Connection available"
+$messageen = "CONNECTED"
+$messageen2 = "Connection available"
 $messagede = "Verbindung vorhanden"
 $shutdownde = "Dienst oder Server wurde heruntergefahren."
 $shutdownen = ""
@@ -51,13 +52,14 @@ foreach ($customer in $customers) {
         $time = $container.lastDate
         $tsp = New-TimeSpan -start $time -End $now
 
-        If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
+        If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
             [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $container.name
                 System        = "OCC-Connector"
+                ID = $container.ID
                 "Last Active" = $time
-                Message       = "Last Message: " + $container.message
+                Message       = $container.message
             }
         }
         if ($container.subtype -eq "0" -and $tsp.TotalDays -gt $LastActiveDays -and $container.message -ne $shutdownde){
@@ -65,19 +67,21 @@ foreach ($customer in $customers) {
                 Customer      = $customer.name
                 Network       = $container.name
                 System        = "OCC-Connector"
+                ID = $container.ID
                 "Last Active" = $time
-                Message       = "Last Message: " + $container.message
+                Message       =  $container.message
             }
         }     
-        If ($container.subtype -eq "2" -and $container.message -ne $messageen -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
+        If ($container.subtype -eq "2" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
             $occ = ""
             $occ = Get-SeApiContainer -AuthToken $AuthToken -CId $container.parentId
             [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $occ.name
                 System        = $container.name
+                ID = $container.ID
                 "Last Active" = $time
-                Message       = "Last Message: " + $container.message
+                Message       = $container.message
             } 
         }      
         If ($container.subtype -eq "2" -and $tsp.TotalDays -gt $LastActiveDays  -and $container.message -ne $shutdownde) {
@@ -87,8 +91,9 @@ foreach ($customer in $customers) {
                 Customer      = $customer.name
                 Network       = $occ.name
                 System        = $container.name
+                ID = $container.ID
                 "Last Active" = $time
-                Message       = "Last Message: " + $container.message
+                Message       = $container.message
             } 
         }                            
     }
