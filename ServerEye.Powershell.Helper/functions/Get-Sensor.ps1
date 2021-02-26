@@ -121,15 +121,14 @@ function getSensorById ($sensorId, $auth) {
   
 }
 function formatSensor($sensor, $sensorhub, $auth,$notification) {
-    $sensorDetails = Get-SeApiAgent -AuthToken $auth -AId $sensor.id
-    $type = $Global:SensorTypes.Get_Item($sensorDetails.type)
-    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.Id}
+    $type = $Global:SensorTypes.Get_Item($sensor.type)
+    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
     $SESensor = [PSCustomObject]@{
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType
         SensorId = $sensor.Id
-        Interval = $sensorDetails.interval
+        Interval = $sensor.interval
         Error = $sensor.state -or $sensor.forceFailed
         HasNotification = $notification.hasNotification
         Sensorhub = $sensorhub.name
