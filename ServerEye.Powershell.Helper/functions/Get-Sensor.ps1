@@ -37,6 +37,7 @@ function Get-Sensor {
     Begin{
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
         cacheSensorTypes -auth $AuthToken
+        $agentList = Get-SeApiMyNodesList -Filter agent -AuthToken $AuthToken
     }
     
     Process {
@@ -89,7 +90,7 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
     $sensorhub = Get-SESensorhub -SensorhubId $sensorhubId -AuthToken $auth
     foreach ($sensor in $agents) {
         if ((-not $filter) -or ($sensor.name -like $filter) -or ($sensor.subtype -like $filter)) {
-            formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub
+            formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub -agentList $agentList
         }
     }
 
@@ -98,43 +99,24 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-SeApiAgent -AId $sensorId -AuthToken $auth
     $sensorhub = Get-SESensorhub -SensorhubId $sensor.parentId -AuthToken $auth 
-    $state = Get-SeApiAgentStateList -AId $sensorId -AuthToken $auth -IncludeMessage "true" -Format plain
+    formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub -agentList $agentList
+}
+function formatSensor($sensor, $sensorhub,$agentlist, $auth) {
     $type = $Global:SensorTypes.Get_Item($sensor.type)
-    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
+    $state = Get-SeApiAgentStateListbulk -AId $sensor.aId -AuthToken $authtoken
+    $notification = $agentList | Where-Object {$_.id -eq $sensor.aId}
     $SESensor = [PSCustomObject]@{
         Name = $sensor.name
         SensorType = $type.defaultName
         SensorTypeID = $type.agentType
         SensorId = $sensor.aId
         Interval = $sensor.interval
-        Error = $state.state -or $state.forceFailed
-        HasNotification = $notification.hasNotification
+        Error = $sensor.state -or $sensor.forceFailed
+        HasNotification = If(!$notification){"Your are not a Manager of this customer, so we can't show that."}else{$notification.hasNotification}
         Sensorhub = $sensorhub.name
         'OCC-Connector' = $sensorhub.'OCC-Connector'
         Customer = $sensorhub.customer
         Message = $state.message
-    }
-    if ($ShowFree) {
-        Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
-    }
-    Return $SESensor
-  
-}
-function formatSensor($sensor, $sensorhub, $auth,$notification) {
-    $type = $Global:SensorTypes.Get_Item($sensor.type)
-    $notification = Get-SeApiMyNodesList -Filter agent -AuthToken $auth | Where-Object {$_.id -eq $sensor.aId}
-    $SESensor = [PSCustomObject]@{
-        Name = $sensor.name
-        SensorType = $type.defaultName
-        SensorTypeID = $type.agentType
-        SensorId = $sensor.Id
-        Interval = $sensor.interval
-        Error = $sensor.state -or $sensor.forceFailed
-        HasNotification = $notification.hasNotification
-        Sensorhub = $sensorhub.name
-        'OCC-Connector' = $sensorhub.'OCC-Connector'
-        Customer = $sensorhub.customer
-        Message = $sensor.message
     }
     if ($ShowFree) {
         Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
