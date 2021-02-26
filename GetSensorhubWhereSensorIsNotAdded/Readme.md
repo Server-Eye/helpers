@@ -1,6 +1,7 @@
 # GetSensorhubWhereSensorIsNotAdded.ps1
 
 Shows all System where the given Sensor is not appled.
+Script can round for a long time based on Customer, Sensorhub and Sensor count.
 
 Sensortype must be provided in English see this link for more Informations.
 https://servereye.freshdesk.com/support/solutions/articles/14000082889-auflistung-aller-sensor-in-der-powershell
