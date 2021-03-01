@@ -54,14 +54,19 @@ function Remove-Notification {
 }
 
 function removeNotificationOfSensorhub ($SensorhubId, $NotificationID,$auth) {
-    $System = Get-SeApiContainer -cid $SensorhubId -auth $auth
-    $Parent = Get-SeApiContainer -cid $System.parentid -auth $auth
-    $Customer = Get-SeApiCustomer -cid $System.customerId -auth $auth
+    $System = Get-SeApiContainer -cid $SensorhubId -AuthToken $auth
+    $Parent = Get-SeApiContainer -cid $System.parentid -AuthToken $auth
+    $Customer = Get-SeApiCustomer -cid $System.customerId -AuthToken $auth
+    $Notification = Get-SeApiAgentNotificationList -cId $SensorhubId -AuthToken $auth | Where-Object {$_.nId -eq $NotificationID}
     Remove-SeApiContainerNotification -AuthToken $auth -nid $NotificationID -cid $SensorhubId
     [PSCustomObject]@{
         NotificationID = $NotificationId
-        Username = $Name
-        Email = $Email
+        Username = if ($user.isGroup -eq $true) {
+            $user.surname
+        } else{
+            ("$($user.prename) $($user.surname)".Trim()) 
+        }
+        Email = $user.email
         Sensorhub = $System.Name
         'OCC-Connector' = $Parent.Name
         Customer = $Customer.companyName
@@ -71,15 +76,20 @@ function removeNotificationOfSensorhub ($SensorhubId, $NotificationID,$auth) {
 }
 
 function removeNotificationBySensor ($SensorID,$NotificationID, $auth) {
-    $Sensor = Get-SeApiAgent -aid $SensorID -auth $auth
-    $System = Get-SeApiContainer -cid $Sensor.parentid -auth $auth
-    $Parent = Get-SeApiContainer -cid $System.parentid -auth $auth
-    $Customer = Get-SeApiCustomer -cid $System.customerId -auth $auth
+    $Sensor = Get-SeApiAgent -aid $SensorID -AuthToken $auth
+    $System = Get-SeApiContainer -cid $Sensor.parentid -AuthToken $auth
+    $Parent = Get-SeApiContainer -cid $System.parentid -AuthToken $auth
+    $Customer = Get-SeApiCustomer -cid $System.customerId -AuthToken $auth
+    $Notification = Get-SeApiAgentNotificationList -aId $SensorID -AuthToken $auth | Where-Object {$_.nId -eq $NotificationID}
     Remove-SeApiAgentNotification -AuthToken $auth -nid $NotificationID -aid $SensorID
     [PSCustomObject]@{
         NotificationID = $NotificationId
-        Username = $Name
-        Email = $Email
+        Username = if ($user.isGroup -eq $true) {
+            $user.surname
+        } else{
+            ("$($user.prename) $($user.surname)".Trim()) 
+        }
+        Email = $user.email
         Sensor = $Sensor.Name
         Sensorhub = $System.Name
         'OCC-Connector' = $Parent.Name

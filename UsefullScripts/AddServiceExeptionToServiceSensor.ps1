@@ -40,13 +40,13 @@ if (!$AuthToken) {
 
 Clear-Host
 Write-Host "  _____                                 ______           " -ForegroundColor Green
-Write-Host " / ____|                               |  ____|    "       -ForegroundColor Green
+Write-Host " / ____|                               |  ____|          " -ForegroundColor Green
 Write-Host "| (___   ___ _ ____   _____ _ __ ______| |__  _   _  ___ " -ForegroundColor Green
 Write-Host " \___ \ / _ \ '__\ \ / / _ \ '__|______|  __|| | | |/ _ \" -ForegroundColor Green
 Write-Host " ____) |  __/ |   \ V /  __/ |         | |___| |_| |  __/" -ForegroundColor Green
 Write-Host "|_____/ \___|_|    \_/ \___|_|         |______\__, |\___|" -ForegroundColor Green
 Write-Host "                                               __/ |     " -ForegroundColor Green
-Write-Host "AntiRansom Tool - Julian Recktenwald          |___/      " -ForegroundColor Green
+Write-Host "Dienste Ausnahmen - Julian Recktenwald          |___/    " -ForegroundColor Green
 Write-Host "julian.recktenwald@kraemer-it.de"
 Start-Sleep 2
 

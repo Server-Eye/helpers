@@ -10,11 +10,14 @@
 #Requires -RunAsAdministrator
 
 $PSINIFilePAth = "C:\Windows\System32\GroupPolicy\Machine\Scripts"
-$PSINIFileName = "psscripts.ini"
+$PSINIFileName = "scripts.ini"
 $TriggerPatchRun = "C:\Program Files (x86)\Server-Eye\triggerPatchRun.cmd"
 
-$PSINIRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\"
+$PSINIRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0"
 
+$Keys = Get-ChildItem -Path $PSINIRegPath
+$KeyToRemove = Get-ItemProperty -Path $keys.PSPath -Name "Script" | Where-Object -Property Script -EQ -Value $TriggerPatchRun
+#region INI
 if (Test-Path ($PSINIFilePAth + "\" + $PSINIFileName)) {
     Write-Output "Checking $PSINIFileName File for SU Script"
     $content = Get-Content (($PSINIFilePAth + "\" + $PSINIFileName))
@@ -25,3 +28,5 @@ if (Test-Path ($PSINIFilePAth + "\" + $PSINIFileName)) {
     Write-Output "Call GPUpdate"
     gpupdate.exe /force
 }
+#endregion INI
+

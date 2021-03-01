@@ -18,8 +18,7 @@ Param(
 
 if((Test-Path "C:\Program Files\Avira\Antivirus\presetup.exe") -eq $true){
     Write-Host "Performing uninstallation of Avira Antivirus"
-    Start-Process -FilePath "C:\Program Files\Avira\Antivirus\presetup.exe" -ArgumentList "/remsilent"
-    Wait-Process -Name "presetup"
+    Start-Process -FilePath "C:\Program Files\Avira\Antivirus\presetup.exe" -Wait -ArgumentList "/remsilent" 
     $avira = Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\CurrentVersion\Uninstall\* | Where-Object {($_.Displayname -eq "Avira") -and ($_.QuietUninstallString -like '"C:\ProgramData\Package Cache\*\Avira.OE.Setup.Bundle.exe" /uninstall /quiet')}
     Write-Host "Performing uninstallation of Avira Launcher"
     Start-Process -FilePath $avira.BundleCachePath -Wait -ArgumentList "/uninstall /quiet"
