@@ -235,6 +235,7 @@ Write-Debug "Finished Argument construction"
 # Installation Server-Eye
 try {
     Start-Process @startProcessParams
+    Remove-Item -Path $SetupPath
 }
 catch {
     Write-Log -Source $EventSourceName -EventID 3002 -EntryType Error -Message "Something went wrong $_ "
