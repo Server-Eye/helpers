@@ -1,5 +1,7 @@
+#Requires -Modules ServerEye.PowerShell.Helper
+#Requires -Modules importexcel
 
- <# 
+<# 
     .SYNOPSIS
     Shows all System with no connection.
 
@@ -8,40 +10,44 @@
 
     Shows time based on the TimeZone of the System on which the Script was executed.
 
+    .PARAMETER LastActiveDays 
+    Last Active Days, default is 14
+
+    .PARAMETER PathtoExcelFile 
+    Excel File if one should be created
+
     .PARAMETER Apikey 
-    Agent intervall from the OCC.
+    The api-Key of the user. ATTENTION only nessesary im no Server-Eye Session exists in den Powershell
     
 #>
 
 [CmdletBinding()]
 Param(
-    [Parameter()]
+    [Parameter(Mandatory = $false)]
     $LastActiveDays = "14",
+    [Parameter(Mandatory = $false)]
+    $PathtoExcelFile,
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken
 )
 
 
-# Check if module is installed, if not install it
-if (!(Get-Module -ListAvailable -Name "ServerEye.Powershell.Helper")) {
-    Write-Host "ServerEye PowerShell Module is not installed. Installing it..." -ForegroundColor Red
-    Install-Module "ServerEye.Powershell.Helper" -Scope CurrentUser -Force
-}
 
-# Check if module is loaded, if not load it
-if (!(Get-Module "ServerEye.Powershell.Helper")) {
-    Import-Module ServerEye.Powershell.Helper
-}
+#region Server-Eye Default Variables
+#endregion Server-Eye Default Variables
 
-$messageen = "CONNECTED"
+#region Internal Variables
+$Messageen = "CONNECTED"
 $messageen2 = "Connection available"
 $messagede = "Verbindung vorhanden"
 $shutdownde = "Dienst oder Server wurde heruntergefahren."
 $shutdownen = ""
-$now = Get-Date
+$result = @()
+#endregion Internal Variables
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
+
 
 $customers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
 foreach ($customer in $customers) {
@@ -49,53 +55,56 @@ foreach ($customer in $customers) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customer.id
 
     foreach ($container in $containers) {
-        $time = $container.lastDate
-        $tsp = New-TimeSpan -start $time -End $now
+        $tsp = New-TimeSpan -start $container.lastDate -End (Get-Date)
 
         If ($container.subtype -eq "0" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
-            [PSCustomObject]@{
+            $result += [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $container.name
                 System        = "OCC-Connector"
-                ID = $container.ID
-                "Last Active" = $time
+                ID            = $container.ID
+                "Last Active" = $container.lastDate
                 Message       = $container.message
             }
         }
-        if ($container.subtype -eq "0" -and $tsp.TotalDays -gt $LastActiveDays -and $container.message -ne $shutdownde){
-            [PSCustomObject]@{
+        if ($container.subtype -eq "0" -and $tsp.TotalDays -gt $LastActiveDays -and $container.message -ne $shutdownde) {
+            $result += [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $container.name
                 System        = "OCC-Connector"
-                ID = $container.ID
-                "Last Active" = $time
-                Message       =  $container.message
+                ID            = $container.ID
+                "Last Active" = $container.lastDate
+                Message       = $container.message
             }
         }     
         If ($container.subtype -eq "2" -and $container.message -ne $messageen -and $container.message -ne $messageen2 -and $container.message -ne $messagede -and $container.message -ne $shutdownde) {
-            $occ = ""
-            $occ = Get-SeApiContainer -AuthToken $AuthToken -CId $container.parentId
-            [PSCustomObject]@{
+            $occ = $containers | Where-Object { $_.id -eq $container.parentId }
+            $result += [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $occ.name
                 System        = $container.name
-                ID = $container.ID
-                "Last Active" = $time
+                ID            = $container.ID
+                "Last Active" = $container.lastDate
                 Message       = $container.message
             } 
         }      
-        If ($container.subtype -eq "2" -and $tsp.TotalDays -gt $LastActiveDays  -and $container.message -ne $shutdownde) {
-            $occ = ""
-            $occ = Get-SeApiContainer -AuthToken $AuthToken -CId $container.parentId
-            [PSCustomObject]@{
+        If ($container.subtype -eq "2" -and $tsp.TotalDays -gt $LastActiveDays -and $container.message -ne $shutdownde) {
+            $occ = $containers | Where-Object { $_.id -eq $container.parentId }
+            $result += [PSCustomObject]@{
                 Customer      = $customer.name
                 Network       = $occ.name
                 System        = $container.name
-                ID = $container.ID
-                "Last Active" = $time
+                ID            = $container.ID
+                "Last Active" = $container.lastDate
                 Message       = $container.message
             } 
         }                            
     }
 }
 
+if ($PathtoExcelFile) {
+    Export-Excel -Path $PathtoExcelFile -InputObject $result -AutoSize -AutoFilter
+}
+else {
+    Write-Output $result
+}
