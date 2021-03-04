@@ -90,6 +90,7 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
     $sensorhub = Get-SESensorhub -SensorhubId $sensorhubId -AuthToken $auth
     foreach ($sensor in $agents) {
         if ((-not $filter) -or ($sensor.name -like $filter) -or ($sensor.subtype -like $filter)) {
+            $sensor = Get-SeApiAgent -AId $sensor.id -AuthToken $auth
             formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub -agentList $agentList
         }
     }
