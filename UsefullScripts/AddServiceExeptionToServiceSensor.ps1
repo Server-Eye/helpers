@@ -46,8 +46,7 @@ Write-Host " \___ \ / _ \ '__\ \ / / _ \ '__|______|  __|| | | |/ _ \" -Foregrou
 Write-Host " ____) |  __/ |   \ V /  __/ |         | |___| |_| |  __/" -ForegroundColor Green
 Write-Host "|_____/ \___|_|    \_/ \___|_|         |______\__, |\___|" -ForegroundColor Green
 Write-Host "                                               __/ |     " -ForegroundColor Green
-Write-Host "Dienste Ausnahmen - Julian Recktenwald          |___/    " -ForegroundColor Green
-Write-Host "julian.recktenwald@kraemer-it.de"
+Write-Host "Dienste Ausnahmen setzen                      |___/      " -ForegroundColor Green
 Start-Sleep 2
 
 # Load all customers of the user
@@ -121,7 +120,7 @@ $repeatInput = $true
 
 Clear-Host
 Write-Host "Gewähltes Tag:" $selectedTag "("$sensorhubsToUpdate.Count "Maschinen mit diesem Tag )" -ForegroundColor Cyan
-Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: C:\Users\julian.recktenwald\Application Data\*.exe' -ForegroundColor Yellow
+Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: CCService' -ForegroundColor Yellow
 do {
     $pathInput = Read-Host -Prompt 'Dienst'
     if ([string]::IsNullOrEmpty($pathInput)) {
