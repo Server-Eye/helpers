@@ -47,6 +47,7 @@ function formatInvetoryOfContainer ($ContainerID, $AuthToken) {
         [PSCustomObject]@{
             Customer        = $Container.Customer
             "OCC Connector" = $Container.name
+            "OCC ConnectorID" = $Container.ConnectorID
             BIOS = $inventory.BIOS
             CPU = $inventory.CPU
             DEVICES = $inventory.DEVICES
@@ -85,6 +86,7 @@ function formatInvetoryOfContainer ($ContainerID, $AuthToken) {
             Customer        = $Container.Customer
             "OCC Connector" = $Container."OCC-Connector"
             Sensorhub       = $Container.name
+            SensorhubId     = $Container.SensorhubId
             BIOS = $inventory.BIOS
             CPU = $inventory.CPU
             DEVICES = $inventory.DEVICES
