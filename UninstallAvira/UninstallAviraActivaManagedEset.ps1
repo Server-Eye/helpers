@@ -3,13 +3,13 @@
     Uninstall Avira Antivirus and the Avira Launcher.
 
     .DESCRIPTION
-    This Script will Uninstall Avira Antivirus and the Avira Launcher form the System and remove Avira Sensor and also add Managed Defender Sensor.
+    This Script will Uninstall Avira Antivirus and the Avira Launcher form the System and remove Avira Sensor and also add Managed ESET Sensor.
 
     .PARAMETER Restart
     Set to something other then 0 to Restart after Avira uninstall.
 
-    .PARAMETER AddDefender
-    Set to something other then 0 to add the Server-Eye Managed Windows Defender Sensor.
+    .PARAMETER AddEset
+    Set to something other then 0 to add the Server-Eye Managed Windows ESET Sensor.
 
     .PARAMETER Apikey
     API Key mandatory to remove or add Sensors.
@@ -24,8 +24,8 @@ Param(
         HelpMessage = "Set to something other then 0 to Restart after Avira uninstall")]
     [int]$Restart = 0,
     [Parameter(Mandatory = $false,
-        HelpMessage = "Set to something other then 0 to add the Server-Eye Managed Windows Defender Sensor")]
-    [int]$AddDefender = 0,
+        HelpMessage = "Set to something other then 0 to add the Server-Eye Managed Windows ESET Sensor")]
+    [int]$AddEset = 0,
     [Parameter(Mandatory = $false,
         HelpMessage = "API Key to remove or add Sensors")] 
     [String]$Apikey
@@ -35,9 +35,9 @@ Begin {
     Write-Host "Script started"
     $ExitCode = 0   
     # 0 = everything is ok
-    $Defender = [PSCustomObject]@{
-        Type = "0000CBF2-63AA-4911-B26D-924C9FC7ABA6"
-        Name = "Managed Windows Defender"
+    $eset = [PSCustomObject]@{
+        Type = "56E5A518-AFFD-4FA4-99F9-6CFB92EF38CD"
+        Name = "Managed ESET"
     }
     #region Register Eventlog Source
     try { New-EventLog -Source "ServerEyeManagedAntivirus" -LogName "Application" -ErrorAction Stop | Out-Null }
@@ -179,7 +179,7 @@ Process {
                 $CId = (Get-Content 'C:\Program Files (x86)\Server-Eye\config\se3_cc.conf' | Select-String -Pattern "\bguid=\b").ToString().Replace("guid=", "")
                 $Sensors = Invoke-RestMethod -Uri "https://api.server-eye.de/2/container/$cid/agents" -Method Get -Headers @{"x-api-key" = $Apikey } 
                 $MAVSensor = $Sensors | Where-Object { $_.subtype -eq "72AC0BFD-0B0C-450C-92EB-354334B4DAAB" }
-                $DAVSensor = $Sensors | Where-Object { $_.subtype -eq $Defender.Type }
+                $DAVSensor = $Sensors | Where-Object { $_.subtype -eq $Eset.Type }
                 if ($MAVSensor) {
                     try {
                         Invoke-RestMethod -Uri "https://api.server-eye.de/2/agent/$($MAVSensor.ID)" -Method Delete -Headers @{"x-api-key" = $Apikey }
@@ -193,16 +193,16 @@ Process {
                 }else {
                     Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Avira Sensor not found"
                 }
-                if ($AddDefender -ne 0 -and !($DAVSensor)) {
-                    Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Adding Managed Defender Sensor"
+                if ($AddEset -ne 0 -and !($DAVSensor)) {
+                    Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Adding Managed ESET Sensor"
                     $body = [PSCustomObject]@{
-                        type     = $Defender.Type
+                        type     = $Eset.Type
                         parentId = $CId
-                        name     = $Defender.Name
+                        name     = $Eset.Name
                     }
                     $body = $body | ConvertTo-Json
                     try {
-                        Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Adding Managed Defender Sensor"
+                        Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Adding Managed ESET Sensor"
                         Invoke-RestMethod -Uri "https://api.server-eye.de/2/agent" -Method Post -Body $body -ContentType "application/json"  -Headers @{"x-api-key" = $Apikey } -ErrorAction Stop
                     }
                     catch {
