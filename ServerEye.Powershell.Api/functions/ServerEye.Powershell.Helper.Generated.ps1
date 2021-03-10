@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2019-12-16T11:19:03.747Z
+DATE: 2021-03-10T10:53:38.455Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -29,43 +29,6 @@ $AId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Get an agent's action log.
-
-    
-        .PARAMETER $AId
-        The id of the agent.
-        
-        .PARAMETER $Start
-        Start index for reading entries.
-        
-        .PARAMETER $Limit
-        How many entries should be returned?
-        
-    #>
-    function Get-AgentActionlogList {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$AId,
-[Parameter(Mandatory=$false)]
-$Start,
-[Parameter(Mandatory=$false)]
-$Limit,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/agent/$AId/actionlog?start=$Start&limit=$Limit" -authtoken $AuthToken
         }
     }
     
@@ -279,7 +242,7 @@ $AId,
         Include the status' raw data if available?
         
         .PARAMETER $Format
-        In which format do you want the message to be rendered?
+        In which format do you want the message to be rendered? If the type plain is set, the plain agent message will be returned
         
     #>
     function Get-AgentState {
@@ -297,7 +260,7 @@ $IncludeMessage,
 [Parameter(Mandatory=$false)]
 $IncludeRawData,
 [Parameter(Mandatory=$false)]
-[ValidateSet('html','plain','text','text_short','mail','markdown')]
+[ValidateSet('plain','html','html_boxed','text','text_short','mail','markdown')]
 $Format,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -338,7 +301,7 @@ $Format,
         Include the status' raw data if available?
         
         .PARAMETER $Format
-        In which format do you want the message to be rendered?
+        In which format do you want the message to be rendered? If the type plain is set, the plain agent message will be returned
         
     #>
     function Get-AgentStateList {
@@ -360,7 +323,7 @@ $IncludeMessage,
 [Parameter(Mandatory=$false)]
 $IncludeRawData,
 [Parameter(Mandatory=$false)]
-[ValidateSet('html','plain','text','text_short','mail','markdown')]
+[ValidateSet('plain','html','html_boxed','text','text_short','mail','markdown')]
 $Format,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -484,145 +447,6 @@ $AkId,
 
     <#
     .SYNOPSIS
-    Check the given containers for compliance-violations. Returns true if at least one violation is found for this container.
-
-    
-        .PARAMETER $ContainerId
-        The id of a container or multiple ids as array.
-        
-        .PARAMETER $CustomerId
-        The id of the customer.
-        
-        .PARAMETER $ViewFilterId
-        The id of the view filter.
-        
-    #>
-    function Get-ComplianceCheck {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$ContainerId,
-[Parameter(Mandatory=$true)]
-$CustomerId,
-[Parameter(Mandatory=$true)]
-$ViewFilterId,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/check?containerId=$ContainerId&customerId=$CustomerId&viewFilterId=$ViewFilterId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Get the compliance template and config for a customer/view filter.
-
-    
-        .PARAMETER $ViewFilterId
-        The id of a view filter.
-        
-        .PARAMETER $CustomerId
-        The id of the customer
-        
-    #>
-    function Get-ComplianceConfig {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$ViewFilterId,
-[Parameter(Mandatory=$true)]
-$CustomerId,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/config?viewFilterId=$ViewFilterId&customerId=$CustomerId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Get all compliance configs for the given customers. Returns all configs for each given id.
-
-    
-        .PARAMETER $CustomerId
-        The id or an array of ids of the customer
-        
-    #>
-    function Get-ComplianceConfigCustomer {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$CustomerId,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/config/customer?customerId=$CustomerId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Get all differences between a container / multiple containers the template configured via /compliance/config.
-
-    
-        .PARAMETER $ContainerId
-        The id of a container or multiple ids as array.
-        
-        .PARAMETER $CustomerId
-        The id of the customer.
-        
-        .PARAMETER $ViewFilterId
-        The id of the view filter.
-        
-        .PARAMETER $MessageFormat
-        If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
-        
-    #>
-    function Get-ComplianceViolation {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$ContainerId,
-[Parameter(Mandatory=$true)]
-$CustomerId,
-[Parameter(Mandatory=$true)]
-$ViewFilterId,
-[Parameter(Mandatory=$false)]
-[ValidateSet('none','md','html')]
-$MessageFormat,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/compliance/violation?containerId=$ContainerId&customerId=$CustomerId&viewFilterId=$ViewFilterId&messageFormat=$MessageFormat" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
     Get a container.
 
     
@@ -644,43 +468,6 @@ $CId,
         
         Process {
             return Intern-GetJson -url "https://api.server-eye.de/2/container/$CId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Get an container's action log.
-
-    
-        .PARAMETER $CId
-        The id of the container.
-        
-        .PARAMETER $Start
-        Start index for reading entries.
-        
-        .PARAMETER $Limit
-        How many entries should be returned?
-        
-    #>
-    function Get-ContainerActionlogList {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$CId,
-[Parameter(Mandatory=$false)]
-$Start,
-[Parameter(Mandatory=$false)]
-$Limit,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-GetJson -url "https://api.server-eye.de/2/container/$CId/actionlog?start=$Start&limit=$Limit" -authtoken $AuthToken
         }
     }
     
@@ -2601,89 +2388,6 @@ $Value,
 
     <#
     .SYNOPSIS
-    Set the compliance template and config for a customer/view filter.
-
-    
-        .PARAMETER $ViewFilterId
-        The id of a view filter.
-        
-        .PARAMETER $CustomerId
-        The id of a customer
-        
-        .PARAMETER $TemplateId
-        The id of a template.
-        
-        .PARAMETER $Checks
-        An array of checks to check for violations between template and the viewvilter's containers.
-        
-    #>
-    function Set-ComplianceConfig {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$ViewFilterId,
-[Parameter(Mandatory=$true)]
-$CustomerId,
-[Parameter(Mandatory=$true)]
-$TemplateId,
-[Parameter(Mandatory=$true)]
-[ValidateSet('applyNotifications','dropNotifications','applyTags','dropTags','applyAgents','dropAgents','applyAgentSettings')]
-$Checks,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            $reqBody = @{
-            
-            'viewFilterId' = $ViewFilterId
-            'customerId' = $CustomerId
-            'templateId' = $TemplateId
-            'checks' = $Checks
-            }
-
-            return Intern-PutJson -url "https://api.server-eye.de/2/compliance/config" -authtoken $AuthToken -body $reqBody
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Apply the changes to the containers.
-
-    
-        .PARAMETER $Changes
-        An array of changes to apply. A change corresponds to one returnvalue of <code>GET compliance/violation</code>
-        
-    #>
-    function Set-ComplianceFix {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$Changes,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            $reqBody = @{
-            
-            'changes' = $Changes
-            }
-
-            return Intern-PutJson -url "https://api.server-eye.de/2/compliance/fix" -authtoken $AuthToken -body $reqBody
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
     Updates attributes of a container.
 
     
@@ -3756,10 +3460,13 @@ $SubstitudeId,
         The old value, which was set before the change was made
         
         .PARAMETER $Limit
-        How many entries of the actionlog do you need? Max value is 100.
+        How many entries of the actionlog do you need in that timespan? Max value is 100.
         
         .PARAMETER $Start
-        The number of entries that you want to skip.
+        An utc date in milliseconds.
+        
+        .PARAMETER $End
+        An utc date in milliseconds.
         
         .PARAMETER $MessageFormat
         If the entry should be human readable, specify the format of the message. This will include a 'message' property in each entry or not.
@@ -3787,6 +3494,8 @@ $Limit,
 [Parameter(Mandatory=$false)]
 $Start,
 [Parameter(Mandatory=$false)]
+$End,
+[Parameter(Mandatory=$false)]
 [ValidateSet('none','md','html')]
 $MessageFormat,
 [Parameter(Mandatory=$false)]
@@ -3807,6 +3516,7 @@ $IncludeRawData,
             'oldValue' = $OldValue
             'limit' = $Limit
             'start' = $Start
+            'end' = $End
             'messageFormat' = $MessageFormat
             'includeRawData' = $IncludeRawData
             }
@@ -5337,6 +5047,38 @@ $Code,
 
     <#
     .SYNOPSIS
+    Resets your secret key
+
+    
+        .PARAMETER $Password
+        Your current password
+        
+    #>
+    function New-ResetSecret {
+        [CmdletBinding()]
+        Param(
+            
+[Parameter(Mandatory=$true)]
+$Password,
+            [Parameter(Mandatory=$true)]
+            [alias("ApiKey","Session")]
+            $AuthToken
+        )
+        
+        
+        Process {
+            $reqBody = @{
+            
+            'password' = $Password
+            }
+
+            return Intern-PostJson -url "https://api.server-eye.de/2/me/setting/secret/reset" -authtoken $AuthToken -body $reqBody
+        }
+    }
+    
+
+    <#
+    .SYNOPSIS
     Copy all agents of this container and pack them into one template.
 
     
@@ -5803,38 +5545,6 @@ $TId,
         
         Process {
             return Intern-DeleteJson -url "https://api.server-eye.de/2/agent/$AId/tag/$TId" -authtoken $AuthToken
-        }
-    }
-    
-
-    <#
-    .SYNOPSIS
-    Delete the compliance config for a customer/view filter.
-
-    
-        .PARAMETER $ViewFilterId
-        The id of a view filter.
-        
-        .PARAMETER $CustomerId
-        The id of the customer
-        
-    #>
-    function Remove-ComplianceConfig {
-        [CmdletBinding()]
-        Param(
-            
-[Parameter(Mandatory=$true)]
-$ViewFilterId,
-[Parameter(Mandatory=$true)]
-$CustomerId,
-            [Parameter(Mandatory=$true)]
-            [alias("ApiKey","Session")]
-            $AuthToken
-        )
-        
-        
-        Process {
-            return Intern-DeleteJson -url "https://api.server-eye.de/2/compliance/config?viewFilterId=$ViewFilterId&customerId=$CustomerId" -authtoken $AuthToken
         }
     }
     
