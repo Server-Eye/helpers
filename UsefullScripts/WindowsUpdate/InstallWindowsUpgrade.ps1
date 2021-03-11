@@ -34,7 +34,7 @@ $MACConf = "se3_mac.conf"
 #Server-Eye Logs
 $Logdir = "{0}\logs" -f $SEDataPath
 $EventLogName = "Application"
-$EventSourceName = "Server-Eye-Windows-Upgrade"
+$EventSourceName = "ServerEye-Custom"
 $script:_SilentOverride = $true
 $script:_LogFilePath = "{0}\ServerEye.Patchmanagement.Upgrade.log" -f $Logdir
 
