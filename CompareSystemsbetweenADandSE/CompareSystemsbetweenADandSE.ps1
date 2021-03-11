@@ -14,25 +14,28 @@ Param(
     [Switch]$SECheck
 )
 
-if ($authoken -eq [String]) {
-    Connect-SESession -apikey $AuthToken    
-}
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-
-
 $diff = Get-ADComputer -Filter * -Property *
+$reftmp = Get-SeApiMyNodesList -filter container -AuthToken $AuthToken | Where-Object {$_.customerId -eq $CustomerID -and $_.Subtype -eq 2}
 
-$ref = Get-SECustomer -CustomerId $CustomerID | Get-SESensorhub
+$ref = $reftmp| Select-Object –unique -Property Name
 
-$comp = Compare-Object -ReferenceObject $ref -DifferenceObject $diff -Property Name #| Select-Object -Property @{Name=("Systems with ServerEye but not in the AD:"); Expression={$_.Inputobject}}
+$double = Compare-object –referenceobject $ref –differenceobject $reftmp -Property Name
+
+$comp = Compare-Object -ReferenceObject $ref -DifferenceObject $diff -Property Name
+
+if ($double) {
+    Write-Output "Duplicate Systems in Server-Eye:"
+(($double | Where-Object Sideindicator -eq "=>").Name)
+}
 
 if ($SECheck.IsPresent -eq $true){
-Write-Host "Following Systems are in the Active Directory but are not Installed with Server-Eye:"
+Write-Output "`nFollowing Systems are in the Active Directory but are not Installed with Server-Eye:"
 (($comp | Where-Object Sideindicator -eq "=>").Name)
 }
 
 if ($ADCheck.IsPresent -eq $true){
-Write-Host "Following Systems are installed with Server-Eye but not found in the Active Directory:"
+Write-Output "`nFollowing Systems are installed with Server-Eye but not found in the Active Directory:"
 (($comp | Where-Object Sideindicator -eq "<=").Name)
 }
