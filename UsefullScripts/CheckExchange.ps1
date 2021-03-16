@@ -21,6 +21,7 @@ $EventSourceName = "ServerEye-Custom"
 $script:_SilentOverride = $false
 $script:_SilentEventlog = $true
 $script:_LogFilePath = "{0}\CheckExchange.log" -f $DataPath
+$INetPubPath = Join-Path -path (Get-WebFilePath 'IIS:\Sites\Default Web Site').root.name -ChildPath (Get-WebFilePath 'IIS:\Sites\Default Web Site').parent.name
 
 #Region Helper Funtions
 function Write-Log {
@@ -135,8 +136,8 @@ function ZipnetLogs {
         Remove-Item "$DataPath\temp" -Recurse
         New-Item -Path "$DataPath\temp" -Value "temp" -ItemType Directory
     }
-    Get-ChildItem -Path c:\inetpub\logs\logfiles -Recurse -Directory | Copy-Item -Destination "$DataPath\temp"
-    $files = Get-ChildItem -Path c:\inetpub\logs\logfiles -Recurse -File | Where-Object { $_.LastAccessTime -gt $date }
+    Get-ChildItem -Path "$INetPubPath\logs\logfiles" -Recurse -Directory | Copy-Item -Destination "$DataPath\temp"
+    $files = Get-ChildItem -Path "$INetPubPath\logs\logfiles" -Recurse -File | Where-Object { $_.LastAccessTime -gt $date }
     foreach ($file in $files) {
         $path = "{0}\temp\{1}" -f $DataPath, $file.Directory.name
         Copy-Item -Path $file.fullname -Destination $path
@@ -249,9 +250,9 @@ if ($serverrole -ne $null) {
     }
     else {
         if ($ExchangeServers.admindisplayversion.major -like "*14*") {
-            $INetPubPath = Join-Path -path $env:SystemDrive -ChildPath  "inetpub\wwwroot\"
-            $INetPub = Get-ChildItem -path $INetPubPath -Filter *.aspx -recurse | Where-Object { $_.lastwritetime -gt $date }
-            if ($INetPub -ne $null) {
+            $INetRootPath = Join-Path -path $INetPubPath -ChildPath  "wwwroot\"
+            $INetRoot = Get-ChildItem -path $INetRootPath -Filter *.aspx -recurse | Where-Object { $_.lastwritetime -gt $date }
+            if ($INetRoot -ne $null) {
                 Write-Log -Source $EventSourceName -EventID 3000 -EntryType Information -Message "Exchange Server 2010 is patched with KB5000978. Compromised ASPX Files found, run MSERT immediatelly!"
 
             }
@@ -261,11 +262,11 @@ if ($serverrole -ne $null) {
         }
         else {
             $HttpProxyPath = Join-Path -Path $env:exchangeinstallpath -ChildPath "FrontEnd\HttpProxy\"
-            $INetPubPath = Join-Path -path $env:SystemDrive -ChildPath  "inetpub\wwwroot\"
+            $INetRootPath = Join-Path -path $INetPubPath -ChildPath  "wwwroot\"
             $HttpProxy = Get-ChildItem -path $HttpProxyPath -Filter *.aspx -recurse | Where-Object { $_.lastwritetime -gt $date }
-            $INetPub = Get-ChildItem -path $INetPubPath -Filter *.aspx -recurse | Where-Object { $_.lastwritetime -gt $date }
+            $INetRoot = Get-ChildItem -path $INetRootPath -Filter *.aspx -recurse | Where-Object { $_.lastwritetime -gt $date }
 
-            if ($HttpProxy -ne $null -or $INetPub -ne $null) {
+            if ($HttpProxy -ne $null -or $INetRoot -ne $null) {
                 Write-Log -Source $EventSourceName -EventID 3000 -EntryType Information -Message "Server is patched with KB5000871. Compromised ASPX Files found, run MSERT immediatelly!"
             }
             else {
@@ -281,8 +282,8 @@ else {
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUdMCfJIRo3DbJNGSM5DujKb8N
-# FEuggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU43FgHgQ0AlzGthebTbPo2z6M
+# Vx6ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -453,29 +454,29 @@ else {
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFGtCGYjaKLm6RxCjCt2ovuN9
-# /eAPMA0GCSqGSIb3DQEBAQUABIIBAGwVnn3GVDUvXTRidoLPFtWTb75Q42oDIr4b
-# jaXs54E4brE+Lp5IFzilO+sgz16ZqBjaqNjOb+l8VPEFCE4UI+dGIhSIZ5Jz/grP
-# 6aLVmC7nTiaWx843x/QS08aLSWo+aOvHTaN3yREgzp44I8rI0R5jo1HOyUKpDurk
-# 8ELAyyHHcBittomu9zTqrFsCSBqr/N7V1mZTbAq0SfQ1GhVHlPTwOES2jJazZgDp
-# CJpcbf1A3NGF/Yyfo/vf5YzwYh2Czni1544lY76COuk552HyJ5kVB1h2aGxmA6ln
-# +ZVKj0FoLYjocvPoNXiJatTE0eKZwmChCGePeD4UlPbD1q2OWgKhggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFKOKFcCl369AxWbPh9kXRtcm
+# CFEZMA0GCSqGSIb3DQEBAQUABIIBAN+TdcDnrz7CDSic7X1TxPMkxTd1csYwAG1e
+# Hzno5jsJ2AQU2WQSm8aiEL2ElP3aboxWQ5PShl6mRSXKlWk5LYvaPjHbpIC0qOk3
+# GMD8RE4zN3T9+AnvioGFRBXZpr8IzLk06BF6NIuLpzqEbdmf8DT4WWnO30YYwiza
+# RN53vwAMDyhOaQk+4nIsJl1NCudF8HccJDb4vQHbsl1rFrSsf0XzVF3Jp9MM0zrD
+# cw/kAAiZrRRzJp0xofdK2XPr5qtQxBb2+Lwo7uV+x1AhMARosvWKMdxuMID9HaBR
+# dXr3p4o1vJSLm/r3of+RejJ+OpfjKOPTo9X22YtbVztnFvqlEAChggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDMxNTE2MDQy
-# MVowPwYJKoZIhvcNAQkEMTIEMKizYWp64IXc1fvc5y9u2Ma7y/pdGoSZWQhtqygs
-# Duc2B6GZESRODMGnZ4UF/t7WPjANBgkqhkiG9w0BAQEFAASCAgBGeD6Car9VVwdE
-# VoAuFBi17JPVp2EwOiBtrxge5Rqa1gdBdS6R7n8yduAJATswJo4yOQvOmItDJKPp
-# jXVDs0uSa02nLbljp1V+baoCWLkpWq+D7Su7hvFXqz8lNAmgmpmZ+CHOydQigkHe
-# LzRpPj7m6ugIfGeZzrHuzD7/97ZxChw1uzJ/HH/l6ofzmbkbYuLrn7MkJJpzYSl1
-# Zu+G1BZ4HJ5as3q6JpA7aNa9iDPZjI0UlBIa7xHI5rWodgmn9aeg0hV2azkd8oyf
-# ebnLXiWnPywbAlayMMucO8mK4vgvdXgrSXzftGdpwNHIpKaL8o96Q1YdFNIu24Ot
-# xTfMq6Vangg//jYEqot+lyjXNoqSVV1f41GMNO8T6b/0EVXrShSJbKKo4dztl8Q6
-# u+Nlpg+eSvJ9eytpeExoz2/sAww4gsWkTF39vq3CcKFt2hpeZk4Tfklc0ToNErvA
-# rvPIVh1OomdMdK1jG0kcb8TJty66ghj0zfb6974qtI4/B3sxtc74JaagT//ZnuZR
-# EyUN0hqXgWknwnp7tk1j5FyjwOgf3NHulDsKhrdoSQOd/OH1udaZIf068KHI+PNz
-# NmNAvKgnVOvjO23uGk1+xokvbsL3pXawAoZAFG2Zk5EyFK5gUhAKxDfePTuOAEUJ
-# RzbYZWy7oIZFmZSfztNudnVcYYDjBg==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDMxNjExMDUw
+# NVowPwYJKoZIhvcNAQkEMTIEMIy8zCAE0phN7WPeehnK3mYmX/faKsvrWKgWF1gj
+# HkgQBqnetmavM6KmgfsWIyiLzjANBgkqhkiG9w0BAQEFAASCAgAnlpMx+PYqpG9t
+# 2ch1IzST1pQesqVJHIQKbxcMBZzsy3ssX6+dGuhRrtEEQcvU2Rz2r/NngcnfiNIA
+# xbcWxDE0f/69AWx1w91a+dQCf8FWKmjR9etSn4Lh+N2dQpJluJ8I4tByLBfyx18Z
+# ptlUAYt/aGutP++O0leJDG1pAisHif4l9PWWl1JuczB/q5w8Nc0FKLBvpU3KYQhu
+# 77c28DwM7myDz5F12KFl4/Z5030RnjxZLHQvTOLv9KfWWo81kLKFldC5tyXklOi2
+# Mx+niWxwL9qb6+UEhhJy1J1x2VvMTVcS3WRhojM16gegbyeJfam/2Ghy4rGDb+Le
+# 0521iMRGXIDWA08tugenf9f5GClbZy3A8Q/AHJj++43eiLxF3y7n7/DrsK2mYxLp
+# yJnAAJkYyj38Rt1qBU3c8ARMczmZ4iQ5YefWiI2MWIC38mcMtLcjDNd0HXMxfaid
+# xX+hroPihRdjPWY6KkdmuVB8WvrTIeC74MbOZxnNd3RPZY8aKmsidnYvLks7m0Tm
+# Y/Fx6dl0aWwYE5FcuwftHEB2K1v69r4ahNbjpyQk49DqULp1mCvkG12Il+93M3Wz
+# S+1bkLYAzNH7GVBmr15Izby431CVMMoHLdNjZAdwHaei2IRHz1Humm39slEHrqI/
+# kakz2h7olg+PDx4kNfe+JE6KufrMRg==
 # SIG # End signature block
