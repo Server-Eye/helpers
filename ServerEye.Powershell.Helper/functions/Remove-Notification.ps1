@@ -57,7 +57,7 @@ function removeNotificationOfSensorhub ($SensorhubId, $NotificationID,$auth) {
     $System = Get-SeApiContainer -cid $SensorhubId -AuthToken $auth
     $Parent = Get-SeApiContainer -cid $System.parentid -AuthToken $auth
     $Customer = Get-SeApiCustomer -cid $System.customerId -AuthToken $auth
-    $Notification = Get-SeApiAgentNotificationList -cId $SensorhubId -AuthToken $auth | Where-Object {$_.nId -eq $NotificationID}
+    $Notification = Get-SeApiContainerNotificationList -cId $SensorhubId -AuthToken $auth | Where-Object {$_.nId -eq $NotificationID}
     Remove-SeApiContainerNotification -AuthToken $auth -nid $NotificationID -cid $SensorhubId
     [PSCustomObject]@{
         NotificationID = $NotificationId
