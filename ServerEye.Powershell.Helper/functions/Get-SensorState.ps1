@@ -153,7 +153,7 @@ function Get-SensorState {
 
         }
         Write-Debug "Get Sensor Information for ID:$($SensorId)"
-        $sensor = Get-Sensor -SensorID $SensorId -AuthToken $AuthToken
+        $sensor = Get-SESensor -SensorID $SensorId -AuthToken $AuthToken
         Write-Debug "Sensor: $sensor"
         
         foreach ($state in $states) {
@@ -168,7 +168,7 @@ function Get-SensorState {
                 LastDate      = $state.lastDate
                 Error         = $state.state -or $state.forceFailed
                 Resolved      = $state.resolved
-                SilencedUntil = $state.silencedUntil
+                SilencedUntil = (([System.DateTimeOffset]::FromUnixTimeMilliseconds($state.silencedUntil)).DateTime)
                 HintCount     = $state.hintCount
                 Hints         = $state.hints
                 Message       = $state.Message

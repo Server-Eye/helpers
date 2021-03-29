@@ -72,7 +72,7 @@ function Set-SensorState {
             HelpMessage = "The id of the state.")]
         [ValidateNotNullOrEmpty()]
         [Alias("sid")]
-        [Int64]
+        [string]
         $StateId,
 
         [parameter(Mandatory = $false,
@@ -121,25 +121,25 @@ function Set-SensorState {
     }
     
     Process {
-        $state = New-SeApiAgentStateHint -AId $SensorId -SId $StateId -Author $author -HintType $hintType -Message $message -AssignedUser $assignedUser -MentionedUsers $mentionedUsers -Private ($private.ToString()).ToLower() -Until $until -AuthToken $AuthToken
+        $state = New-SeApiAgentStateHint -AId $SensorId -SId $StateId -Author $author -HintType $hintType -Message $message -AssignedUser $assignedUser -MentionedUsers $mentionedUsers -Private ($private.ToString()).ToLower() -Until ([DateTimeOffset](((Get-Date).addhours($until)).ToUniversalTime())).ToUnixTimeMilliseconds() -AuthToken $AuthToken
         Write-Debug "New State: $state"
         $sensor = Get-SESensor -SensorID $SensorId -AuthToken $AuthToken
         Write-Debug "Sensor: $sensor"
 
         [PSCustomObject]@{
-            Name           = $sensor.Name
-            SensorType     = $Sensor.SensorType
-            SensorTypeID   = $Sensor.SensorTypeID
-            SensorId       = $Sensor.SensorId
-            StateId        = $state.sId
-            HintID         = $state.hId
-            Hinttype       = $state.Hinttype
-            Message        = $state.message
-            Author         = $state.author.email
-            Assigend       = $state.assigned.email
-            Private        = $state.private
-            Until          = $state.until
-            Date           = $state.date
+            Name = $sensor.Name
+            SensorType = $Sensor.SensorType
+            SensorTypeID = $Sensor.SensorTypeID
+            SensorId = $Sensor.SensorId
+            StateId = $state.sId
+            HintID = $state.hId
+            Hinttype = If ($state.Hinttype -eq 0) { "working" }elseif ($state.Hinttype -eq 1) {"reopen"}elseif ($state.Hinttype -eq 2) {"false alert"}elseif ($state.Hinttype -eq 3) {"hint"}
+            Message = $state.message
+            Author = $state.author.email
+            Assigend = $state.assigned.email
+            Private = $state.private
+            Until = $state.until
+            Date = $state.date
             mentionedUsers = $state.mentionedUsers.email
         }
     }
