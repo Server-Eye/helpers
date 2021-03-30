@@ -1,101 +1,92 @@
 #Requires -Module ServerEye.Powershell.Helper
 #Requires -Module importExcel
 
+<#
+    .SYNOPSIS
+    Get Inventory
+    
+    .DESCRIPTION
+    Create a Excel File per Customer with all Inventorydata from all Sensorhubs.
+
+    .PARAMETER Path
+    Path were the Excel File should be created, default is the root of the Script in the directory inventory.
+    
+    .PARAMETER CustomerID
+    Id of the Customer that should be checked
+
+    .PARAMETER AuthToken
+    Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
+
+#>
+
 param (
-    [Parameter(Mandatory=$true)][string]$ApiKey,
-    [Parameter(Mandatory=$false)][string]$CustomerID
+    [Parameter(Mandatory = $false)][string]$Path = $psscriptroot + '\inventory',
+
+    [Parameter(Mandatory = $false)][string]$CustomerID,
+
+    [Parameter(Mandatory = $false)]
+    [Alias("ApiKey", "Session")]
+    [string]
+    $AuthToken
 )
 
+$NoConversion = "SCANIP", "VERSION", "NEGATIVECURRENCYMODE", "ODBC", "BDE", "DAO", "ADO", "OPENGL", "IE", "NET", "DIRECTX", "MSI", "QT", "DRIVERVERSION", "IPADDRESSES", "DNSSERVERS", "ADDRESS", "IPADDRESS", "IPADDRESSMASK", "DHCP_IPADDRESS", "GATEWAY_IPADDRESS", "PRIMARYWINS_IPADDRESS", "SECONDARYWINS_IPADDRESS", "REVISIONNUMBER", "PCSCANVER", "SCANIP"
 
+$Data = Get-SeApiMyNodesList -Filter Customer, container -AuthToken $AuthToken
 
-function status{
-    param (
-        [Parameter(Mandatory=$true)][string]$activity,
-        [Parameter(Mandatory=$true)][int]$counter,
-        [Parameter(Mandatory=$true)][int]$max,
-        [Parameter(Mandatory=$true)][string]$status,
-        [Parameter(Mandatory=$true)][int]$id,
-        [Parameter(Mandatory=$false)][int]$parentid
-    )
-    $percentcomplete = (($counter*100)/$max)
-    if ($percentcomplete -gt 100){
-        $percentcomplete = 100
-    }
-    $status = "$([math]::Round($($percentcomplete)))% - "+$status
-    if ($parentid){
-        Write-Progress -Activity $activity -PercentComplete $percentcomplete -status $status -id $id -ParentId $parentid
-    }
-    else{
-        Write-Progress -Activity $activity -PercentComplete $percentcomplete -status $status -id $id
-    }
-}
-
-if (!$customerid){
-    $customers = Get-SECustomer -AuthToken $apikey
-    $customercount = $customers.count
-}
-else{
-    $customers = @((Get-SECustomer -authtoken $apikey|where-object {$_.customerId -eq $customerid}))
-    $customercount = 1
-}
-
-$inventoryroot = $psscriptroot+'\inventory'
-if (!(test-path $inventoryroot)){
-    New-Item -Path $inventoryroot -ItemType "directory"|out-null
-}
-
-$countC = 0
-
-foreach ($customer in $customers){
-    $countC++
-    status -activity "$($countC)/$($customercount) Inventarisiere" -max $customercount -counter $countC -status $customer.name -id 1
+if ($CustomerID) {
+    $customers = $Data | Where-Object { $_.Type -eq 1 -and $_.id -eq $CustomerID } | Sort-Object -Property Name
     
-    $hubs = Get-SeApiCustomerContainerList -AuthToken $apikey -CId $customer.customerid|where-object {$_.subtype -eq 2}
-    #$customername = (get-seapicustomer -CId $customer -AuthToken $apikey).companyname
-    $xlsfile = $psscriptroot+"\inventory\$($customer.name).xlsx"
-   
+}
+else {
+    $customers = $Data | Where-Object { $_.Type -eq 1 } | Sort-Object -Property Name
 
-    $countH = 0
-    $hubcount = $hubs.count
+}
+
+if (!(test-path $Path)) {
+    New-Item -Path $Path -ItemType "directory" | out-null
+}
+
+
+foreach ($customer in $customers) {
+    $hubs = $Data | Where-Object { $_.Type -eq 2 -and $_.subtype -eq 2 -and $_.customerId -eq $customer.id }
+
+    $xlsfile = $Path + "\$($customer.name).xlsx"
+
     $initfile = $true
 
-    foreach ($hub in $hubs){
-        $countH++
-        status -activity "$($countH)/$($hubcount) Inventarisiere $($customer.name)" -max $hubcount -counter $countH -status $hub.name -id 2 -parentid 1
-        
-        $state = (Get-SeApiContainerStateListbulk -AuthToken $apikey -CId $hub.id)
-        $lastdate = [datetime]$state.lastdate
-        if ($lastdate -lt ([datetime]'01.01.2020') -or $state.message -eq 'OCC Connector hat die Verbindung zum Sensorhub verloren'){
+    foreach ($hub in $hubs) {        
+        $state = Get-SeApiContainerStateListbulk -AuthToken $AuthToken -CId $hub.id
+        if ($state.lastdate -lt ([datetime]'01.01.2020') -or $state.message -eq 'OCC Connector hat die Verbindung zum Sensorhub verloren') {
             write-host $hub.name 'keine Daten'
             continue
         }
-        else{
-            $inventory = Get-SeApiContainerInventory -AuthToken $apikey -CId $hub.id
+        else {
+            $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $hub.id
         }
         
-        $objects = (($inventory|Get-Member)|Where-Object {$_.membertype -eq 'NoteProperty'}).name
+        $objects = (($inventory | Get-Member) | Where-Object { $_.membertype -eq 'NoteProperty' }).name
         
-        foreach ($object in $objects){
-            $subobject = $inventory.$object|Select-Object host,*
-            #$object
-            if ($subobject.count -gt 1){
+        foreach ($object in $objects) {
+            $subobject = $inventory.$object | Select-Object -property host, * -ExcludeProperty hash
+            if ($subobject.count -gt 1) {
                 $count = $subobject.count
-                for ($a=0;$a -le $count-1;$a++){
-                    $subobject[$a].host = $inventory.system.hostname
+                for ($a = 0; $a -le $count - 1; $a++) {
+                    $subobject[$a].host = $hub.name
                 }
             }
-            elseif(!$subobject){
+            elseif (!$subobject) {
             }
-            else{
+            else {
                 $subobject.host = $hub.name
             }
-            
-            if ((test-path $xlsfile) -and $initfile){
+
+            if ((test-path $xlsfile) -and $initfile) {
                 export-excel -path $xlsfile -KillExcel
                 remove-item $xlsfile                
             }
             $initfile = $false
-            $subobject|export-excel -path $xlsfile -WorksheetName $object -Append -AutoFilter -AutoSize -FreezeTopRow -BoldTopRow -KillExcel
+            $subobject | export-excel -path $xlsfile -WorksheetName $object -Append -AutoFilter -AutoSize -FreezeTopRow -BoldTopRow -NoNumberConversion $NoConversion -KillExcel
             Clear-Variable subobject
         }
     }
