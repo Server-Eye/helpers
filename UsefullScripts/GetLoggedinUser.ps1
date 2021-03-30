@@ -19,7 +19,7 @@ Param(
         Position = 0,
         HelpMessage = "Id of the Customer that should be checked")]
     [ValidateNotNullOrEmpty()]
-    [guid]
+    [string]
     $CustomerID,
 
     [Parameter(Mandatory = $false,
@@ -32,7 +32,7 @@ $type = "A9D8173C-9A40-406a-B7DB-538231F4E3A2"
 $authtoken = Test-SEAuth -AuthToken $authtoken
 
 $Data = Get-SeApiMyNodesList -Filter Agent, Customer, container -AuthToken $AuthToken
-$Sensorhubs = $Data | Where-Object { $_.Type -eq 2 }
+$Sensorhubs = $Data | Where-Object { $_.Type -eq 2 -and $_.subtype -eq 2}
 $result = @()
 if ($CustomerID) {
     $customers = $Data | Where-Object { $_.Type -eq 1 -and $_.id -eq $CustomerID } | Sort-Object -Property Name
@@ -40,7 +40,6 @@ if ($CustomerID) {
 else {
     $customers = $Data | Where-Object { $_.Type -eq 1 } | Sort-Object -Property Name
 }
-
 
 foreach ($customer in $customers) {
     $PCAgents = $Data | Where-Object { $_.Type -eq 3 -and $_.agentType -eq $type -and $_.customerId -eq $customer.id }
@@ -51,12 +50,12 @@ foreach ($customer in $customers) {
 
         $Sensorhub = $Sensorhubs | Where-Object { $_.id -eq $pcagent.parentId }
         
-        $result += [PSCustomObject]@{ 
-            Customer  = $Customer.Name
-            Sensorhub = $Sensorhub.name
-            user      = $state.raw.data.sysInfo.lastlogonuser
+        [PSCustomObject]@{ 
+            Customer   = $Customer.Name
+            Sensorhub  = $Sensorhub.name
+            user       = $state.raw.data.sysInfo.lastlogonuser
+            lastLogon  = $state.raw.data.sysInfo.lastLogonUserTime
+            LastConnection = $Sensorhub.lastDate
         }
     }
 }
-$result | Sort-Object -Property Customer
-Return $result 
