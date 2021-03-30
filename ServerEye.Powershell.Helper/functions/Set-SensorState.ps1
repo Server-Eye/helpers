@@ -127,19 +127,30 @@ function Set-SensorState {
         Write-Debug "Sensor: $sensor"
 
         [PSCustomObject]@{
-            Name = $sensor.Name
-            SensorType = $Sensor.SensorType
-            SensorTypeID = $Sensor.SensorTypeID
-            SensorId = $Sensor.SensorId
-            StateId = $state.sId
-            HintID = $state.hId
-            Hinttype = If ($state.Hinttype -eq 0) { "working" }elseif ($state.Hinttype -eq 1) {"reopen"}elseif ($state.Hinttype -eq 2) {"false alert"}elseif ($state.Hinttype -eq 3) {"hint"}
-            Message = $state.message
-            Author = $state.author.email
-            Assigend = $state.assigned.email
-            Private = $state.private
-            Until = $state.until
-            Date = $state.date
+            Name           = $sensor.Name
+            SensorType     = $Sensor.SensorType
+            SensorTypeID   = $Sensor.SensorTypeID
+            SensorId       = $Sensor.SensorId
+            StateId        = $state.sId
+            HintID         = $state.hId
+            Hinttype       = If ($state.Hinttype -eq 0) { 
+                "working" 
+            }
+            elseif ($state.Hinttype -eq 1) { 
+                "reopen" 
+            }
+            elseif ($state.Hinttype -eq 2) { 
+                "false alert" 
+            }
+            else { 
+                "hint" 
+            }
+            Message        = $state.message
+            Author         = $state.author.email
+            Assigend       = $state.assigned.email
+            Private        = $state.private
+            Until          = $state.until
+            Date           = $state.date
             mentionedUsers = $state.mentionedUsers.email
         }
     }
