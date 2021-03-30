@@ -219,6 +219,7 @@ Process {
             }
 
         }
+        Get-ChildItem -Path $path -Filter avlicense -Recurse | Remove-Item
         if ((Test-Path "C:\Program Files\Avira\Antivirus\presetup.exe") -eq $true) {
             try {
                 Write-Log -Source "ServerEyeManagedAntivirus" -EventID 3000 -EntryType Information -Message "Performing uninstallation of Avira Antivirus"
