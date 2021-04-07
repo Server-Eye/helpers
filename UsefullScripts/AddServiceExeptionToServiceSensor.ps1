@@ -1,75 +1,58 @@
-# Julian Recktenwald 19.07.2018
+#Requires -Module ServerEye.Powershell.Helper
+
+<#
+    .SYNOPSIS
+        Sets Service to ignore List
+        
+    .DESCRIPTION
+        Sets Service to ignore List
+
+    .PARAMETER customerId 
+    ID of the Customer
+
+    .PARAMETER PathToIgnoreCSV 
+    Path to the CSV with a List of the Services, please Services as the heading in the CSV.
+
+    .NOTES
+        Author  : Server-Eye
+        Version : 1.0
+
+    .Link
+    https://support.microsoft.com/de-de/topic/9-m%C3%A4rz-2021-kb5000802-betriebssystembuilds-19041-867-und-19042-867-63552d64-fe44-4132-8813-ef56d3626e14
+#>
+
 [CmdletBinding()]
 Param(
+    [Parameter(Mandatory = $false)]
+    $customerId,
+    [Parameter(Mandatory = $false)]
+    $PathToIgnoreCSV,
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken
 )
 
-$agentId = "43C5B1C4-EF06-4117-B84A-7057EA3B31CF"
+$AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-# Check if module is installed, if not install it
-if (!(Get-Module -ListAvailable -Name "ServerEye.Powershell.Helper")) {
-    Write-Host "ServerEye PowerShell Module is not installed. Installing it..." -ForegroundColor Red
-    Install-Module "ServerEye.Powershell.Helper" -Scope CurrentUser -Force
+$AgentType = "43C5B1C4-EF06-4117-B84A-7057EA3B31CF"
+
+$data = Get-SeApiMyNodesList -Filter customer, agent, container -AuthToken $AuthToken -listType object
+
+$containers = $data.container
+
+
+
+
+if ($customerId) {
+    $customers = $Data.managedCustomers | Where-Object { $_.id -eq $customerId }
+}
+else {
+    $customers = $Data.managedCustomers
 }
 
-# Check if module is loaded, if not load it
-if (!(Get-Module "ServerEye.Powershell.Helper")) {
-    Import-Module ServerEye.Powershell.Helper
-}
-
-try {
-    # Check for existing session
-    $AuthToken = Test-SEAuth -AuthToken $AuthToken
-}
-catch {
-    # There is no session - prompt for login
-    $AuthToken = Connect-SESession
-}
-
-if (!$AuthToken) {
-    $AuthToken = Connect-SESession
-}
-
-if (!$AuthToken) {
-    Write-Error "Fehler beim Login!"
-    exit 1
-}
-
-
-Clear-Host
-Write-Host "  _____                                 ______           " -ForegroundColor Green
-Write-Host " / ____|                               |  ____|          " -ForegroundColor Green
-Write-Host "| (___   ___ _ ____   _____ _ __ ______| |__  _   _  ___ " -ForegroundColor Green
-Write-Host " \___ \ / _ \ '__\ \ / / _ \ '__|______|  __|| | | |/ _ \" -ForegroundColor Green
-Write-Host " ____) |  __/ |   \ V /  __/ |         | |___| |_| |  __/" -ForegroundColor Green
-Write-Host "|_____/ \___|_|    \_/ \___|_|         |______\__, |\___|" -ForegroundColor Green
-Write-Host "                                               __/ |     " -ForegroundColor Green
-Write-Host "Dienste Ausnahmen setzen                      |___/      " -ForegroundColor Green
-Start-Sleep 2
-
-# Load all customers of the user
-$myCustomerList = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
-
-Clear-Host
-Write-Host "Wähle den Kunden aus der folgenden Liste aus:" -ForegroundColor Yellow
-$i = 1;
-foreach ($customer in $myCustomerList) {
-    Write-Host $i ":" $customer.name
-    $i += 1
-}
-
-try {
-    $customerId = ($myCustomerList[[int](Read-Host -Prompt 'Gib die Nummer des Kunden ein') - 1]).id
-}
-catch {
-    Write-Host "Ungültige Eingabe!" -ForegroundColor Red
-    exit 1
-}
 
 # Load all sensorhubs of the selected customer
-$customerSensorhubList = Get-SeApiCustomerContainerList -AuthToken $AuthToken -CId $customerId | Where-Object subtype -eq 2 #subtype 2 = sensorhub
+$customerSensorhubList = $Sensorhubs = $containers | Where-Object { $_.subtype -eq 2 -and $customers.id -contains $_.customerid }
 
 Clear-Host
 $tagList = New-Object System.Collections.ArrayList
@@ -86,61 +69,97 @@ foreach ($sensorhub in $customerSensorhubList) {
 
 $i = 0
 
-Write-Host "Gewählter Kunde:" $(Get-SeApiCustomer -AuthToken $AuthToken -CId $customerId).companyName -ForegroundColor Cyan
-Write-Host 'Wähle das gewünschte Tag aus der Liste aus:' -ForegroundColor Yellow
+if ($customers.count -ge 1) {
+    Write-Host "Gewählter Kunden:" ($customers.name -join ", ") -ForegroundColor Cyan
+}
+else {
+    Write-Host "Gewählter Kunde:" $customers.name -ForegroundColor Cyan
+}
+
+
+Write-Host 'Wähle das gewünschte Tag aus der Liste aus wo die Ausnahme gesetzt werden soll:' -ForegroundColor Yellow
 foreach ($tag in $tagList) {
     Write-Host $i ":" $tag
     $i += 1
 }
 
-$tagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
+$AddtagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
+
+if ($AddtagInput -eq 0) {
+    continue
+}
+else {
+    $tagList.Remove("Alle Systeme - Nicht nach Tag filtern") | Out-Null
+    $tagList.Add("Keine Systeme - Kein Tag entfernen") | Out-Null
+    $i = 0
+    Write-Host 'Wähle das gewünschte Tag aus der Liste aus wo die Ausnahme nicht gesetzt werden soll:' -ForegroundColor Yellow
+    foreach ($tag in $tagList) {
+        Write-Host $i ":" $tag
+        $i += 1
+    }
+}
+$RemovetagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
+
 $sensorhubsToUpdate = New-Object System.Collections.ArrayList
 
-$selectedTag = $tagList[$tagInput]
-if ($tagInput -ne 0) {
-    if (!($selectedTag)) {
+$selectedAddTag = $tagList[$AddtagInput]
+$selectedRemoveTag = $tagList[$RemovetagInput]
+if ($AddtagInput -ne 0) {
+    if (!($selectedAddTag)) {
         Write-Host "Ungültige Eingabe!" -ForegroundColor Red
         exit 1
     }
     foreach ($sensorhub in $customerSensorhubList) {
         foreach ($tag in $sensorhub.tags) {
-            if ($tag.name -eq $selectedTag) {
+            if ($tag.name -eq $selectedAddTag) {
                 $sensorhubsToUpdate.Add($sensorhub) | Out-Null
             }
         }
 
+    }if ($selectedRemoveTag) {
+        
     }
 }
 else {
     $sensorhubsToUpdate = $customerSensorhubList
 }
 
-$pathsInput = New-Object System.Collections.ArrayList
-$repeatInput = $true
 
-Clear-Host
-Write-Host "Gewähltes Tag:" $selectedTag "("$sensorhubsToUpdate.Count "Maschinen mit diesem Tag )" -ForegroundColor Cyan
-Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: CCService' -ForegroundColor Yellow
-do {
-    $pathInput = Read-Host -Prompt 'Dienst'
-    if ([string]::IsNullOrEmpty($pathInput)) {
-        if ($pathsInput.Count -eq 0) {
-            Write-Host "Du musst mindestens einen Dienst angeben!" -ForegroundColor Red
+$sensorhubsToUpdate = $sensorhubsToUpdate | Where-Object {$_.tags.name -notcontains $selectedRemoveTag}
+
+Write-Debug $sensorhubsToUpdate
+
+if ($PathToIgnoreCSV) {
+    $pathsInput = (Import-csv -Path $PathToIgnoreCSV).Services
+}else {
+    $pathsInput = New-Object System.Collections.ArrayList
+    $repeatInput = $true
+    
+    Clear-Host
+    Write-Host "Gewähltes Tag:" $selectedTag "("$sensorhubsToUpdate.Count "Maschinen mit diesem Tag )" -ForegroundColor Cyan
+    Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: CCService' -ForegroundColor Yellow
+    do {
+        $pathInput = Read-Host -Prompt 'Dienst'
+        if ([string]::IsNullOrEmpty($pathInput)) {
+            if ($pathsInput.Count -eq 0) {
+                Write-Host "Du musst mindestens einen Dienst angeben!" -ForegroundColor Red
+            }
+            else {
+                $repeatInput = $false
+            }
         }
         else {
-            $repeatInput = $false
+            $pathsInput.Add($pathInput) | Out-Null
         }
-    }
-    else {
-        $pathsInput.Add($pathInput) | Out-Null
-    }
-} while ($repeatInput -eq $true)
+    } while ($repeatInput -eq $true) 
+}
+
 
 Clear-Host
 $count = 0
 foreach ($sensorhub in $sensorhubsToUpdate) {
     # Load all AntiRansom agents
-    $agents = Get-SeApiContainerAgentList -AuthToken $AuthToken -CId $sensorhub.id | Where-Object subtype -eq $agentId
+    $Agents = $Data.agent | Where-Object {$_.Type -eq 3 -and $_.parentId -eq $sensorhub.id -and $_.subtype -eq $AgentType}
     foreach ($agent in $agents) {
         # Get the current path settings of the agent
         $currentPaths = (Get-SeApiAgentSettingList -AuthToken $AuthToken -AId $agent.id | Where-Object key -eq "serviceList").value
