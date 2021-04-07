@@ -70,6 +70,9 @@ function Get-Sensorhub {
         [string]$Filter,
         [parameter(ValueFromPipelineByPropertyName, ParameterSetName = "byCustomer")]
         $CustomerId,
+        [Parameter(ValueFromPipeline,Mandatory = $false, ParameterSetName = "byCustomer")]
+        [Parameter(ValueFromPipeline,Mandatory = $false, ParameterSetName = "bySensorhub")]
+        $customer,
         [parameter(ValueFromPipelineByPropertyName, ParameterSetName = "bySensorhub")]
         $SensorhubId,
         [Parameter(Mandatory = $false, ParameterSetName = "byCustomer")]
@@ -83,10 +86,10 @@ function Get-Sensorhub {
     
     Process {
         if ($CustomerId) {
-            getSensorhubByCustomer -customerId $CustomerId -filter $Filter -auth $AuthToken
+            getSensorhubByCustomer -customerId $CustomerId -filter $Filter -auth $AuthToken -customer $customer
         }
         elseif ($SensorhubId) {
-            Get-SEContainer -containerid $SensorhubId -AuthToken $AuthToken
+            Get-Container -containerid $SensorhubId -AuthToken $AuthToken -customer $customer
         }
         else {
             Write-Error "Please provide a SensorhubId or a CustomerId."
@@ -98,12 +101,13 @@ function Get-Sensorhub {
     }
 }
 
-function getSensorhubByCustomer ($customerId, $filter, $auth) {
+function getSensorhubByCustomer ($customerId, $customer, $filter, $auth) {
     $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId | Where-Object { $_.Subtype -eq 2 }
     foreach ($sensorhub in $containers) {
         if ((-not $filter) -or ($sensorhub.name -like $filter)) {
-            Get-SEContainer -containerid $sensorhub.id
+            Get-Container -containerid $sensorhub.id -customer $customer
         }
     }
 }
+
 

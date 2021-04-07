@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get a container.
     
@@ -52,76 +52,89 @@
 function Get-Container {
     [CmdletBinding()]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $containerid,
-        [Parameter(Mandatory=$false)]
+        [parameter(ValueFromPipeline)]
+        $customer,
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
 
-    Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+    Begin {
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
+        $data = Get-SeApiMyNodesList -Filter container -AuthToken $AuthToken
     }
     
     Process {
         $container = Get-SeApiContainer -cId $containerid -AuthToken $AuthToken
         if ($container.type -eq 0) {
-            getOCCConnector -container $container -auth $AuthToken
+            getOCCConnector -container $container -auth $AuthToken -customer $customer
         }
         if ($container.type -eq 2) {
-            getSensorhub -container $container -auth $AuthToken
+            getSensorhub -container $container -auth $AuthToken -customer $customer
         }
   
 
     }
 
-    End{
+    End {
 
     }
 }
 
-function getOCCConnector($container,$auth) {
-    $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
-    $notification = Get-SeApiMyNodesList -Filter container -AuthToken $auth | Where-Object {$_.id -eq $container.cId}
-
-    [PSCustomObject]@{
-        Customer    = $customer.companyName
-        Name        = $container.name
-        ConnectorID = $container.cId
-        MachineName = $container.machineName
-        HasNotification = $notification.hasNotification
+function getOCCConnector($container, $auth, $customer) {
+    if (!$customer) {
+        Write-Debug "Need to get Customer"
+        $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
     }
-}
+    $notification = $data | Where-Object { $_.id -eq $container.cId }
 
-function getSensorhub($container, $auth) {
-    $occConnector = Get-SeApiContainer -cId $container.parentId -AuthToken $auth
-    $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
-    $notification = Get-SeApiMyNodesList -Filter container -AuthToken $auth | Where-Object {$_.id -eq $container.cId}
     [PSCustomObject]@{
-        Name = $container.name
-        IsServer = $container.isServer
-        IsVM = $container.isVm
-        'OCC-Connector' = $occConnector.name
-        Customer = $customer.companyName
-        SensorhubId = $container.cId
-        HasNotification = $notification.hasNotification
-        Hostname = $container.machineName
-        OsName = $container.osName
-        OsVersion = $container.osVersion
-        OsServicepack = $container.osServicePack
-        Architecture = $container.architecture
-        Ip = $container.ip
-        PublicIp = $container.publicIp
-        LastBootTime = (([datetime]'1/1/1970').AddSeconds([int]($container.lastBootUpTime / 1000)))
-        LastRebootInfo = [PSCustomObject]@{ 
-            Reason = $container.lastRebootInfo.reason
-            Action = $container.lastRebootInfo.action
-            Comment = $container.lastRebootInfo.comment
-            User = $container.lastRebootInfo.user
+        Customer        = if ($customer.name) { $customer.name }else {
+            $customer.companyName
         }
-        NumberOfProcessors = $container.numberOfProcessors
-        TotalRam = [math]::Ceiling($container.totalRam /1024 /1024)
+        Name            = $container.name
+        ConnectorID     = $container.cId
+        MachineName     = $container.machineName
+        HasNotification = $notification.hasNotification
+    }
+}
+
+function getSensorhub($container, $auth, $customer) {
+    if (!$customer) {
+        Write-Debug "Need to get Customer"
+        $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
+    }
+    $occConnector = Get-SeApiContainer -cId $container.parentId -AuthToken $auth
+    $notification = $data | Where-Object { $_.id -eq $container.cId }
+    [PSCustomObject]@{
+        Name                = $container.name
+        IsServer            = $container.isServer
+        IsVM                = $container.isVm
+        'OCC-Connector'     = $occConnector.name
+        Customer            = if ($customer.name) { $customer.name }else {
+            $customer.companyName
+        }
+        SensorhubId         = $container.cId
+        HasNotification     = $notification.hasNotification
+        Hostname            = $container.machineName
+        OsName              = $container.osName
+        OsVersion           = $container.osVersion
+        OsServicepack       = $container.osServicePack
+        Architecture        = $container.architecture
+        Ip                  = $container.ip
+        PublicIp            = $container.publicIp
+        LastBootTime        = (([datetime]'1/1/1970').AddSeconds([int]($container.lastBootUpTime / 1000)))
+        LastRebootInfo      = [PSCustomObject]@{ 
+            Reason  = $container.lastRebootInfo.reason
+            Action  = $container.lastRebootInfo.action
+            Comment = $container.lastRebootInfo.comment
+            User    = $container.lastRebootInfo.user
+        }
+        NumberOfProcessors  = $container.numberOfProcessors
+        TotalRam            = [math]::Ceiling($container.totalRam / 1024 / 1024)
         maxHeartbeatTimeout = $container.maxHeartbeatTimeout
-        alertOffline = $container.alertOffline
-        alertShutdown = $container.alertShutdown
+        alertOffline        = $container.alertOffline
+        alertShutdown       = $container.alertShutdown
     }
 }
