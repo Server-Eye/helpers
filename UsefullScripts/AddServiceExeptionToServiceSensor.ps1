@@ -52,22 +52,24 @@ else {
 
 
 # Load all sensorhubs of the selected customer
-$customerSensorhubList = $Sensorhubs = $containers | Where-Object { $_.subtype -eq 2 -and $customers.id -contains $_.customerid }
+$customerSensorhubList = $containers | Where-Object { $_.subtype -eq 2 -and $customers.id -contains $_.customerid }
 
 Clear-Host
-$tagList = New-Object System.Collections.ArrayList
-$tagList.Add("Alle Systeme - Nicht nach Tag filtern") | Out-Null
+$tagList = [PSCustomObject]@{
+    id       = 0
+    name     = "Alle Systeme - Nicht nach Tag filtern"
+    readonly = $false
+}
 
 foreach ($sensorhub in $customerSensorhubList) {
     foreach ($tag in $sensorhub.tags) {
-        if (!$tagList.Contains($tag.name)) {
-            $tagList.Add($tag.name) | Out-Null
+        if ($tagList.Name -notcontains $tag.name) {
+            $tagList = [Array]$tagList + $tag
         }
     }
-
 }
 
-$i = 0
+
 
 if ($customers.count -ge 1) {
     Write-Host "Gewählter Kunden:" ($customers.name -join ", ") -ForegroundColor Cyan
@@ -76,82 +78,79 @@ else {
     Write-Host "Gewählter Kunde:" $customers.name -ForegroundColor Cyan
 }
 
-
+$i = 0
 Write-Host 'Wähle das gewünschte Tag aus der Liste aus wo die Ausnahme gesetzt werden soll:' -ForegroundColor Yellow
 foreach ($tag in $tagList) {
-    Write-Host $i ":" $tag
+    Write-Host $i ":" $tag.Name
     $i += 1
 }
-
 $AddtagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
 
-if ($AddtagInput -eq 0) {
-    continue
+$selectedAddTag = $tagList[$AddtagInput]
+if (!$selectedAddTag) {
+    Write-Error "Ungültige Eingabe!"
+    exit 1
+}
+elseif ($selectedAddTag.id -eq 0) {
+    $sensorhubsToUpdate = $customerSensorhubList
 }
 else {
-    $tagList.Remove("Alle Systeme - Nicht nach Tag filtern") | Out-Null
-    $tagList.Add("Keine Systeme - Kein Tag entfernen") | Out-Null
     $i = 0
     Write-Host 'Wähle das gewünschte Tag aus der Liste aus wo die Ausnahme nicht gesetzt werden soll:' -ForegroundColor Yellow
     foreach ($tag in $tagList) {
-        Write-Host $i ":" $tag
+        Write-Host $i ":" $tag.Name
         $i += 1
     }
-}
-$RemovetagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
-
-$sensorhubsToUpdate = New-Object System.Collections.ArrayList
-
-$selectedAddTag = $tagList[$AddtagInput]
-$selectedRemoveTag = $tagList[$RemovetagInput]
-if ($AddtagInput -ne 0) {
-    if (!($selectedAddTag)) {
-        Write-Host "Ungültige Eingabe!" -ForegroundColor Red
+    $RemovetagInput = Read-Host -Prompt 'Gib die Nummer des Tags ein'
+    $selectedRemoveTag = $tagList[$RemovetagInput]
+    if (!($selectedRemoveTag)) {
+        Write-Error "Ungültige Eingabe!"
         exit 1
     }
-    foreach ($sensorhub in $customerSensorhubList) {
-        foreach ($tag in $sensorhub.tags) {
-            if ($tag.name -eq $selectedAddTag) {
-                $sensorhubsToUpdate.Add($sensorhub) | Out-Null
-            }
-        }
-
-    }if ($selectedRemoveTag) {
-        
+    elseif ($selectedRemoveTag -eq 0) {
+        $sensorhubsToUpdate = $customerSensorhubList | Where-Object { $_.tags.Id -contains $selectedAddTag.id }
+    }
+    else {
+        $sensorhubsToUpdate = $customerSensorhubList | Where-Object { $_.tags.Id -contains $selectedAddTag.id -and $_.tags.Id -notcontains $selectedRemoveTag.id }
     }
 }
-else {
-    $sensorhubsToUpdate = $customerSensorhubList
+
+if (!$sensorhubsToUpdate) {
+    Write-Host "$($sensorhubsToUpdate.Count) Maschinen mit deiner Tag kombination." -ForegroundColor Cyan
+    exit
 }
-
-
-$sensorhubsToUpdate = $sensorhubsToUpdate | Where-Object {$_.tags.name -notcontains $selectedRemoveTag}
-
-Write-Debug $sensorhubsToUpdate
-
-if ($PathToIgnoreCSV) {
-    $pathsInput = (Import-csv -Path $PathToIgnoreCSV).Services
-}else {
-    $pathsInput = New-Object System.Collections.ArrayList
-    $repeatInput = $true
-    
+else {
+    $Agents = $Data.agent | Where-Object { $_.subtype -eq $AgentType -and $sensorhubsToUpdate.id -contains $_.parentId }
     Clear-Host
-    Write-Host "Gewähltes Tag:" $selectedTag "("$sensorhubsToUpdate.Count "Maschinen mit diesem Tag )" -ForegroundColor Cyan
-    Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: CCService' -ForegroundColor Yellow
-    do {
-        $pathInput = Read-Host -Prompt 'Dienst'
-        if ([string]::IsNullOrEmpty($pathInput)) {
-            if ($pathsInput.Count -eq 0) {
-                Write-Host "Du musst mindestens einen Dienst angeben!" -ForegroundColor Red
-            }
-            else {
-                $repeatInput = $false
-            }
+    if ($agents.count -eq 0) {
+        Write-Host "$($sensorhubsToUpdate.Count) Maschinen mit deiner Tag kombination, davon haben $($agents.count) den Windows Dienste Gesundheit Sensor angelegt, müssen keine veränderungen gemacht werden." -ForegroundColor Cyan
+        exit
+    }
+    else {
+        Write-Host "$($sensorhubsToUpdate.Count) Maschinen mit deiner Tag kombination, davon haben $($agents.count) den Windows Dienste Gesundheit Sensor angelegt" -ForegroundColor Cyan
+        Write-Host 'Gib nun die Dienste (Dienstname, nicht Anzeigename) zum hinzufügen ein - Lass den Dienst leer und drücke Enter zum fortfahren. z.B: CCService' -ForegroundColor Yellow
+        if ($PathToIgnoreCSV) {
+            $pathsInput = (Import-csv -Path $PathToIgnoreCSV).Services
         }
         else {
-            $pathsInput.Add($pathInput) | Out-Null
+            $pathsInput = New-Object System.Collections.ArrayList
+            $repeatInput = $true
         }
-    } while ($repeatInput -eq $true) 
+        do {
+            $pathInput = Read-Host -Prompt 'Dienst'
+            if ([string]::IsNullOrEmpty($pathInput)) {
+                if ($pathsInput.Count -eq 0) {
+                    Write-Host "Du musst mindestens einen Dienst angeben!" -ForegroundColor Red
+                }
+                else {
+                    $repeatInput = $false
+                }
+            }
+            else {
+                $pathsInput.Add($pathInput) | Out-Null
+            }
+        } while ($repeatInput -eq $true) 
+    }
 }
 
 
@@ -159,7 +158,7 @@ Clear-Host
 $count = 0
 foreach ($sensorhub in $sensorhubsToUpdate) {
     # Load all AntiRansom agents
-    $Agents = $Data.agent | Where-Object {$_.Type -eq 3 -and $_.parentId -eq $sensorhub.id -and $_.subtype -eq $AgentType}
+    $Agents = $Data.agent | Where-Object { $_.Type -eq 3 -and $_.parentId -eq $sensorhub.id -and $_.subtype -eq $AgentType }
     foreach ($agent in $agents) {
         # Get the current path settings of the agent
         $currentPaths = (Get-SeApiAgentSettingList -AuthToken $AuthToken -AId $agent.id | Where-Object key -eq "serviceList").value
