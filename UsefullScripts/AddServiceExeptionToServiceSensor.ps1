@@ -11,7 +11,7 @@
     ID of the Customer
 
     .PARAMETER PathToIgnoreCSV 
-    Path to the CSV with a List of the Services, please Services as the heading in the CSV.
+    Path to the CSV with a List of the Services, please use Services as the heading in the CSV.
 
     .NOTES
         Author  : Server-Eye
