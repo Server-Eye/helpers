@@ -221,7 +221,7 @@ else {
 #Erstellen der Prozess Argument
 #region Arguments
 
-$argument = '/quietinstall /skipeula /auto upgrade /UninstallUponUpgrade /copylogs {0}' -f $_LogFilePath
+$argument = '/quietinstall /skipeula /auto upgrade /UninstallUponUpgrade /NoReboot /copylogs {0}' -f $_LogFilePath
 $startProcessParams = @{
     FilePath     = $SetupPath
     ArgumentList = $argument       
