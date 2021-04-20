@@ -12,7 +12,7 @@
     RootModule = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion = '2.15.20'
+    ModuleVersion = '2.15.21'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -133,7 +133,8 @@
     "Get-ContainerInventory",
     "Set-SensorState",
     "Get-DuplicatedSensorhub",
-    "Restart-Sensor"
+    "Restart-Sensor",
+    "New-APIKey"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport = @()
