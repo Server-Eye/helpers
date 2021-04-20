@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2021-03-10T10:53:38.455Z
+DATE: 2021-04-20T14:13:21.890Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -3834,7 +3834,7 @@ $DeferId,
         Is this note only visible to the posters customer?
         
         .PARAMETER $Until
-        If you are working on this state, how long will it take? 0 for forever, 1 for one houer, 2 for two hours and so on.
+        If you are working on this state, until will you be working on it? unix timestamp millis.
         
     #>
     function New-AgentStateHint {
@@ -3928,7 +3928,6 @@ $Name,
 [ValidateSet('user','customer','container')]
 $Type,
 [Parameter(Mandatory=$false)]
-[ValidateSet('JavaScript UTC timestamp')]
 $ValidUntil,
 [Parameter(Mandatory=$false)]
 $MaxUses,
