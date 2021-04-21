@@ -80,7 +80,7 @@ function NewNotificationofSensor {
     $Authtoken
     )
     $noti = New-SeApiAgentNotification -AuthToken $Authtoken -AId $sensorId -UserId $UserId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket
-    formatSensorNotificationNew -Authtoken $Authtoken -notiID $noti.nid -sensorid $noti.aid  -DeferId $deferid
+    formatSensorNotificationNew -Authtoken $Authtoken -notiID $noti.nid -sensorid $noti.id  -DeferId $deferid
 }
 
 function formatSensorNotificationNew($notiID, $Authtoken, $SensorId, $deferid){
@@ -149,7 +149,7 @@ function NewNotificationofContainer {
         $customerName = $sensorhub.Customer
     }
     
-    formatContainerNotificationNew -notiID $noti.nid -authoken $Authtoken -SensorhubID $noti.cid -deferid $deferId
+    formatContainerNotificationNew -notiID $noti.nid -authoken $Authtoken -SensorhubID $noti.id -deferid $deferId
 
 }
 
