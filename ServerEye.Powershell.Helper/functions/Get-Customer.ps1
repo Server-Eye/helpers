@@ -78,7 +78,6 @@ function Get-Customer {
     Process {
         if ($all.IsPresent -eq $true) {
             $Listcustomers = Get-SeApiCustomerList -AuthToken $AuthToken
-            $Global:ServerEyeCustomer = $Listcustomers 
             foreach ($ListCustomer in $ListCustomers) {
                 Format-Customer -Customer $ListCustomer -AuthToken $AuthToken
             }
