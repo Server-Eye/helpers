@@ -6,6 +6,9 @@
         
     .DESCRIPTION
         Install newest Windows 10 Upgrade
+
+    .PARAMETER Reboot 
+        Should the System be rebooted after the installation, 0 for not 1 for yes. default 0
         
     .NOTES
         Author  : Server-Eye
@@ -14,6 +17,13 @@
     .Link
     https://docs.microsoft.com/de-de/windows-hardware/manufacture/desktop/windows-setup-command-line-options
 #>
+
+[CmdletBinding()]
+Param(
+    [Parameter(Mandatory = $false)]
+    [ValidateSet(0, 1)]
+    [int]$Reboot = 0
+)
 
 #region Internal Variables
 
@@ -221,7 +231,14 @@ else {
 #Erstellen der Prozess Argument
 #region Arguments
 
-$argument = '/quietinstall /skipeula /auto upgrade /UninstallUponUpgrade /NoReboot /copylogs {0}' -f $_LogFilePath
+if ($Reboot -eq 1) {
+    $argument = '/quietinstall /skipeula /auto upgrade /UninstallUponUpgrade /NoReboot /copylogs {0}' -f $_LogFilePath
+}
+else {
+    $argument = '/quietinstall /skipeula /auto upgrade /UninstallUponUpgrade /copylogs {0}' -f $_LogFilePath
+}
+
+
 $startProcessParams = @{
     FilePath     = $SetupPath
     ArgumentList = $argument       
