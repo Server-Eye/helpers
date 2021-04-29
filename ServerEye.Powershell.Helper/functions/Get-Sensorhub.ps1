@@ -86,7 +86,7 @@ function Get-Sensorhub {
             getSensorhubByCustomer -customerId $CustomerId -filter $Filter -auth $AuthToken
         }
         elseif ($SensorhubId) {
-            Get-SEContainer -containerid $SensorhubId -AuthToken $AuthToken
+            Get-Container -containerid $SensorhubId -AuthToken $AuthToken
         }
         else {
             Write-Error "Please provide a SensorhubId or a CustomerId."
@@ -98,11 +98,17 @@ function Get-Sensorhub {
     }
 }
 
-function getSensorhubByCustomer ($customerId, $filter, $auth) {
+function getSensorhubByCustomer{
+    [CmdletBinding()]
+    Param(
+        $customerId,
+        $filter,
+        $Auth
+    )
     $containers = Get-SeApiCustomerContainerList -AuthToken $auth -CId $customerId | Where-Object { $_.Subtype -eq 2 }
     foreach ($sensorhub in $containers) {
         if ((-not $filter) -or ($sensorhub.name -like $filter)) {
-            Get-SEContainer -containerid $sensorhub.id
+            Get-Container -containerid $sensorhub.id
         }
     }
 }

@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get a container.
     
@@ -52,106 +52,95 @@
 function Get-Container {
     [CmdletBinding()]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $containerid,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
 
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
+        if (!$global:ServerEyeMAC) {
+            $global:ServerEyeMAC = @()
+        }
+        if (!$global:ServerEyeCC) {
+            $global:ServerEyeCC = @()
+        }
         $containerList = Get-SeApiMyNodesList -Filter container -AuthToken $AuthToken
-        $Global:ServerEyeContainer = $containerList
     }
     
     Process {
         $container = Get-SeApiContainer -cId $containerid -AuthToken $AuthToken
         if ($container.type -eq 0) {
+            $global:ServerEyeMAC += $container
             getOCCConnector -container $container -auth $AuthToken
         }
         if ($container.type -eq 2) {
+            $global:ServerEyeCC += $container
             getSensorhub -container $container -auth $AuthToken
         }
-  
-
     }
 
-    End{
+    End {
     }
 }
 
-function getOCCConnector{
+function getOCCConnector {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $container,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $auth
     )
-    if ($global:ServerEyeCustomer.cid -contains $container.customerId) {
-        Write-Debug "Customer Caching"
-        $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $container.customerId}
-    }else {
-        Write-Debug "Customer API Call"
-        $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $Auth
-        $global:ServerEyeCustomer = $Customer
-    }
-    $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
-    $notification = $containerList | Where-Object {$_.id -eq $container.cId}
-
+    $customer = Get-CachedCustomer -customerid $container.customerId -AuthToken $auth
+    $notification = $containerList | Where-Object { $_.id -eq $container.cId }
     [PSCustomObject]@{
-        Customer    = $customer.companyName
-        Name        = $container.name
-        ConnectorID = $container.cId
-        MachineName = $container.machineName
+        Customer        = $customer.companyName
+        Name            = $container.name
+        ConnectorID     = $container.cId
+        MachineName     = $container.machineName
         HasNotification = $notification.hasNotification
     }
 }
 
-function getSensorhub{
+function getSensorhub {
     [CmdletBinding()]
     Param(
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $container,
-        [Parameter(Mandatory=$true)]
+        [Parameter(Mandatory = $true)]
         $auth
     )
-    $occConnector = $containerList | Where-Object {$_.id -eq $container.parentid}
-    if ($global:ServerEyeCustomer.cid -contains $container.customerId) {
-        Write-Debug "Customer Caching"
-        $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $container.customerId}
-    }else {
-        Write-Debug "Customer API Call"
-        $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $Auth
-        $global:ServerEyeCustomer = $Customer
-    }
-    $notification = $containerList | Where-Object {$_.id -eq $container.cId}
+    $occConnector = $containerList | Where-Object { $_.id -eq $container.parentid }
+    $customer = Get-CachedCustomer -customerid $container.customerId -AuthToken $auth
+    $notification = $containerList | Where-Object { $_.id -eq $container.cId }
     [PSCustomObject]@{
-        Name = $container.name
-        IsServer = $container.isServer
-        IsVM = $container.isVm
-        'OCC-Connector' = $occConnector.name
-        Customer = $customer.companyName
-        SensorhubId = $container.cId
-        HasNotification = $notification.hasNotification
-        Hostname = $container.machineName
-        OsName = $container.osName
-        OsVersion = $container.osVersion
-        OsServicepack = $container.osServicePack
-        Architecture = $container.architecture
-        Ip = $container.ip
-        PublicIp = $container.publicIp
-        LastBootTime = (([datetime]'1/1/1970').AddSeconds([int]($container.lastBootUpTime / 1000)))
-        LastRebootInfo = [PSCustomObject]@{ 
-            Reason = $container.lastRebootInfo.reason
-            Action = $container.lastRebootInfo.action
+        Name                = $container.name
+        IsServer            = $container.isServer
+        IsVM                = $container.isVm
+        'OCC-Connector'     = $occConnector.name
+        Customer            = $customer.companyName
+        SensorhubId         = $container.cId
+        HasNotification     = $notification.hasNotification
+        Hostname            = $container.machineName
+        OsName              = $container.osName
+        OsVersion           = $container.osVersion
+        OsServicepack       = $container.osServicePack
+        Architecture        = $container.architecture
+        Ip                  = $container.ip
+        PublicIp            = $container.publicIp
+        LastBootTime        = (([datetime]'1/1/1970').AddSeconds([int]($container.lastBootUpTime / 1000)))
+        LastRebootInfo      = [PSCustomObject]@{ 
+            Reason  = $container.lastRebootInfo.reason
+            Action  = $container.lastRebootInfo.action
             Comment = $container.lastRebootInfo.comment
-            User = $container.lastRebootInfo.user
+            User    = $container.lastRebootInfo.user
         }
-        NumberOfProcessors = $container.numberOfProcessors
-        TotalRam = [math]::Ceiling($container.totalRam /1024 /1024)
+        NumberOfProcessors  = $container.numberOfProcessors
+        TotalRam            = [math]::Ceiling($container.totalRam / 1024 / 1024)
         maxHeartbeatTimeout = $container.maxHeartbeatTimeout
-        alertOffline = $container.alertOffline
-        alertShutdown = $container.alertShutdown
+        alertOffline        = $container.alertOffline
+        alertShutdown       = $container.alertShutdown
     }
 }

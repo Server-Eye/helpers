@@ -52,32 +52,20 @@ function Get-Note {
 
 function getNoteOfContainer ($containerID, $auth) {
     $notes = Get-SeApiContainerNoteList -AuthToken $auth -CId $containerId
-    $container = Get-SeApiContainer -AuthToken $auth -CId $containerId
-
-    $sensorhubName = ""
-    $connectorName = ""
-    $customerName = ""
-    
-    if ($container.type -eq "0") {
-        $customer = Get-SECustomer -AuthToken $auth -CustomerId $container.customerId
-        $connectorName = $container.Name
-        $connectorID = $container.cId
-        $customerName = $customer.Name
+    $Container = Get-CachedContainer -ContainerID $ContainerID -AuthToken $Auth
+    $customer = Get-CachedCustomer -customerid $container.customerid -authtoken $Auth
+    if ($container.type -eq 0) {
         foreach ($note in $notes) {
             $displayName = "$($note.prename) $($note.surname)".Trim() 
-            formatConnectorNote -note $note -auth $auth
+            formatConnectorNote -note $note -auth $auth -container $container -customer $Customer
     
         }
     }
     else {
-        $sensorhub = Get-SESensorhub -AuthToken $auth -SensorhubId $containerId
-        $sensorhubName = $sensorhub.Name
-        $SensorhubId = $Sensorhub.sensorhubId 
-        $connectorName = $sensorhub.'OCC-Connector'
-        $customerName = $sensorhub.Customer
+        $MAC = Get-CachedContainer -ContainerID $Container.parentId -AuthToken $AuthToken
         foreach ($note in $notes) {
             $displayName = "$($note.prename) $($note.surname)".Trim() 
-            formatSensorhubNote -note $note -auth $auth
+            formatSensorhubNote -note $note -auth $auth -container $container -customer $Customer -mac $mac
     
         }
     }
@@ -109,28 +97,29 @@ function formatSensorNote($note, $auth, $sensor) {
     }
 }
 
-function formatSensorhubNote($note, $auth) {
+function formatSensorhubNote($note,$container,$customer,$mac, $auth) {
+
     [PSCustomObject]@{
         Message = $note.Message 
         PostedOn = $note.postedOn
         PostedFrom = $displayName
         Email = $note.email
         NoteID = $note.nId
-        Sensorhub       = $sensorhubName
-        SensorhubId     = $SensorhubId
-        'OCC Connector' = $connectorName
-        Customer        = $customerName
+        Sensorhub       = $container.name
+        SensorhubId     = $container.cid
+        'OCC Connector' = $mac.name
+        Customer        = $Customer.companyname
     }
 }
-function formatConnectorNote($note, $auth) {
+function formatConnectorNote($note,$container,$customer, $auth) {
     [PSCustomObject]@{
         Message = $note.Message 
         PostedOn = $note.postedOn
         PostedFrom = $displayName
         Email = $note.email
         NoteID = $note.nId
-        'OCC Connector' = $connectorName
-        $ConnectorID = $ConnectorID
-        Customer        = $customerName
+        'OCC Connector' = $Container.name
+        ConnectorID = $Container.cid
+        Customer        = $customer.companyname
     }
 }

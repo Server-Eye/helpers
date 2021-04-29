@@ -67,20 +67,19 @@ function Get-ContainerState {
     }
     
     Process {
-        $container = Get-SEContainer -containerid $containerid -authtoken $AuthToken
-        
+        $container = Get-CachedContainer -ContainerID $containerid -AuthToken $AuthToken
         if ($start -and $end) {
-            $states = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -IncludeHints "true" -IncludeMessage "true" -Start ([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds() -End ([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds()
+            $states = Get-SeApiContainerStateList -cId $container.cid -AuthToken $AuthToken -IncludeHints "true" -IncludeMessage "true" -Start ([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds() -End ([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds()
         }
         else {
-            $states = Get-SeApiContainerStateList -cId $containerid -AuthToken $AuthToken -Limit $Limit -IncludeHints "true" -IncludeMessage "true"
+            $states = Get-SeApiContainerStateList -cId $container.cid -AuthToken $AuthToken -Limit $Limit -IncludeHints "true" -IncludeMessage "true"
         }
         foreach ($state in $states) {
-            if ($container.ConnectorID) {
-                formatOCCConnectorState -container $container -state $state
+            if ($container.type -eq 0) {
+                formatOCCConnectorState -container $container -state $state -AuthToken $AuthToken
             }
-            if ($container.SensorhubId) {
-                formatSensorhubState -container $container -state $state
+            if ($container.type -eq 2) {
+                formatSensorhubState -container $container -state $state -AuthToken $AuthToken
             }
         }
 
@@ -91,11 +90,12 @@ function Get-ContainerState {
     }
 }
 
-function formatOCCConnectorState($container, $state) {
+function formatOCCConnectorState($container, $state, $AuthToken) {
+    $customer = Get-CachedCustomer -CustomerId $container.customerId -AuthToken $auth
     [PSCustomObject]@{
-        Customer      = $container.Customer
+        Customer      = $customer.companyName
         Name          = $container.name
-        ConnectorID   = $container.ConnectorID
+        ConnectorID   = $container.cid
         StateId       = $state.sId
         Date          = $state.Date
         LastDate      = $state.lastDate
@@ -105,12 +105,14 @@ function formatOCCConnectorState($container, $state) {
         SilencedUntil = $state.silencedUntil
     }
 }
-function formatSensorhubState($container, $state) {
+function formatSensorhubState($container, $state,$AuthToken ) {
+    $customer = Get-CachedCustomer -CustomerId $container.customerId -AuthToken $auth
+    $MAC = Get-CachedContainer -ContainerID $Container.parentId -AuthToken $AuthToken
     [PSCustomObject]@{
-        Customer      = $container.Customer
+        Customer      = $customer.companyName
         Name          = $container.name
-        Connector     = $container."OCC-Connector"
-        SensorhubID   = $container.SensorhubId
+        Connector     = $MAC.name
+        SensorhubID   = $container.cid
         StateId       = $state.sId
         Date          = $state.Date
         LastDate      = $state.lastDate

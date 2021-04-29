@@ -71,7 +71,10 @@ function Get-Customer {
             }
             Update-TypeData @SECustomerTypeData
         }
-        $Global:ServerEyeCustomer = @()
+        if (!$Global:ServerEyeCustomer) {
+            $Global:ServerEyeCustomer = @()
+        }
+
 
     }
 

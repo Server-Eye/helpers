@@ -42,12 +42,13 @@ function Get-ContainerInventory {
 
 function formatInvetoryOfContainer ($ContainerID, $AuthToken) {
     $inventory = Get-SeApiContainerInventory -AuthToken $AuthToken -CId $ContainerID -Format json -ErrorAction SilentlyContinue
-    $Container = Get-SEContainer -containerid $ContainerID -AuthToken $AuthToken
-    if ($Container.ConnectorID) {
+    $Container = Get-CachedContainer -ContainerID $ContainerID -AuthToken $AuthToken
+    $Customer = Get-CachedCustomer -CustomerId $Container.customerId -AuthToken $AuthToken
+    if ($Container.type -eq 0) {
         [PSCustomObject]@{
-            Customer        = $Container.Customer
+            Customer        = $Customer.companyName
             "OCC Connector" = $Container.name
-            "OCC ConnectorID" = $Container.ConnectorID
+            "OCC ConnectorID" = $Container.cId
             BIOS = $inventory.BIOS
             CPU = $inventory.CPU
             DEVICES = $inventory.DEVICES
@@ -82,11 +83,12 @@ function formatInvetoryOfContainer ($ContainerID, $AuthToken) {
         }
     }
     else {
+        $MAC = Get-CachedContainer -ContainerID $Container.parentId -AuthToken $AuthToken
         [PSCustomObject]@{
-            Customer        = $Container.Customer
-            "OCC Connector" = $Container."OCC-Connector"
+            Customer        = $Customer.companyName
+            "OCC Connector" = $MAC.name
             Sensorhub       = $Container.name
-            SensorhubId     = $Container.SensorhubId
+            SensorhubId     = $Container.cId
             BIOS = $inventory.BIOS
             CPU = $inventory.CPU
             DEVICES = $inventory.DEVICES

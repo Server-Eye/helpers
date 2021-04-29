@@ -37,14 +37,7 @@ function Get-CustomerManager {
     }
     
     Process {
-        if ($global:ServerEyeCustomer.cid -contains $CustomerId) {
-            Write-Debug "Caching"
-            $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $CustomerId}
-        }else {
-            Write-Debug "API Call"
-            $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
-            $global:ServerEyeCustomer = $Customer
-        }
+        $Customer = Get-CachedCustomer -customerID $CustomerId -authtoken $AuthToken
         $managers = Get-SeApiCustomerManagerList -CId $Customer.cID -AuthToken $AuthToken
 
         foreach ($manager in $managers) {
