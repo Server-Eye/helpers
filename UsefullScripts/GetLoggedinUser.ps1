@@ -22,39 +22,66 @@ Param(
     [string]
     $CustomerID,
 
+    [parameter(Mandatory = $false,
+        HelpMessage = "Id of the Customer that should be checked")]
+    [ValidateNotNullOrEmpty()]
+    [switch]
+    $Client,
+
+    [parameter(Mandatory = $false,
+        HelpMessage = "Id of the Customer that should be checked")]
+    [ValidateNotNullOrEmpty()]
+    [switch]
+    $Terminalserver,
+
     [Parameter(Mandatory = $false,
         HelpMessage = "Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.")]
     $AuthToken
 )
 
-$type = "A9D8173C-9A40-406a-B7DB-538231F4E3A2"
+if ($Client.IsPresent -eq $true) {
+    $type = "A9D8173C-9A40-406a-B7DB-538231F4E3A2"
+}
+elseif ($Terminalserver.IsPresent -eq $true) {
+    $type = "993DB9BD-27A1-4082-85C4-815C126741A2"
+}
 
 $authtoken = Test-SEAuth -AuthToken $authtoken
 
-$Data = Get-SeApiMyNodesList -Filter Agent, Customer, container -AuthToken $AuthToken
-$Sensorhubs = $Data | Where-Object { $_.Type -eq 2 -and $_.subtype -eq 2}
+$data = Get-SeApiMyNodesList -Filter customer, agent, container -AuthToken $AuthToken -listType object
+$containers = $data.container
+$Sensorhubs = $containers | Where-Object { $_.subtype -eq 2 }
+
 $result = @()
+
 if ($CustomerID) {
-    $customers = $Data | Where-Object { $_.Type -eq 1 -and $_.id -eq $CustomerID } | Sort-Object -Property Name
+    $customers = $Data.managedCustomers | Where-Object { $_.id -eq $CustomerID }
+    $customers += $data.customer  | Where-Object { $_.id -eq $CustomerID }
 }
 else {
-    $customers = $Data | Where-Object { $_.Type -eq 1 } | Sort-Object -Property Name
+    $customers = $Data.managedCustomers
+    $customers += $data.customer
 }
 
 foreach ($customer in $customers) {
-    $PCAgents = $Data | Where-Object { $_.Type -eq 3 -and $_.agentType -eq $type -and $_.customerId -eq $customer.id }
+    $Agents = $Data.agent | Where-Object { $_.agentType -eq $type -and $_.customerId -eq $customer.id }
 
-    foreach ($pcagent in $PCAgents) {
 
-        $state = Get-SeApiAgentStateList -AuthToken $AuthToken -AId $pcagent.id -Limit 1 -IncludeRawData "true"
+    foreach ($Agent in $Agents) {
 
-        $Sensorhub = $Sensorhubs | Where-Object { $_.id -eq $pcagent.parentId }
+        $state = Get-SeApiAgentStateList -AuthToken $AuthToken -AId $agent.id -Limit 1 -IncludeRawData "true"
+
+        $Sensorhub = $Sensorhubs | Where-Object { $_.id -eq $agent.parentId }
         
         [PSCustomObject]@{ 
-            Customer   = $Customer.Name
-            Sensorhub  = $Sensorhub.name
-            user       = $state.raw.data.sysInfo.lastlogonuser
-            lastLogon  = $state.raw.data.sysInfo.lastLogonUserTime
+            Customer       = $Customer.Name
+            Sensorhub      = $Sensorhub.name
+            user           = if ($Client) { $state.raw.data.sysInfo.lastlogonuser }elseif ($Terminalserver) {
+                $state.raw.data.sessInfo.user
+            }
+            lastLogon      = if ($Client) { $state.raw.data.sysInfo.lastLogonUserTime }elseif ($Terminalserver) {
+                $state.raw.data.sessInfo.login
+            }
             LastConnection = $Sensorhub.lastDate
         }
     }

@@ -12,7 +12,7 @@
     RootModule             = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion          = '2.16.0'
+    ModuleVersion          = '2.16.1'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -172,7 +172,7 @@
             IconUri      = 'https://github.com/Server-Eye/helpers/raw/master/ServerEye.Powershell.Helper/icon.png'
     
             # ReleaseNotes of this module
-            ReleaseNotes = 'Added Caching.'
+            ReleaseNotes = 'Bug Fix.'
     
             # External dependent modules of this module
             # ExternalModuleDependencies = ''
