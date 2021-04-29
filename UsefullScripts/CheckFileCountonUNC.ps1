@@ -127,7 +127,7 @@ if ($null -eq $drive) {
     $api.setStatus([ServerEye.PowerShell.API.PowerShellStatus]::ERROR) 
 
 }
-#Check if HBK file is on Drive
+#Check if file is on Drive
 else {
     $File = (Get-ChildItem -Path $drive.Root)
     #Check if file is older than Hours Parameter
