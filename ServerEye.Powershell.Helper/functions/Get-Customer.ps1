@@ -67,40 +67,31 @@ function Get-Customer {
         if (!(Get-Typedata "ServerEye.Customer")) {
             $SECustomerTypeData = @{
                 TypeName                  = "ServerEye.Customer"
-                DefaultDisplayPropertySet = "Name", "CustomerId", "CustomerNumber"
-    
+                DefaultDisplayPropertySet = "Name", "CustomerId", "CustomerNumber"    
             }
             Update-TypeData @SECustomerTypeData
         }
+        $Global:ServerEyeCustomer = @()
 
     }
 
     Process {
         if ($all.IsPresent -eq $true) {
             $Listcustomers = Get-SeApiCustomerList -AuthToken $AuthToken
+            $Global:ServerEyeCustomer = $Listcustomers 
             foreach ($ListCustomer in $ListCustomers) {
-                
-                [PSCustomObject]@{
-                    PSTypeName     = "ServerEye.Customer"
-                    Name           = $ListCustomer.companyName
-                    CustomerId     = $ListCustomer.cId
-                    CustomerNumber = $ListCustomer.customerNumberExtern
-                    Street         = $ListCustomer.street
-                    StreetNumber   = $ListCustomer.streetNumber
-                    ZipCode        = $ListCustomer.zipCode
-                    City           = $ListCustomer.city
-                    country        = $Listcustomer.country
-                }
+                Format-Customer -Customer $ListCustomer -AuthToken $AuthToken
             }
         }
         elseif ($CustomerId) {
-            Format-Customer -CustomerId $CustomerId -AuthToken $AuthToken
+            Format-Customer -Customer $CustomerId -AuthToken $AuthToken
+
         }
         else {
             $Nodecustomers = Get-SeApiMyNodesList -Filter customer -AuthToken $AuthToken
             foreach ($Nodecustomer in $Nodecustomers) {
                 if ((-not $Filter) -or ($Nodecustomer.name -like $Filter)) {
-                Format-Customer -CustomerId $Nodecustomer.id -AuthToken $AuthToken
+                    Format-Customer -Customer $Nodecustomer -AuthToken $AuthToken
                 }
             }
         }
@@ -108,16 +99,21 @@ function Get-Customer {
 }
 
 function Format-Customer {
+    [CmdletBinding()]
     param (
-        $CustomerId,
+        $Customer,
         [Parameter(ValueFromPipelineByPropertyName, Mandatory = $false)]
         [alias("ApiKey", "Session")]
         $AuthToken
     )
-
-        $customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
-        Write-Debug $customer
-        [PSCustomObject]@{
+    if ($Customer.gettype() -eq [String]) {
+        $customer = Get-SeApiCustomer -CId $Customer -AuthToken $AuthToken
+    }elseif ($customer.ID) {
+        $customer = Get-SeApiCustomer -CId $Customer.id -AuthToken $AuthToken
+    }
+    $Global:ServerEyeCustomer += $customer
+    Write-Debug $customer
+    [PSCustomObject]@{
         PSTypeName             = "ServerEye.Customer"
         Name                   = $customer.companyName
         CustomerId             = $customer.cId
@@ -136,5 +132,4 @@ function Format-Customer {
         properties             = $customer.properties
         licenses               = $customer.licenses
     }
-
 }
