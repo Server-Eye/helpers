@@ -38,7 +38,7 @@ Param(
 
 #region internal variables
 $Type = 103
-$start = (Get-Date).($TimeFrame)($TimeToAdd)
+$start = (Get-Date).($TimeFrame)(-$TimeToAdd)
 $end = Get-Date
 $startMS = (([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds())
 $endMS = (([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds())
@@ -51,7 +51,7 @@ $endMS = (([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds())
 $authtoken = Test-SEAuth -authtoken $authtoken
 
 $timespan = New-TimeSpan -Start $start -End $end
-Write-Output "Deleted Sensorhubs in the last $($timespan.Days) Days"
+
 if ($customerID) {
     $customers = Get-SeApiCustomerList -authtoken $authtoken | Where-Object {$_.cid -eq $customerID}
 }else {
@@ -59,14 +59,18 @@ if ($customerID) {
 }
 
 foreach ($customer in $customers) {
+    Write-Verbose "Deleted Sensorhubs in the last $($timespan.Days) Days for Customer $($customer.Companyname)"
     try {
         $Containers = Get-SeApiActionlogList -AuthToken $authtoken -Type $Type -Start $startms -End $endMS -Of $customer.cid
+
         if ($Containers) {
             foreach ($Container in $Containers) {
+                Write-Debug $Container
                 [PSCustomObject]@{
                     Kunde         = $customer.Companyname
                     ContainerID   = if($Container.target.cid){$Container.target.cid}else {$Container.target.id} 
                     ContainerName = $Container.target.name
+                    Date = $Container.changedate
                 } 
             } 
         }
