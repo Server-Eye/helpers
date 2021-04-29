@@ -39,7 +39,15 @@ function Get-CustomerSetting {
     }
     
     Process {
-        getSettingByCustomer -customerId $CustomerId -auth $AuthToken
+        if ($global:ServerEyeCustomer.cid -contains $CustomerId) {
+            Write-Debug "Caching"
+            $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $CustomerId}
+        }else {
+            Write-Debug "API Call"
+            $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
+            $global:ServerEyeCustomer = $Customer
+        }
+        getSettingByCustomer -customer $Customer -auth $AuthToken
     }
 
     End {
@@ -47,13 +55,10 @@ function Get-CustomerSetting {
     }
 }
 
-function getSettingByCustomer ($customerId, $auth) {
-    $settings = Get-SeApiCustomerSettingList -cId $customerId -AuthToken $auth
-
-    $Customer = Get-SeApiCustomer -cid $customerId -AuthToken $auth
-
+function getSettingByCustomer ($customer, $auth) {
+    $settings = Get-SeApiCustomerSettingList -cId $customer.cid -AuthToken $auth
     [PSCustomObject]@{
-        CustomerId      = $settings.cid
+        CustomerId      = $Customer.cid
         CustomerName    = $Customer.companyName
         TANSSURL        = $settings.TANSSURL
         TANSSVersion    = $settings.TANSSVersion

@@ -36,12 +36,19 @@ function Get-CustomerSecret {
     }
 
     Process {
-        $Customer = Get-SECustomer -CustomerId $CustomerId -AuthToken $AuthToken
-        $Secret = Get-SeApiCustomerSecret -cid $CustomerId -AuthToken $AuthToken
+        if ($global:ServerEyeCustomer.cid -contains $CustomerId) {
+            Write-Debug "Caching"
+            $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $CustomerId}
+        }else {
+            Write-Debug "API Call"
+            $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
+            $global:ServerEyeCustomer = $Customer
+        }
+        $Secret = Get-SeApiCustomerSecret -cid $Customer.cid -AuthToken $AuthToken
         [PSCustomObject]@{
-            Name           = $customer.Name
-            CustomerId     = $customer.CustomerId
-            CustomerNumber = $customer.CustomerNumber
+            Name           = $customer.companyName
+            CustomerId     = $customer.cId
+            CustomerNumber = $customer.customerNumberExtern
             secretKey      = $Secret.secretKey
         }
     }
