@@ -60,7 +60,8 @@ function Get-Container {
 
     Begin{
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
-        $containerList = Get-SeApiMyNodesList -Filter container -AuthToken $AuthToken 
+        $containerList = Get-SeApiMyNodesList -Filter container -AuthToken $AuthToken
+        $Global:ServerEyeContainer = $containerList
     }
     
     Process {
@@ -79,7 +80,22 @@ function Get-Container {
     }
 }
 
-function getOCCConnector($container,$auth) {
+function getOCCConnector{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]
+        $container,
+        [Parameter(Mandatory=$true)]
+        $auth
+    )
+    if ($global:ServerEyeCustomer.cid -contains $container.customerId) {
+        Write-Debug "Customer Caching"
+        $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $container.customerId}
+    }else {
+        Write-Debug "Customer API Call"
+        $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $Auth
+        $global:ServerEyeCustomer = $Customer
+    }
     $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
     $notification = $containerList | Where-Object {$_.id -eq $container.cId}
 
@@ -92,9 +108,23 @@ function getOCCConnector($container,$auth) {
     }
 }
 
-function getSensorhub($container, $auth) {
+function getSensorhub{
+    [CmdletBinding()]
+    Param(
+        [Parameter(Mandatory=$true)]
+        $container,
+        [Parameter(Mandatory=$true)]
+        $auth
+    )
     $occConnector = $containerList | Where-Object {$_.id -eq $container.parentid}
-    $customer = Get-SeApiCustomer -cId $container.customerId -AuthToken $auth
+    if ($global:ServerEyeCustomer.cid -contains $container.customerId) {
+        Write-Debug "Customer Caching"
+        $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $container.customerId}
+    }else {
+        Write-Debug "Customer API Call"
+        $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $Auth
+        $global:ServerEyeCustomer = $Customer
+    }
     $notification = $containerList | Where-Object {$_.id -eq $container.cId}
     [PSCustomObject]@{
         Name = $container.name
