@@ -37,7 +37,7 @@ if ($Customerid) {
 }
 else {
     $Customers = $Data.managedCustomers
-    $Customers += $Customer
+    $Customers += $Data.Customer
 }
 
 
