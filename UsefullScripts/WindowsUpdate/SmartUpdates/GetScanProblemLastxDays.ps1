@@ -31,9 +31,9 @@ $AuthToken = Test-SEAuth -AuthToken $AuthToken
 $Data = Get-SeApiMyNodesList -AuthToken $AuthToken -ListType object -Filter agent, customer, container
 
 if ($Customerid) {
+    $Customers = $Data.managedCustomers
     $Customers += $Data.Customer
-    $Customers = $Data.managedCustomers | Where-Object { $_.ID -eq $CustomerId }
-    
+    $Customers = $Customers | Where-Object { $_.ID -eq $CustomerId }
 }
 else {
     $Customers = $Data.managedCustomers
