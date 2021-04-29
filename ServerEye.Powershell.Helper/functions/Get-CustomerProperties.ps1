@@ -34,7 +34,14 @@ function Get-CustomerProperties {
     }
     
     Process {
-        $customer = Get-SeApiCustomer -AuthToken $authtoken -CId $CustomerId
+        if ($global:ServerEyeCustomer.cid -contains $CustomerId) {
+            Write-Debug "Caching"
+            $Customer = $global:ServerEyeCustomer | Where-Object {$_.cid -eq $CustomerId}
+        }else {
+            Write-Debug "API Call"
+            $Customer = Get-SeApiCustomer -CId $CustomerId -AuthToken $AuthToken
+            $global:ServerEyeCustomer = $Customer
+        }
         [PSCustomObject]@{
             Name       = $customer.companyName
             CustomerId = $customer.cid
