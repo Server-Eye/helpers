@@ -70,7 +70,7 @@ function Get-Container {
     }
     
     Process {
-        $container = Get-SeApiContainer -cId $containerid -AuthToken $AuthToken
+        $container = Get-CachedContainer -containerid $containerid -authtoken $authtoken
         if ($container.type -eq 0) {
             $global:ServerEyeMAC += $container
             getOCCConnector -container $container -auth $AuthToken
@@ -112,14 +112,14 @@ function getSensorhub {
         [Parameter(Mandatory = $true)]
         $auth
     )
-    $occConnector = $containerList | Where-Object { $_.id -eq $container.parentid }
+    $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $container.parentid
     $customer = Get-CachedCustomer -customerid $container.customerId -AuthToken $auth
     $notification = $containerList | Where-Object { $_.id -eq $container.cId }
     [PSCustomObject]@{
         Name                = $container.name
         IsServer            = $container.isServer
         IsVM                = $container.isVm
-        'OCC-Connector'     = $occConnector.name
+        'OCC-Connector'     = $MAC.name
         Customer            = $customer.companyName
         SensorhubId         = $container.cId
         HasNotification     = $notification.hasNotification
