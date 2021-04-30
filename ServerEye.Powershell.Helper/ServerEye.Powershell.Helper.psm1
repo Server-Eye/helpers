@@ -164,7 +164,7 @@ function Get-CachedAgent {
     }
 }
 
-function CachedSensorTypes{
+function CachedSensorTypes {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory = $false)]
@@ -196,7 +196,8 @@ function CachedSensorTypes{
         $suType | Add-Member -type NoteProperty -name forFree -value $true
         $Global:ServerEyeSensorTypes.add($suType.agentType, $suType)
     
-    }else {
+    }
+    else {
         Write-Debug "Type Caching"
     }
 }

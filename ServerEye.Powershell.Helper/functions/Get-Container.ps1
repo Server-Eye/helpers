@@ -72,11 +72,9 @@ function Get-Container {
     Process {
         $container = Get-CachedContainer -containerid $containerid -authtoken $authtoken
         if ($container.type -eq 0) {
-            $global:ServerEyeMAC += $container
             getOCCConnector -container $container -auth $AuthToken
         }
         if ($container.type -eq 2) {
-            $global:ServerEyeCC += $container
             getSensorhub -container $container -auth $AuthToken
         }
     }
