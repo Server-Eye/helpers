@@ -153,26 +153,33 @@ function Get-SensorState {
 
         }
         Write-Debug "Get Sensor Information for ID:$($SensorId)"
-        $sensor = Get-SESensor -SensorID $SensorId -AuthToken $AuthToken
+        $sensor = Get-CachedAgent -AgentID $sensorId -AuthToken $auth
+        $type = $Global:ServerEyeSensorTypes.Get_Item($sensor.type)
+        $CC = Get-CachedContainer -ContainerID $sensor.parentId -AuthToken $auth
+        $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $CC.parentID
+        $customer = Get-CachedCustomer -AuthToken $auth -CustomerId $CC.CustomerId
         Write-Debug "Sensor: $sensor"
         
         foreach ($state in $states) {
             Write-Debug "State: $state"
             [PSCustomObject]@{
-                Name          = $sensor.Name
-                SensorType    = $Sensor.SensorType
-                SensorTypeID  = $Sensor.SensorTypeID
-                SensorId      = $state.aId
-                StateId       = $state.sId
-                Date          = $state.Date
-                LastDate      = $state.lastDate
-                Error         = $state.state -or $state.forceFailed
-                Resolved      = $state.resolved
-                SilencedUntil = (([System.DateTimeOffset]::FromUnixTimeMilliseconds($state.silencedUntil)).DateTime)
-                HintCount     = $state.hintCount
-                Hints         = $state.hints
-                Message       = $state.Message
-                Raw           = $state.raw
+                Customer        = $customer.Companyname
+                Sensorhub       = $CC.Name
+                "OCC-Connector" = $MAC.Name
+                Name            = $sensor.Name
+                SensorType      = $Type.defaultName
+                SensorTypeID    = $Type.agentType
+                SensorId        = $state.aId
+                StateId         = $state.sId
+                Date            = $state.Date
+                LastDate        = $state.lastDate
+                Error           = $state.state -or $state.forceFailed
+                Resolved        = $state.resolved
+                SilencedUntil   = (([System.DateTimeOffset]::FromUnixTimeMilliseconds($state.silencedUntil)).DateTime)
+                HintCount       = $state.hintCount
+                Hints           = $state.hints
+                Message         = $state.Message
+                Raw             = $state.raw
             }
         }
 

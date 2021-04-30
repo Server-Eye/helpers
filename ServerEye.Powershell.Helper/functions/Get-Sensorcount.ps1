@@ -53,11 +53,12 @@ function Get-Sensorcount {
     )
     Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
+        $Agents = Get-SeApiMyNodesList -Filter agent -AuthToken $AuthToken
     }
 
     Process {
-        $Customer = Get-SECustomer -CustomerId $CustomerId -AuthToken $AuthToken
-        $Sensors = Get-SeApiMyNodesList -Filter agent -AuthToken $AuthToken | Where-Object { $_.customerId -eq $CustomerId }
+        $customer = Get-CachedCustomer -customerid $CustomerId -authtoken $AuthToken
+        $Sensors = $Agents| Where-Object { $_.customerId -eq $CustomerId }
 
         if ((!$Sensors.Count) -and ($Sensors.Count -ne 0)) {
             $Count = 1
@@ -66,7 +67,7 @@ function Get-Sensorcount {
             $Count = $Sensors.Count
         }
         [PSCustomObject]@{
-            Customer       = $Customer.Name
+            Customer       = $Customer.CompanyName
             "Sensor Count" = $Count
         }
 

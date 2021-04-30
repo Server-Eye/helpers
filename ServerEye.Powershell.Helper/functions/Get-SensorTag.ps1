@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get a list of all Tags from a Sensor.
 
@@ -37,30 +37,32 @@
     https://api.server-eye.de/docs/2/
 #>
 function Get-Sensortag {
-    [CmdletBinding(DefaultParameterSetName='byFilter')]
+    [CmdletBinding(DefaultParameterSetName = 'byFilter')]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $SensorId,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
-    Begin{
+    Begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
 
     Process {
-            $Tags = Get-SeApiAgentTagList -AId $SensorId -AuthToken $authtoken
-            $Sensor = Get-SeApiAgent -AId $sensorId -AuthToken $AuthToken
-            $sensorhub = Get-SESensorhub -SensorhubId $Sensor.parentId -AuthToken $AuthToken
+        $Tags = Get-SeApiAgentTagList -AId $SensorId -AuthToken $authtoken
+        $sensor = Get-CachedAgent -AgentID $sensorId -AuthToken $auth
+        $CC = Get-CachedContainer -ContainerID $sensor.parentId -AuthToken $auth
+        $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $CC.parentID
+        $customer = Get-CachedCustomer -AuthToken $auth -CustomerId $CC.CustomerId
         
-                [PSCustomObject]@{
-                    Sensorname = $sensor.Name
-                    SensorId = $sensor.aId
-                    Sensorhub = $sensorhub.name
-                    'OCC-Connector' = $sensorhub.'OCC-Connector'
-                    Customer = $sensorhub.customer
-                    Tag = $tags.Name
-                }
+        [PSCustomObject]@{
+            Sensorname      = $sensor.Name
+            SensorId        = $sensor.aId
+            Sensorhub       = $CC.name
+            'OCC-Connector' = $MAC.Name
+            Customer        = $customer.CompanyName
+            Tag             = $tags.Name
+        }
             
     }
 }

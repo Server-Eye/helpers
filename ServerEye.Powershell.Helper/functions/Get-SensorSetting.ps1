@@ -1,4 +1,4 @@
- <#
+<#
     .SYNOPSIS
     Get all settings for a sensor. 
     
@@ -14,46 +14,46 @@
 function Get-SensorSetting {
     [CmdletBinding()]
     Param(
-        [parameter(ValueFromPipelineByPropertyName,Mandatory=$true)]
+        [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
         $SensorId,
-        [Parameter(Mandatory=$false)]
+        [Parameter(Mandatory = $false)]
         $AuthToken
     )
 
-    Begin{
-        $AuthToken = Test-Auth -AuthToken $AuthToken
+    Begin {
+        $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     
     Process {
         getSettingBySensor -sensorId $SensorId -auth $AuthToken
     }
 
-    End{
+    End {
 
     }
 }
 
 function getSettingBySensor ($sensorId, $auth) {
     $settings = Get-SeApiAgentSettingList -AId $sensorId -AuthToken $auth
+    $sensor = Get-CachedAgent -AgentID $sensorId -AuthToken $auth
+    $CC = Get-CachedContainer -ContainerID $sensor.parentId -AuthToken $auth
+    $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $CC.parentID
+    $customer = Get-CachedCustomer -AuthToken $auth -CustomerId $CC.CustomerId
 
-    $sensor = Get-Sensor -SensorId $sensorId -AuthToken $auth
-    $result = @()
     foreach ($setting in $settings) {
-        $out = New-Object psobject
-        $out | Add-Member NoteProperty Key ($setting.key)
-        $key = $setting.key | Out-String -Stream
-        if ($key.ToLower() -eq "password") {
-            $out | Add-Member NoteProperty Value ("Password cannot be exported")
-            # the encrypted value could be exported but it is useless and breaks the Excel export
-        } else {
-            $out | Add-Member NoteProperty Value ($setting.value)
+        [PSCustomObject]@{
+            Key             = $setting.key
+            Value           = if ($setting.key.ToLower() -eq "password") { "Password cannot be exported" }else {
+                $setting.value
+            }
+            SensorId        = $sensor.aid
+            Sensor          = $sensor.name
+            Sensorhub       = $CC.Name
+            "OCC-Connector" = $MAC.Name
+            Customer        = $Customer.companyName
+
         }
-        $out | Add-Member NoteProperty SensorId ($sensor.SensorId)
-        $out | Add-Member NoteProperty Sensor ($sensor.name)
-        $out | Add-Member NoteProperty Sensorhub ($sensor.sensorhub)
-        $out | Add-Member NoteProperty OCC-Connector ($sensor.'OCC-Connector')
-        $out | Add-Member NoteProperty Customer ($sensor.customer)
-        $out
+
     }
 }
 

@@ -109,11 +109,10 @@ function Format-Customer {
         $AuthToken
     )
     if ($Customer.gettype() -eq [String]) {
-        $customer = Get-SeApiCustomer -CId $Customer -AuthToken $AuthToken
+        $Customer = Get-CachedCustomer -customerID $Customer -authtoken $AuthToken
     }elseif ($customer.ID) {
-        $customer = Get-SeApiCustomer -CId $Customer.id -AuthToken $AuthToken
+        $Customer = Get-CachedCustomer -customerID $Customer.id  -authtoken $AuthToken
     }
-    $Global:ServerEyeCustomer += $customer
     Write-Debug $customer
     [PSCustomObject]@{
         PSTypeName             = "ServerEye.Customer"

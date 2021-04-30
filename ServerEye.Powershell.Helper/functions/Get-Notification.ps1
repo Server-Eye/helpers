@@ -103,17 +103,21 @@ function getNotificationOfContainer ($containerID, $auth) {
 
 function getNotificationBySensor ($sensorId, $auth) {
     $notifies = Get-SeApiAgentNotificationList -AuthToken $auth -AId $sensorId
-    $sensor = get-SeSensor -SensorId $sensorId -AuthToken $auth
+    $sensor = Get-CachedAgent -AgentID $sensorId -AuthToken $auth
+    $CC = Get-CachedContainer -ContainerID $sensor.parentID -AuthToken $Auth
+    $MAC = Get-CachedContainer -ContainerID $CC.parentID -AuthToken $Auth
+    $customer = Get-CachedCustomer -customerid $CC.customerid -authtoken $Auth
 
     foreach ($notify in $notifies) {
         $displayName = "$($notify.prename) $($notify.surname)".Trim() 
         if ((-not $filter) -or ($notify.useremail -like $filter) -or $displayName -like $filter) {
-            formatSensorNotification -notify $notify -auth $auth -sensor $sensor
+            formatSensorNotification -notify $notify  -sensor $sensor -CC $CC -mac $MAC -Customer $customer -auth $auth
         }
     }
 
 }
-function formatSensorNotification($notify, $auth, $sensor) {
+function formatSensorNotification($notify, $CC, $MAC, $Customer, $auth) {
+
     [PSCustomObject]@{
         Name            = $displayName
         Email           = $notify.useremail
@@ -141,13 +145,13 @@ function formatSensorNotification($notify, $auth, $sensor) {
         NotificationId  = $notify.nId
         Sensor          = $sensor.name
         SensorID        = $sensor.SensorId
-        Sensorhub       = $sensor.sensorhub
-        'OCC-Connector' = $sensor.'OCC-Connector'
-        Customer        = $sensor.customer
+        Sensorhub       = $CC.name
+        'OCC-Connector' = $MAC.Name
+        Customer        = $Customer.CompanyName
     }
 }
 
-function formatMACNotification($notify, $container, $displayName, $auth) {
+function formatMACNotification($notify, $sensor, $container, $displayName, $auth) {
     [PSCustomObject]@{
         Name            = $displayName
         Email           = $notify.useremail

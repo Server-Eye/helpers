@@ -13,6 +13,7 @@ function Get-SensorhubProposal {
     Param(
         [parameter(Mandatory = $true, ValueFromPipelineByPropertyName)]
         $SensorhubId,
+        [parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
         $AuthToken
     )
 
@@ -22,17 +23,19 @@ function Get-SensorhubProposal {
     
     Process {
         $props = Get-SeApiContainerProposalList -AuthToken $authtoken -CId $SensorhubId
+        $CC = Get-CachedContainer -ContainerID $SensorhubId -AuthToken $auth
+        $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $cc.parentID
+        $customer = Get-CachedCustomer -AuthToken $auth -CustomerId $cc.CustomerId
 
         foreach ($prop in $props) {
-            $sensorhub = Get-SESensorhub -SensorhubId $SensorhubId -AuthToken $AuthToken
             [PSCustomObject]@{
                 Name            = $prop.Name
                 ProposalID      = $prop.pid 
                 forFree         = $prop.forfree
                 Beta            = $prop.Beta
-                Sensorhub       = $sensorhub.Name
-                "OCC-Connector" = $sensorhub."OCC-Connector"
-                Customer        = $sensorhub.Customer
+                Sensorhub       = $CC.Name
+                "OCC-Connector" = $MAC.Name
+                Customer        = $Customer.CompanyName
             }
         }
     }

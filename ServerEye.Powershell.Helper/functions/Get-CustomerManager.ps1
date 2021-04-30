@@ -37,6 +37,7 @@ function Get-CustomerManager {
     }
     
     Process {
+        
         $Customer = Get-CachedCustomer -customerID $CustomerId -authtoken $AuthToken
         $managers = Get-SeApiCustomerManagerList -CId $Customer.cID -AuthToken $AuthToken
 

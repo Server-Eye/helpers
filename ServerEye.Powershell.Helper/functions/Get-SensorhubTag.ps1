@@ -54,13 +54,15 @@ function Get-Sensorhubtag {
 
     Process {
             $Tags = Get-SeApiContainerTagList -cid $SensorhubId -AuthToken $authtoken
-            $sensorhub = Get-SESensorhub -SensorhubId $SensorhubId -AuthToken $AuthToken
+            $CC = Get-CachedContainer -ContainerID $SensorhubId -AuthToken $auth
+            $MAC = Get-CachedContainer -AuthToken $auth -ContainerID $cc.parentID
+            $customer = Get-CachedCustomer -AuthToken $auth -CustomerId $cc.CustomerId
         
                 [PSCustomObject]@{
-                    Sensorhub = $sensorhub.name
-                    SensorhubId = $sensorhub.SensorhubId
-                    'OCC-Connector' = $sensorhub.'OCC-Connector'
-                    Customer = $sensorhub.customer
+                    Sensorhub = $CC.name
+                    SensorhubId = $CC.cid
+                    'OCC-Connector' = $MAC.Name
+                    Customer = $customer.CompanyName
                     Tag = $tags.Name
                 }
             
