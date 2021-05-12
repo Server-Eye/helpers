@@ -1,3 +1,4 @@
+#region Call Helper
 function Intern-DeleteJson($url, $session, $apiKey) {
     if ($authtoken -is [string]) {
         return (Invoke-RestMethod -Uri $url -Method Delete -Headers @{"x-api-key" = $authtoken } );
@@ -53,6 +54,8 @@ function Remove-Null {
         $result
     }
 }
+#endregion Call Helper
+#region Helper Function
 function Get-CachedContainer {
     [CmdletBinding()]
     Param(
@@ -201,8 +204,7 @@ function CachedSensorTypes {
         Write-Debug "Type Caching"
     }
 }
-
-
+#endregion Helper Function
 
 $moduleRoot = Split-Path -Path $MyInvocation.MyCommand.Path
 
