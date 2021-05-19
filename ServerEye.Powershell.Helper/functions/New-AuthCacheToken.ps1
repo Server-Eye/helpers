@@ -19,16 +19,13 @@ function New-AuthCacheToken {
     [CmdletBinding(DefaultParameterSetName = "byPassword")]
     Param ( 
         [Parameter(Mandatory = $true,ParameterSetName = "ByPassword")]
-        [securestring]$password,
+        [securestring]$password = (Read-Host -Prompt "OCC Password?" -AsSecureString),
         [Parameter(Mandatory = $true,ParameterSetName = "ByKey")]
         $privateKey,
         [Parameter(Mandatory = $false,ParameterSetName = "ByPassword")]
         [Parameter(Mandatory = $false,ParameterSetName = "ByKey")]
         [alias("ApiKey", "Session")]
         $AuthToken
-
-
-
     )
 
     begin {
@@ -37,7 +34,7 @@ function New-AuthCacheToken {
     Process {
         if ($password) {
             $reqBody = @{  
-                'password'   = $password.GetNetworkCredential().Password
+                'password'   = $password | ConvertFrom-SecureString -AsPlainText
             }
         }elseif ($privateKey) {
             $reqBody = @{  
@@ -49,6 +46,7 @@ function New-AuthCacheToken {
 
         $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
         $Global:ServerEyeAuthCacheToken = $Result.token
+        Write-Output $result
     }
 
     End {
