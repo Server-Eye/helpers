@@ -1,15 +1,13 @@
 <#
     .SYNOPSIS
-    Get Vault
+    Get a Vault
     
     .DESCRIPTION
-     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
+    Get a specific Vault
 
-    .PARAMETER CustomerId
-    ID des Kunden bei dem die Einstellungen geändert werden sollen.
+    .PARAMETER VaultID
+    ID of the Vault
 
-    .PARAMETER Filter
-    Name der Gruppe die geändert werden soll
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
@@ -21,7 +19,7 @@ function Get-Vault {
         [Parameter(Mandatory = $false)]
         [alias("ApiKey", "Session")]
         $AuthToken,
-        [Parameter(Mandatory = $true)]
+        [Parameter(Mandatory = $true,ValueFromPipelineByPropertyName=$true)]
         $VaultID
     )
 

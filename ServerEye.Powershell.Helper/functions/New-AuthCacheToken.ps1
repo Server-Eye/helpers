@@ -1,29 +1,36 @@
 <#
     .SYNOPSIS
-    Get Vault
+    Create Authtoken
     
     .DESCRIPTION
-     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
+    Create a Authtoken for the Server-Eye Vaults
 
-    .PARAMETER CustomerId
-    ID des Kunden bei dem die Einstellungen geändert werden sollen.
+    .PARAMETER password
+    OCC User Password the token should be created for
 
-    .PARAMETER Filter
-    Name der Gruppe die geändert werden soll
+    .PARAMETER privateKey
+    OCC User privateKey the token should be created for
+
+    .PARAMETER Persist
+    Token will be stored to $Global:ServerEyeAuthCacheToken
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
 #>
 function New-AuthCacheToken {
-    [CmdletBinding(DefaultParameterSetName = "byPassword")]
+    [CmdletBinding()]
     Param ( 
-        [Parameter(Mandatory = $true,ParameterSetName = "ByPassword")]
-        [securestring]$password = (Read-Host -Prompt "OCC Password?" -AsSecureString),
-        [Parameter(Mandatory = $true,ParameterSetName = "ByKey")]
+        [Parameter(Mandatory = $false)]
+        [securestring]$password,
+
+        [Parameter(Mandatory = $false)]
         $privateKey,
-        [Parameter(Mandatory = $false,ParameterSetName = "ByPassword")]
-        [Parameter(Mandatory = $false,ParameterSetName = "ByKey")]
+
+        [Parameter(Mandatory = $false)]
+        [switch] $Persist,      
+
+        [Parameter(Mandatory = $false)]
         [alias("ApiKey", "Session")]
         $AuthToken
     )
@@ -32,20 +39,22 @@ function New-AuthCacheToken {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     Process {
-        if ($password) {
-            $reqBody = @{  
-                'password'   = $password | ConvertFrom-SecureString -AsPlainText
+        if (!$password -and !$privateKey) {
+            $password = Read-Host -Prompt "OCC Password?" -AsSecureString
+        }
+        $reqBody = @{  
+            'password'   = if ($password) { $password | ConvertFrom-SecureString -AsPlainText }else {
+                $null
             }
-        }elseif ($privateKey) {
-            $reqBody = @{  
-                'privateKey'   = $privateKey
-            }
+            'privateKey' = $privateKey
         }
 
         $url = "https://api-ms.server-eye.de/3/auth/token"
 
         $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
-        $Global:ServerEyeAuthCacheToken = $Result.token
+        if ($Persist) {
+            $Global:ServerEyeAuthCacheToken = $Result.token   
+        }
         Write-Output $result
     }
 

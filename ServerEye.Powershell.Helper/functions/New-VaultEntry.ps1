@@ -1,48 +1,47 @@
 <#
     .SYNOPSIS
-    Get Vault
+    Create Vault Entry
     
     .DESCRIPTION
-     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
+    Creates an Entry in the given Vault with the given Data
 
-    .PARAMETER CustomerId
-    ID des Kunden bei dem die Einstellungen geändert werden sollen.
+    .PARAMETER name
+    Name of the entry
 
-    .PARAMETER Filter
-    Name der Gruppe die geändert werden soll
+    .PARAMETER description
+    Description for the entry
+
+    .PARAMETER vaultId
+    ID of the Vault,
+
+    .PARAMETER token
+    A token created with New-SEAuthCacheToken
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
 #>
 function New-VaultEntry {
-    [CmdletBinding(DefaultParameterSetName = "byPassword")]
+    [CmdletBinding()]
     Param ( 
-        [Parameter(Mandatory = $true, ParameterSetName = "byToken" )]
-        [Parameter(Mandatory = $true, ParameterSetName = "byPassword")]
-        [Parameter(Mandatory = $true, ParameterSetName = "byKey")]
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         $name,
-        [Parameter(Mandatory = $true, ParameterSetName = "byToken" )]
-        [Parameter(Mandatory = $true, ParameterSetName = "byPassword")]
-        [Parameter(Mandatory = $true, ParameterSetName = "byKey")]
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         $description,
-        [Parameter(Mandatory = $true, ParameterSetName = "byToken" )]
-        [Parameter(Mandatory = $true, ParameterSetName = "byPassword")]
-        [Parameter(Mandatory = $true, ParameterSetName = "byKey")]
-        [PSCredential]$credentials,
-        [Parameter(Mandatory = $true, ParameterSetName = "byToken" )]
-        [Parameter(Mandatory = $true, ParameterSetName = "byPassword")]
-        [Parameter(Mandatory = $true, ParameterSetName = "byKey")]
+
+        [Parameter(Mandatory = $true,ValueFromPipelineByPropertyName=$true)]
+        [PSCredential]$credentials = (Get-Credential -Title "Credential to be stored?"),
+        [Parameter(Mandatory = $true)]
         $vaultId,
-        [Parameter(Mandatory = $true, ParameterSetName = "byPassword")]
-        [Security.SecureString]$password = (Read-Host -AsSecureString),
-        [Parameter(Mandatory = $true, ParameterSetName = "byKey")]
-        $privateKey,
-        [Parameter(Mandatory = $false, ParameterSetName = "byToken")]
+
+        [Parameter(Mandatory = $true)]
+        [ValidateNotNullOrEmpty()]
         $token = $Global:ServerEyeAuthCacheToken,
-        [Parameter(Mandatory = $false, ParameterSetName = "byToken" )]
-        [Parameter(Mandatory = $false, ParameterSetName = "byPassword")]
-        [Parameter(Mandatory = $false, ParameterSetName = "byKey")]
+
+        [Parameter(Mandatory = $false)]
         [alias("ApiKey", "Session")]
         $AuthToken
     )
@@ -51,25 +50,26 @@ function New-VaultEntry {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
     }
     Process {
+        if ($null -eq $token) {
+            $token = New-SEAuthCacheToken
+        }
         $reqBody = @{  
             'name'        = $name
             'description' = $description
             'credentials' = @{
-                "username"= @{
-                    "value"= $credentials.GetNetworkCredential().UserName
-                    "encrypted"= $false
+                "username" = @{
+                    "value"     = $credentials.GetNetworkCredential().UserName
+                    "encrypted" = $false
                 }
-                "password"= @{
-                    "value"= $credentials.GetNetworkCredential().Password
-                    "encrypted"= $true
+                "password" = @{
+                    "value"     = $credentials.GetNetworkCredential().Password
+                    "encrypted" = $true
                 }
-                "domain"= @{
-                    "value"= $credentials.GetNetworkCredential().Domain
-                    "encrypted"= $false
+                "domain"   = @{
+                    "value"     = $credentials.GetNetworkCredential().Domain
+                    "encrypted" = $false
                 }
             }
-            'password'    = $password | ConvertFrom-SecureString -AsPlainText
-            'privateKey'  = $privateKey
             'token'       = $token
 
         }
@@ -77,6 +77,8 @@ function New-VaultEntry {
         $url = "https://api-ms.server-eye.de/3/vault/$vaultID/entry"
 
         Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
+
+        
 
     }
 

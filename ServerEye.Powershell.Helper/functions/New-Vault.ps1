@@ -1,15 +1,36 @@
 <#
     .SYNOPSIS
-    Get Vault
+    Create Vault
     
     .DESCRIPTION
-     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
+    Create a new Server-Eye Password Vault
 
-    .PARAMETER CustomerId
-    ID des Kunden bei dem die Einstellungen geändert werden sollen.
+    .PARAMETER showPassword
+    Is it possible to show the Password in plain text
 
-    .PARAMETER Filter
-    Name der Gruppe die geändert werden soll
+    .PARAMETER authenticationMethod
+    Which Method should be use to encrypt the Vault
+
+    .PARAMETER showPassword
+    Is it possible to show the Password in plain text
+
+    .PARAMETER name
+    Name of the Vault
+
+    .PARAMETER description
+    description of the Vault
+
+    .PARAMETER userId
+    ID of the User the Vault will be crated for, can not be used with customerId or distributorId
+
+    .PARAMETER customerId
+    ID of the Customer the Vault will be crated for, can not be used with userId or distributorId
+
+    .PARAMETER distributorId
+    ID of the distributor the Vault will be crated for, can not be used with userId or customerId
+
+    .PARAMETER PathToSaveKey
+    Path where the RestoreKey for the Vault should be stored
     
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
@@ -50,9 +71,6 @@ function New-Vault {
         [Parameter(Mandatory = $false, ParameterSetName = "byDistributorId")]
         [alias("ApiKey", "Session")]
         $AuthToken
-
-
-
     )
 
     begin {
@@ -84,26 +102,26 @@ function New-Vault {
         $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
 
         [PSCustomObject]@{
-            Name = $result.Name
-            VaultID = $result.ID
-            Description = $Result.description
+            Name                 = $result.Name
+            VaultID              = $result.ID
+            Description          = $Result.description
             AuthenticationMethod = $Result.authenticationMethod
-            Users = $Result.users
-            Entries = $Result.entries
-            Type = [PSCustomObject]@{
-                TypeName = if($Result.distributorId){"distributor"}elseif($Result.customerId) {"customer"}elseif ($result.userId) {"User"}
-                ID = if($Result.distributorId){$Result.distributorId}elseif($Result.customerId) {$Result.customerId}elseif ($result.userId) {$result.userId}
+            Users                = $Result.users
+            Entries              = $Result.entries
+            Type                 = [PSCustomObject]@{
+                TypeName = if ($Result.distributorId) { "distributor" }elseif ($Result.customerId) { "customer" }elseif ($result.userId) { "User" }
+                ID       = if ($Result.distributorId) { $Result.distributorId }elseif ($Result.customerId) { $Result.customerId }elseif ($result.userId) { $result.userId }
             }
-            ShowPassword = $Result.showPassword
-            restoreKey = $Result.restoreKey
+            ShowPassword         = $Result.showPassword
+            restoreKey           = $Result.restoreKey
         }
-        if ($PathToSaveKey) {
-            Out-File -FilePath "$PathToSaveKey\$name-Restorekey.txt"  -Encoding utf8 -InputObject $Result.restoreKey
-        }else {
-            Write-Output "Please Save the Restore Key"
-            $PathToSaveKey = Get-FileName -initialDirectory $PSScriptRoot
-            Out-File -FilePath $PathToSaveKey -Encoding utf8 -InputObject $Result.restoreKey
+        try {
+            Out-File -FilePath "$PathToSaveKey\$name-Restorekey.txt"  -Encoding utf8 -InputObject $Result.restoreKey 
         }
+        catch {
+            Write-Error -Message "Something went wrong: $_"
+        }
+            
 
     }
 
