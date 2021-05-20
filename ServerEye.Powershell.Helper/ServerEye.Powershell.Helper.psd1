@@ -12,7 +12,7 @@
     RootModule             = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion          = '2.17.0'
+    ModuleVersion          = '2.17.1'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -69,7 +69,7 @@
     # NestedModules = @()
     
     # Functions to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no functions to export.
-    FunctionsToExport      = 
+    FunctionsToExport= 
     'Connect-Session',
     'Disconnect-Session',
     "Get-Customer",
@@ -125,6 +125,7 @@
     "Get-Container",
     "Get-ContainerState",
     "Get-SensorhubState",
+    "Get-ConnectorState",
     "Remove-Container",
     "Remove-Connector",
     "Remove-Sensorhub",
@@ -134,7 +135,13 @@
     "Set-SensorState",
     "Get-DuplicatedSensorhub",
     "Restart-Sensor",
-    "New-APIKey"
+    "New-APIKey",
+    "Get-Vault",
+    "Get-VaultList",
+    "New-Vault",
+    "New-VaultEntry",
+    "Import-VaulEntries",
+    "New-AuthCacheToken"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
     CmdletsToExport        = @()
