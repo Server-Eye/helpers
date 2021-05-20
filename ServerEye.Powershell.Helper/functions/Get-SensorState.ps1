@@ -175,7 +175,11 @@ function Get-SensorState {
                 LastDate        = $state.lastDate
                 Error           = $state.state -or $state.forceFailed
                 Resolved        = $state.resolved
-                SilencedUntil   = (([System.DateTimeOffset]::FromUnixTimeMilliseconds($state.silencedUntil)).DateTime)
+                SilencedUntil   = if (!$state.silencedUntil) {
+                    ""
+                }else {
+                    (([System.DateTimeOffset]::FromUnixTimeMilliseconds($state.silencedUntil)).DateTime)   
+                }
                 HintCount       = $state.hintCount
                 Hints           = $state.hints
                 Message         = $state.Message
