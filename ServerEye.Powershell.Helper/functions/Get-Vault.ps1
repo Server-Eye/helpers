@@ -19,7 +19,7 @@ function Get-Vault {
         [Parameter(Mandatory = $false)]
         [alias("ApiKey", "Session")]
         $AuthToken,
-        [Parameter(Mandatory = $true,ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         $VaultID
     )
 
@@ -30,19 +30,39 @@ function Get-Vault {
         $url = "https://api-ms.server-eye.de/3/vault/$VaultID "
 
         $result = Intern-GetJson -url $url -authtoken $AuthToken
+        $TypeName = if ($Result.distributorId) { 
+            "distributor" 
+        }
+        elseif ($Result.customerId) { 
+            "customer" 
+        }
+        elseif ($result.userId) { 
+            "User" 
+        }
+        $ID = if ($Result.distributorId) { 
+            $Result.distributorId 
+        }
+        elseif ($Result.customerId) {
+            $Result.customerId 
+        }
+        elseif ($result.userId) { 
+            $result.userId 
+        }
+
+        $type = [PSCustomObject]@{
+            TypeName = $TypeName
+            ID       = $ID
+        }
 
         [PSCustomObject]@{
-            Name = $result.Name
-            VaultID = $result.ID
-            Description = $Result.description
+            Name                 = $result.Name
+            VaultID              = $result.ID
+            Description          = $Result.description
             AuthenticationMethod = $Result.authenticationMethod
-            Users = $Result.users
-            Entries = $Result.entries
-            Type = [PSCustomObject]@{
-                TypeName = if($Result.distributorId){"distributor"}elseif($Result.customerId) {"customer"}elseif ($result.userId) {"User"}
-                ID = if($Result.distributorId){$Result.distributorId}elseif($Result.customerId) {$Result.customerId}elseif ($result.userId) {$result.userId}
-            }
-            ShowPassword = $Result.showPassword
+            Users                = $Result.users
+            Entries              = $Result.entries
+            Type                 = $type
+            ShowPassword         = $Result.showPassword
         }
 
     }
@@ -50,7 +70,4 @@ function Get-Vault {
     End {
 
     }
-
-
-
 }
