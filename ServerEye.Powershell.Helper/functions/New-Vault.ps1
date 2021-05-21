@@ -92,6 +92,30 @@ function New-Vault {
 
         $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
 
+        $TypeName = if ($Result.distributorId) { 
+            "distributor" 
+        }
+        elseif ($Result.customerId) { 
+            "customer" 
+        }
+        elseif ($result.userId) { 
+            "User" 
+        }
+        $ID = if ($Result.distributorId) { 
+            $Result.distributorId 
+        }
+        elseif ($Result.customerId) {
+            $Result.customerId 
+        }
+        elseif ($result.userId) { 
+            $result.userId 
+        }
+
+        $type = [PSCustomObject]@{
+            TypeName = $TypeName
+            ID       = $ID
+        }
+
         [PSCustomObject]@{
             Name                 = $result.Name
             VaultID              = $result.ID
@@ -99,10 +123,7 @@ function New-Vault {
             AuthenticationMethod = $Result.authenticationMethod
             Users                = $Result.users
             Entries              = $Result.entries
-            Type                 = [PSCustomObject]@{
-                TypeName = if ($Result.distributorId) { "distributor" }elseif ($Result.customerId) { "customer" }elseif ($result.userId) { "User" }
-                ID       = if ($Result.distributorId) { $Result.distributorId }elseif ($Result.customerId) { $Result.customerId }elseif ($result.userId) { $result.userId }
-            }
+            Type                 = $type
             ShowPassword         = $Result.showPassword
             restoreKey           = $Result.restoreKey
         }
