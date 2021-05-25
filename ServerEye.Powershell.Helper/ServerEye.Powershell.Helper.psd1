@@ -12,7 +12,7 @@
     RootModule             = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion          = '2.17.3'
+    ModuleVersion          = '2.17.4'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -140,7 +140,7 @@
     "Get-VaultList",
     "New-Vault",
     "New-VaultEntry",
-    "Import-VaulEntries",
+    "Import-VaultEntries",
     "New-AuthCacheToken"
     
     # Cmdlets to export from this module, for best performance, do not use wildcards and do not delete the entry, use an empty array if there are no cmdlets to export.
