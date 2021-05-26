@@ -25,10 +25,11 @@ Param(
     [string]
     $customerID,
     [Parameter(Mandatory = $true)]
+    [ValidateRange("Negative")]
     [int]
     $TimeToAdd,
     [Parameter(Mandatory = $true)]
-    [ValidateSet("AddYears", "AddMonths", "AddDays", "AddHours", "AddMinutes", "AddSeconds", "AddMilliseconds")]
+    [ValidateSet("AddYears", "AddMonths", "AddDays", "AddHours")]
     $TimeFrame,
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
@@ -38,10 +39,12 @@ Param(
 
 #region internal variables
 $Type = 102
-$start = Get-Date
-$end = (Get-Date).($TimeFrame)($TimeToAdd)
+$start = (Get-Date).($TimeFrame)($TimeToAdd)
+$end = Get-Date
 $startMS = (([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds())
 $endMS = (([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds())
+Write-Debug $start
+Write-Debug $end
 #endregion internal variables
 
 #region internal function
@@ -59,9 +62,9 @@ if ($customerID) {
 }
 
 foreach ($customer in $customers) {
-    Write-Verbose "Insalled Sensorhubs in the last $($timespan.Days) Days for Customer $($customer.Companyname)"
+    Write-Verbose "Installed Sensorhubs in the last $($timespan.Days) Days for Customer $($customer.Companyname)"
     try {
-        $Containers = Get-SeApiActionlogList -AuthToken $authtoken -Type $Type -Start $endMS -End $startMS -Of $customer.cid
+        $Containers = Get-SeApiActionlogList -AuthToken $authtoken -Type $Type -Start $startMS -End $endMS -Of $customer.cid
 
         if ($Containers) {
             foreach ($Container in $Containers) {

@@ -25,10 +25,11 @@ Param(
     [string]
     $customerID,
     [Parameter(Mandatory = $true)]
+    [ValidateRange("Negative")]
     [int]
     $TimeToAdd,
     [Parameter(Mandatory = $true)]
-    [ValidateSet("AddYears", "AddMonths", "AddDays", "AddHours", "AddMinutes", "AddSeconds", "AddMilliseconds")]
+    [ValidateSet("AddYears", "AddMonths", "AddDays", "AddHours")]
     $TimeFrame,
     [Parameter(ValueFromPipeline = $true)]
     [alias("ApiKey", "Session")]
@@ -38,10 +39,12 @@ Param(
 
 #region internal variables
 $Type = 103
-$start = (Get-Date).($TimeFrame)(-$TimeToAdd)
+$start = (Get-Date).($TimeFrame)($TimeToAdd)
 $end = Get-Date
 $startMS = (([DateTimeOffset](($start).ToUniversalTime())).ToUnixTimeMilliseconds())
 $endMS = (([DateTimeOffset](($end).ToUniversalTime())).ToUnixTimeMilliseconds())
+Write-Debug $start
+Write-Debug $end
 #endregion internal variables
 
 #region internal function
