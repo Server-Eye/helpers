@@ -10,7 +10,9 @@
 #>
 
 Param ( 
-    [Parameter()] 
+    [Parameter(Mandatory = $true)]
+    [ValidateRange("Negative")]
+    [int]
     $OlderThan
 )
 
@@ -74,7 +76,7 @@ if ((!$volumes)) {
     $withoutShadow = $volumes | Where-Object {($ShadowCopies.VolumeName -notcontains $_.DeviceID)}
 
     #Get shadow Copies created in the last 24 hours on Volumes with Shadow Copies
-    $shadow24 = $ShadowCopies | Where-Object {($withShadow.DeviceID -contains $_.VolumeName) -and ($_.InstallDate -gt (Get-Date).AddHours(-$OlderThan))}
+    $shadow24 = $ShadowCopies | Where-Object {($withShadow.DeviceID -contains $_.VolumeName) -and ($_.InstallDate -gt (Get-Date).AddHours($OlderThan))}
 
     #Check if one Volume have no Shadow Copie
     if(($withoutShadow | Measure-Object).Count -gt 0){
