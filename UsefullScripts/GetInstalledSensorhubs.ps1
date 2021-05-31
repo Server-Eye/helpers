@@ -25,7 +25,7 @@ Param(
     [string]
     $customerID,
     [Parameter(Mandatory = $true)]
-    [ValidateRange("Negative")]
+    [ValidateRange(-99,0)]
     [int]
     $TimeToAdd,
     [Parameter(Mandatory = $true)]
