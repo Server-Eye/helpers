@@ -32,7 +32,7 @@ function New-VaultEntry {
         [ValidateNotNullOrEmpty()]
         $description,
 
-        [Parameter(Mandatory = $true,ValueFromPipelineByPropertyName=$true)]
+        [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential]$credentials = (Get-Credential -Title "Credential to be stored?"),
         [Parameter(Mandatory = $true)]
         $vaultId,
@@ -53,39 +53,52 @@ function New-VaultEntry {
         if ($null -eq $token) {
             $token = New-SEAuthCacheToken
         }
-        $reqBody = @{  
-            'name'        = $name
-            'description' = $description
-            'credentials' = @{
-                "username" = @{
-                    "value"     = $credentials.GetNetworkCredential().UserName
-                    "encrypted" = $false
+        if ([string]::IsNullOrEmpty($credentials.GetNetworkCredential().Domain) -eq 0) {
+            $reqBody = @{  
+                'name'        = $name
+                'description' = $description
+                'credentials' = @{
+                    "username" = @{
+                        "value"     = $credentials.GetNetworkCredential().UserName
+                        "encrypted" = $false
+                    }
+                    "password" = @{
+                        "value"     = $credentials.GetNetworkCredential().Password
+                        "encrypted" = $true
+                    }
+                    "domain"   = @{
+                        "value"     = $credentials.GetNetworkCredential().Domain
+                        "encrypted" = $false
+                    }
                 }
-                "password" = @{
-                    "value"     = $credentials.GetNetworkCredential().Password
-                    "encrypted" = $true
-                }
-                "domain"   = @{
-                    "value"     = $credentials.GetNetworkCredential().Domain
-                    "encrypted" = $false
-                }
+                'token'       = $token
             }
-            'token'       = $token
-
+        }
+        else {
+            $reqBody = @{  
+                'name'        = $name
+                'description' = $description
+                'credentials' = @{
+                    "username" = @{
+                        "value"     = $credentials.GetNetworkCredential().UserName
+                        "encrypted" = $false
+                    }
+                    "password" = @{
+                        "value"     = $credentials.GetNetworkCredential().Password
+                        "encrypted" = $true
+                    }
+                }
+                'token'       = $token
+            }
         }
 
         $url = "https://api-ms.server-eye.de/3/vault/$vaultID/entry"
 
         Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
-
-        
-
     }
 
     End {
 
     }
-
-
 
 }
