@@ -116,7 +116,7 @@ function getNotificationBySensor ($sensorId, $auth) {
     }
 
 }
-function formatSensorNotification($notify, $CC, $MAC, $Customer, $auth) {
+function formatSensorNotification($notify, $CC, $MAC, $Customer,$sensor,$auth) {
 
     [PSCustomObject]@{
         Name            = $displayName
@@ -144,7 +144,7 @@ function formatSensorNotification($notify, $CC, $MAC, $Customer, $auth) {
         }
         NotificationId  = $notify.nId
         Sensor          = $sensor.name
-        SensorID        = $sensor.SensorId
+        SensorID        = $sensor.aid
         Sensorhub       = $CC.name
         'OCC-Connector' = $MAC.Name
         Customer        = $Customer.CompanyName
