@@ -42,8 +42,15 @@ function New-AuthCacheToken {
         if (!$password -and !$privateKey) {
             $password = Read-Host -Prompt "OCC Password?" -AsSecureString
         }
+        if ($password) {
+            $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($password)
+            $UnsecurePassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
+        }
+        if ((Test-path $privatekey) -eq $true) {
+            $privateKey = Get-content $privateKey
+        }
         $reqBody = @{  
-            'password'   = if ($password) { $password | ConvertFrom-SecureString -AsPlainText }else {
+            'password'   = if ($UnsecurePassword) { $UnsecurePassword }else {
                 $null
             }
             'privateKey' = $privateKey
@@ -55,13 +62,10 @@ function New-AuthCacheToken {
         if ($Persist) {
             $Global:ServerEyeAuthCacheToken = $Result.token   
         }
-        Write-Output $result
+        Write-Output $result 
+        End {
+
+        }
+
     }
-
-    End {
-
-    }
-
-
-
 }
