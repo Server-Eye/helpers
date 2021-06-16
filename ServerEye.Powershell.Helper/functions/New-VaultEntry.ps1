@@ -34,6 +34,7 @@ function New-VaultEntry {
 
         [Parameter(Mandatory = $true, ValueFromPipelineByPropertyName = $true)]
         [PSCredential]$credentials = (Get-Credential -Title "Credential to be stored?"),
+        
         [Parameter(Mandatory = $true)]
         $vaultId,
 
@@ -53,7 +54,7 @@ function New-VaultEntry {
         if ($null -eq $token) {
             $token = New-SEAuthCacheToken
         }
-        if ([string]::IsNullOrEmpty($credentials.GetNetworkCredential().Domain) -eq 0) {
+        if ([string]::IsNullOrEmpty($credentials.GetNetworkCredential().Domain) -eq $false) {
             $reqBody = @{  
                 'name'        = $name
                 'description' = $description
@@ -94,7 +95,19 @@ function New-VaultEntry {
 
         $url = "https://api-ms.server-eye.de/3/vault/$vaultID/entry"
 
-        Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
+        try {
+            Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
+        }
+        catch {
+            if ($_.ErrorDetails.Message -eq '{"message":"BAD_DECRYPT","error":"UNKNOWN_ERROR"}') {
+                throw "Please recreate Token with correct Method, Password or PrivateKey."
+                break
+            }
+            else {
+                Write-Output $_
+                break
+            }
+        }
     }
 
     End {
