@@ -50,9 +50,7 @@ function New-AuthCacheToken {
             $privateKey = Get-content $privateKey
         }
         $reqBody = @{  
-            'password'   = if ($UnsecurePassword) { $UnsecurePassword }else {
-                $null
-            }
+            'password'   = $UnsecurePassword
             'privateKey' = $privateKey
         }
 
