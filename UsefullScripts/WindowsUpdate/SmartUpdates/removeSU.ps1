@@ -13,37 +13,52 @@ Param(
 )
 
 $PSINIFilePAth = "C:\Windows\System32\GroupPolicy\Machine\Scripts"
-$PSINIFileName = "scripts.ini"
-$TriggerPatchRun = "C:\Program Files (x86)\Server-Eye\triggerPatchRun.cmd"
-$PSINIPath = Join-Path -Path $PSINIFilePAth -ChildPath $PSINIFileName
+$PSINICMDFileName = "scripts.ini"
+$PSINIPSFileName = "psscripts.ini"
+$TriggerPatchRun = "C:\Program Files (x86)\Server-Eye\triggerPatchRun.*"
+$PSCMDINIPath = Join-Path -Path $PSINIFilePAth -ChildPath $PSINICMDFileName
+$PSPSINIPath = Join-Path -Path $PSINIFilePAth -ChildPath $PSINIPSFileName
 
 $PSINIRegPath = "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Group Policy\State\Machine\Scripts\Shutdown\0"
 
 $Keys = Get-ChildItem -Path $PSINIRegPath
-$KeyToRemove = Get-ItemProperty -Path $keys.PSPath -Name "Script" | Where-Object -Property Script -EQ -Value $TriggerPatchRun
+$KeyToRemove = Get-ItemProperty -Path $keys.PSPath -Name "Script" | Where-Object -Property Script -like -Value $TriggerPatchRun
 #region INI
 
-if (Test-Path $PSINIPath) {
-    Write-Verbose "Checking $PSINIFileName File for SU Script"
-    $content = Get-Content $PSINIPath
+if (Test-Path $PSCMDINIPath) {
+    Write-Verbose "Checking $PSINICMDFileName File for SU Script"
+    $content = Get-Content $PSCMDINIPath
     $string = $content | Select-String -Pattern "triggerPatchRun.cmd"
     if ($string) {
         $SetNumber = ($string.ToString()).Substring(0, 1)
         Write-Verbose "Remove Lines form File"
-        $content | Select-String -Pattern $SetNumber -NotMatch | Set-Content -Path $PSINIPath 
-    }else {
+        $content | Select-String -Pattern $SetNumber -NotMatch | Set-Content -Path $PSCMDINIPath 
+    }
+    else {
         Write-Verbose "No Lines in File"
     }
-
-    
-
+}
+if (Test-Path $PSPSINIPath) {
+    Write-Verbose "Checking $PSINIPSFileName File for SU Script"
+    $content = Get-Content $PSPSINIPath
+    $string = $content | Select-String -Pattern "triggerPatchRun.ps1"
+    if ($string) {
+        $SetNumber = ($string.ToString()).Substring(0, 1)
+        Write-Verbose "Remove Lines form File"
+        $content | Select-String -Pattern $SetNumber -NotMatch | Set-Content -Path $PSPSINIPath 
+    }
+    else {
+        Write-Verbose "No Lines in File"
+    }
 }
 #endregion INI
 
 #region Reg
-if (Test-Path $KeyToRemove.PSPath) {
-    Write-Verbose "Remove Linies form Registry"
-    Remove-Item $KeyToRemove.PSPath
+if ($KeyToRemove) {
+    if (Test-Path $KeyToRemove.PSPath) {
+        Write-Verbose "Remove Linies form Registry"
+        Remove-Item $KeyToRemove.PSPath
+    }
 }
 #endregion Reg
 Write-Verbose "Call GPUpdate"
@@ -51,8 +66,8 @@ gpupdate.exe /force
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUiI4M3KEt2EIjGE62Y4KE8TnG
-# 3nmggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUQNlSbJTxYV41fN/Z/q4bEXR4
+# OF+ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -223,29 +238,29 @@ gpupdate.exe /force
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFFE+qGJ78yqPQQowMOubQWfG
-# If4BMA0GCSqGSIb3DQEBAQUABIIBAEniZba1aohEqa+QammqHL7SavoYJT2kP9o3
-# 9rnYePP2M9Uw4us5T71ECTHi2vbpSfaWmBBhzRieaJZybtMuZYSZsyvUjwgzjWcW
-# XPLH0yFeVPdbrGP7w9mVD8ZSSCu77l2bkxBFERAY6CptxYkQVFN3/L9PBi9q1F8W
-# OTPMEbo/muVJArGadM6W9mgXFq1t4dc8VPKL9Ks0QDoZuT0Y0Az9e1QJcVNQh66B
-# 2AsNlEtkmI9k8/hjyExSYu3mTne6+cNScxZhaqlm9his4VIl1s3ol77k7Cyuv+2i
-# un3HCOr++TNIr9nxh8y/NnxVKYm2TlPTpceAbrcSTMwVjvi4O42hggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFMQRvkbyiMekZK2YPWpv0l8r
+# TCDdMA0GCSqGSIb3DQEBAQUABIIBAAjZDmajcdjYuRd1EFAkW35i91TN9xL83MeB
+# UDXkOhuYFQQxedWIOv+UnWPqmZ11QGrIo3zo9IKYtCKgpPgPJawkXEofu6xBPG7I
+# qY7zo5p7yZRON/e07+wa1PwlTdWkH1niZKIDTnRb+2ai5eWQtbrXtFk4hqaFrWBQ
+# yTxvKAkBnwVnJx0+idJQlLjO37hwpHy0d/AaD5TepveIypHtNemuFSzSY1DPx7RO
+# Qz+oZjClYJ+WrY1qdeelzagcy65mbsy9tqaE2WUXp0VA3NT05vYZ6rqAubaTjccf
+# kbHK06vSMbzI6hoQ8FgVNL/3/NX6WSG1/BJRlwOnTsAKi6qsQbOhggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDYyNTA2MjU0
-# MFowPwYJKoZIhvcNAQkEMTIEMOFWr56LTNz8ZerNQsv5KZCveK90gC1zQta4ijr5
-# u4xv6uCsXqWh8Pm690AHecXZDjANBgkqhkiG9w0BAQEFAASCAgB3fgAZ3hy5Jtks
-# xm20ynpgFEAke5eiI0KoX1utZcVeIuDeunLcGB/QLaKeg/JoXZ3cXMfD66E0Z4Hf
-# 8OacGgiHvW04TJaQKPrJdO4uR+rOLXJUN5jSgMxV1L6AZfN+LcTvCRUutCw+mb4D
-# obUOwQy/BEbnXz/IPTCXjntsJZBQpv25bcY+CdPfpRH2FDwrySQTnU3hu44gTPKm
-# HLLxuajtuFWwf3hHACWfkgPfQMXQzoM6nQ4q9miD13YwMqdb3Ik9eRR/HQDjSx1Z
-# yPCxMqTHMkxko3dLeucUZOTi3A8QYdnEMBwuZ5vHEyiNwzEiE6W5oMmd55vWo2e9
-# QNkhzGuSJq6GJ7HAae4b5XLx25wyadBaN8xWIqZ/vxOVw1DOt8pg2qmMgYStJgWx
-# 43xcsDDLoUHT/6T2faeJI+GJStbeaFfNkrT0pOD70V8SMG/Xu3G5Ke92oR98sDmW
-# dthUjIn+ru8K10Py5JDzMJAxnyhyV3VpUCYkOcDy6AEfGL7N0w328XS/GdziADOv
-# iTdFPLdgolVTtOIpbE5gdrvfLnZiFkeLRyQiWJh7W8lMIRU9ejLeQcrVPeaoKrnB
-# 9O4mDXURJSDhxGp5K5curkWNF9sxpPT/rPRZ764ekrNZhIaXavgO19JuqjulzIDg
-# 2+riH6+nl9HXQwF93Q4bUwXgMKGrgg==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDYyNTA3NDIz
+# NVowPwYJKoZIhvcNAQkEMTIEMHYsvfw/s1F4EGPCz166ksn1EuXNYtyd4k2rtm/A
+# i7LXkVDu+d8Qgh5br2zpKbS1vDANBgkqhkiG9w0BAQEFAASCAgARcQ7KbIHtchI0
+# khAXWUMJaRUUcmSyhqyr/+yFqItO7zyyZ98DIiSGP/Q/aP3DOofEgJhmeRkiAFDx
+# IAAYXrAt/Wv/LeWTYwMFngUSFPhW2GuikTOEZOj9A9f7JkFV/GbThvg20Xc8p2T4
+# ROaryD6nkVlvOBlAXswHfGxQ6S2JVwCHH2YGtYR6/oZQAzmd1K4djULYqfX417ZQ
+# w/wpUoCB56HdmMm5SRG4J+9OLU0v+0fTJyTEtm3Rg1XKbG3KIuAs/1ExTbEQv9tD
+# yqWql8wwmtfwhfsSFBo7n/522YBE3wye6MaVQhJ7SJ+cgXy9VJwLzs/g5Nn35/Mw
+# uZ0eNLAwv2h6uMASvCl1u7QgYXlwM60W5EUbIzos/1h1d73j4E5QLHsZdEqvVLvc
+# kU51KiLakSyHEoOd15zo8L8zehS6ZYtZ5CINmqy0ZIJKtgTD5/GUVvGhSvvSkO1C
+# fIIa/4Zu/+Im2wORR8lfVxXkI7vwmgldGMbt8+Vcg7Q40wlmg6GNdB2+6IZVGt3y
+# 8OsJdceOdMvb8XlEU4FV6nVcdgwZGbVp9u+J4NJ5nfezwgzxZyGJfjcFztNN0eze
+# tiyWHi87wRR+6OwylGhL7jc9cMFrNiEW8QmyQw4C0iide5SVjDOl/lGRJ7qDiZRT
+# K3CCVKraAg3ke5pmOd9YToFV00fE0g==
 # SIG # End signature block
