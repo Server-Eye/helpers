@@ -1,8 +1,8 @@
-Version,Version,Wartungsoption,Verfügbarkeitsdatum,OS build,Letztes Revisionsdatum,Serviceende: Home| Pro| Pro Education| Pro für Workstations und IoT Core,Serviceende für Enterprise| Education und IoT Enterprise,Enddatum für regulären Support,Enddatum für erweiterten Support,Microsoft empfiehlt
-21H1,21H1,Halbjaehriger Kanal,18.05.2021,190.431.081,21.06.2021,13.12.2022,13.12.2022,,,X
-20H2,20H2,Halbjaehriger Kanal,20.10.2020,190.421.081,21.06.2021,10.05.2022,09.05.2023,,,
-2004,2004,Halbjaehriger Kanal,27.05.2020,190.411.081,21.06.2021,14.12.2021,14.12.2021,,,
-1909,1909,Halbjaehriger Kanal,12.11.2019,183.631.645,15.06.2021,Serviceende,10.05.2022,,,
-1809,1809,Langfristiger Servicekanal (LTSC),13.11.2018,177.632.028,15.06.2021,,,09.01.2024,09.01.2029,
-1803,1607,Long-Term Servicing Branch (LTSB),02.08.2016,143.934.467,08.06.2021,,,12.10.2021,13.10.2026,
-1709,1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,1.024.018.967,08.06.2021,,,Serviceende,14.10.2025,
+Version,Wartungsoption,Verfï¿½gbarkeitsdatum,OS build,Letztes Revisionsdatum,Serviceende: Home| Pro| Pro Education| Pro fï¿½r Workstations und IoT Core,Serviceende fï¿½r Enterprise| Education und IoT Enterprise,Enddatum fï¿½r regulï¿½ren Support,Enddatum fï¿½r erweiterten Support,Microsoft empfiehlt
+21H1,Halbjaehriger Kanal,18.05.2021,190.431.081,21.06.2021,13.12.2022,13.12.2022,,,X
+20H2,Halbjaehriger Kanal,20.10.2020,190.421.081,21.06.2021,10.05.2022,09.05.2023,,,
+2004,Halbjaehriger Kanal,27.05.2020,190.411.081,21.06.2021,14.12.2021,14.12.2021,,,
+1909,Halbjaehriger Kanal,12.11.2019,183.631.645,15.06.2021,Serviceende,10.05.2022,,,
+1809,Langfristiger Servicekanal (LTSC),13.11.2018,177.632.028,15.06.2021,,,09.01.2024,09.01.2029,
+1607,Long-Term Servicing Branch (LTSB),02.08.2016,143.934.467,08.06.2021,,,12.10.2021,13.10.2026,
+1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,1.024.018.967,08.06.2021,,,Serviceende,14.10.2025,
