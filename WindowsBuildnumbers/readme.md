@@ -1,5 +1,6 @@
 # Information provided without guarantee
-CSV file information based on data form this link: https://docs.microsoft.com/en-us/windows/release-information/
+CSV file information based on data form this link: https://docs.microsoft.com/de-de/windows/release-health/release-information
+https://winreleaseinfoprod.blob.core.windows.net/winreleaseinfoprod/de-DE.html
 
 # CheckWin10BuildNumber.ps1
 
