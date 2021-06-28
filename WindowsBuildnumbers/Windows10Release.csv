@@ -1,11 +1,8 @@
-Version,Servicing option,Availability date,OS build,Latest revision date,End of service: Home|Pro| Pro Education| Pro for Workstations and IoT Core,End of service: Enterprise| Education and IoT Enterprise|Mainstream support end date,Extended support end date,
-21H1,Semi-Annual Channel,2021.05.18,19043.1081,2021.06.21,2022.12.13,2022.12.13,Microsoft recommends,
-20H2,Semi-Annual Channel,20.10.2020,19042.746,12.01.2021,10.05.2022,09.05.2023,
-2004,Semi-Annual Channel,27.05.2020,19041.746,12.01.2021,14.12.2021,14.12.2021,,
-1909,Semi-Annual Channel,12.11.2019,18363.1316,12.01.2021,11.05.2021,10.05.2022,,
-1809,Semi-Annual Channel or Targeted,28.03.2019,17763.1697,12.11.2019,12.05.2020,11.05.2021,,
-1803,Semi-Annual Channel or Targeted,10.07.2018,17763.1697,12.11.2019,End of service,10.11.2020,,
-1709,Semi-Annual Channel or Targeted,18.01.2018,17134.1967,12.11.2019,End of service,14.04.2020,,
-1809,Long-Term Servicing Channel (LTSC),13.11.2018,17134.1967,10.12.2019,,,09.01.2024,09.01.2029
-1607,Long-Term Servicing Branch (LTSB),02.08.2016,14393.4169,10.12.2019,,,12.10.2021,13.10.2026
-1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,10240.18818,10.12.2019,,,13.10.2020,14.10.2025
+Version,Version,Wartungsoption,Verfügbarkeitsdatum,OS build,Letztes Revisionsdatum,Serviceende: Home| Pro| Pro Education| Pro für Workstations und IoT Core,Serviceende für Enterprise| Education und IoT Enterprise,Enddatum für regulären Support,Enddatum für erweiterten Support,Microsoft empfiehlt
+21H1,21H1,Halbjähriger Kanal,18.05.2021,190.431.081,21.06.2021,13.12.2022,13.12.2022,,,X
+20H2,20H2,Halbjähriger Kanal,20.10.2020,190.421.081,21.06.2021,10.05.2022,09.05.2023,,,,
+2004,2004,Halbjähriger Kanal,27.05.2020,190.411.081,21.06.2021,14.12.2021,14.12.2021,,,,
+1909,1909,Halbjähriger Kanal,12.11.2019,183.631.645,15.06.2021,Serviceende,10.05.2022,,,,
+1809,1809,Langfristiger Servicekanal (LTSC),13.11.2018,177.632.028,15.06.2021,,,09.01.2024,09.01.2029,,
+1803,1607,Long-Term Servicing Branch (LTSB),02.08.2016,143.934.467,08.06.2021,,,12.10.2021,13.10.2026,,
+1709,1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,1.024.018.967,08.06.2021,,,Serviceende,14.10.2025,,
