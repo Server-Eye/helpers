@@ -36,7 +36,7 @@ foreach($Sensorhub in $Sensorhubs){
         OSName = $Sensorhub.OsName
         Version = $myrelase.Version
         'Servicing option' = $myrelase.'Servicing option'
-        "End of Service Home or Pro" = if ($myrelase.'End of service: Home; Pro; Pro Education; Pro for Workstations and IoT Core' -eq "") {$myrelase."Mainstream support end date"}else {$myrelase.'End of service: Home; Pro; Pro Education; Pro for Workstations and IoT Core'}
-        "End of Service Enterprise/Extendent Support" = if ($myrelase."End of service: Enterprise; Education and IoT Enterprise" -eq "") { $myrelase."Extended support end date"} else{$myrelase.'End of service: Enterprise; Education and IoT Enterprise'}
+        "End of Service Home or Pro" = if ($myrelase.'Serviceende: Home| Pro| Pro Education| Pro fuer Workstations und IoT Core' -eq "") {$myrelase."Mainstream support end date"}else {$myrelase.'Enddatum fuer regulueren Support'}
+        "End of Service Enterprise/Extendent Support" = if ($myrelase."Serviceende fuer Enterprise| Education und IoT Enterprise" -eq "") { $myrelase."Extended support end date"} else{$myrelase.'Enddatum fuer erweiterten Support'}
     }
 }
