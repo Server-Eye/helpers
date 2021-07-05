@@ -16,8 +16,7 @@ Param (
 )
 
 #load the libraries from the Server Eye directory
-#$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
-$scriptDir = "C:\Program Files (x86)\Server-Eye\service\1003"
+$scriptDir = $MyInvocation.MyCommand.Definition | Split-Path -Parent | Split-Path -Parent
 
 $pathToApi = $scriptDir + "\ServerEye.PowerShell.API.dll"
 $pathToJson = $scriptDir + "\Newtonsoft.Json.dll"
