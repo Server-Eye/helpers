@@ -23,7 +23,7 @@ Param (
 
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
-$Date = Get-SeApiMyNodesList -AuthToken $apikey -ListType object -Filter agent,customer
+$Date = Get-SeApiMyNodesList -AuthToken $AuthToken -ListType object -Filter agent,customer,container
 
 if ($Customerid) {
     $Customers = $date.managedCustomers | Where-Object {$_.ID -eq $CustomerId}
@@ -37,7 +37,7 @@ foreach ($Customer in $Customers){
     $Agents = $Date.agent | Where-Object {$_.customerId -eq $Customer.id -and $_.agenttype -eq "ECD47FE1-36DF-4F6F-976D-AC26BA9BFB7C"} 
 
     foreach ($Agent in $Agents) {
-        $state = Get-SeApiAgentStateList -AId $agent.id -Limit 1 -AuthToken $apikey -IncludeRawData "true"
+        $state = Get-SeApiAgentStateList -AId $agent.id -Limit 1 -AuthToken $AuthToken -IncludeRawData "true"
         $Container = $Containers | Where-Object {$_.Id -eq $Agent.container_id}
         if ($state.raw.data.shutdownAction.installReady -eq $true) {
             [PSCustomObject]@{
