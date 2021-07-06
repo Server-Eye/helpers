@@ -1,7 +1,7 @@
 
 <#
 AUTOR: This file is auto-generated
-DATE: 2021-04-20T14:13:21.890Z
+DATE: 2021-07-05T09:37:36.758Z
 DESC: Module enables easier access to the PowerShell API
 #>
 
@@ -3221,7 +3221,7 @@ $Surname,
 [Parameter(Mandatory=$true)]
 $Email,
 [Parameter(Mandatory=$false)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','mav','pcvisit','pm','powershell','reporting','rmm','tanss','tasks')]
 $Roles,
 [Parameter(Mandatory=$false)]
 $Phone,
@@ -3304,7 +3304,7 @@ $GId,
 [Parameter(Mandatory=$true)]
 $UId,
 [Parameter(Mandatory=$true)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','mav','pcvisit','pm','powershell','reporting','rmm','tanss','tasks')]
 $Roles,
             [Parameter(Mandatory=$true)]
             [alias("ApiKey","Session")]
@@ -5145,7 +5145,7 @@ $Surname,
 [Parameter(Mandatory=$false)]
 $Email,
 [Parameter(Mandatory=$false)]
-[ValidateSet('lead','installer','architect','techie','hr','hinter','reporting','pcvisit','pm','mav','powershell','tanss')]
+[ValidateSet('lead','installer','architect','techie','hr','hinter','mav','pcvisit','pm','powershell','reporting','rmm','tanss','tasks')]
 $Roles,
 [Parameter(Mandatory=$false)]
 $Phone,
