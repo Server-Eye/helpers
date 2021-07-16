@@ -1,8 +1,8 @@
 Version,Wartungsoption,Verfuegbarkeitsdatum,OS build,Letztes Revisionsdatum,Default,Enterprise,Mainstream,Extended,Recommend
-21H1,Halbjaehriger Kanal,18.05.2021,190.431.081,21.06.2021,13.12.2022,13.12.2022,,,X
-20H2,Halbjaehriger Kanal,20.10.2020,190.421.081,21.06.2021,10.05.2022,09.05.2023,,,
-2004,Halbjaehriger Kanal,27.05.2020,190.411.081,21.06.2021,14.12.2021,14.12.2021,,,
-1909,Halbjaehriger Kanal,12.11.2019,183.631.645,15.06.2021,Serviceende,10.05.2022,,,
-1809,Langfristiger Servicekanal (LTSC),13.11.2018,177.632.028,15.06.2021,,,09.01.2024,09.01.2029,
-1607,Long-Term Servicing Branch (LTSB),02.08.2016,143.934.467,08.06.2021,,,12.10.2021,13.10.2026,
-1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,1.024.018.967,08.06.2021,,,Serviceende,14.10.2025,
+21H1,Halbjaehriger Kanal,18.05.2021,19043.1110,21.06.2021,13.12.2022,13.12.2022,,,X
+20H2,Halbjaehriger Kanal,20.10.2020,19043.1110,21.06.2021,10.05.2022,09.05.2023,,,
+2004,Halbjaehriger Kanal,27.05.2020,19043.1110,21.06.2021,14.12.2021,14.12.2021,,,
+1909,Halbjaehriger Kanal,12.11.2019,18363.1679,15.06.2021,Serviceende,10.05.2022,,,
+1809,Langfristiger Servicekanal (LTSC),13.11.2018,17763.2061,15.06.2021,,,09.01.2024,09.01.2029,
+1607,Long-Term Servicing Branch (LTSB),02.08.2016,14393.4530,08.06.2021,,,12.10.2021,13.10.2026,
+1507 (RTM),Long-Term Servicing Branch (LTSB),29.07.2015,10240.19003,08.06.2021,,,Serviceende,14.10.2025,
