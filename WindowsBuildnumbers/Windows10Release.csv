@@ -1,4 +1,4 @@
-Version,Wartungsoption,Verfuegbarkeitsdatum,OS build,Letztes Revisionsdatum,Serviceende: Home| Pro| Pro Education| Pro fuer Workstations und IoT Core,Serviceende fuer Enterprise| Education und IoT Enterprise,Enddatum fuer regulueren Support,Enddatum fuer erweiterten Support,Microsoft empfiehlt
+Version,Wartungsoption,Verfuegbarkeitsdatum,OS build,Letztes Revisionsdatum,Default,Enterprise,Mainstream,Extended,Recommend
 21H1,Halbjaehriger Kanal,18.05.2021,190.431.081,21.06.2021,13.12.2022,13.12.2022,,,X
 20H2,Halbjaehriger Kanal,20.10.2020,190.421.081,21.06.2021,10.05.2022,09.05.2023,,,
 2004,Halbjaehriger Kanal,27.05.2020,190.411.081,21.06.2021,14.12.2021,14.12.2021,,,
