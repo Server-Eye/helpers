@@ -162,14 +162,14 @@ $exitcode = 0
 $OSName = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\" -Name ProductName).ProductName -replace "[^0-9]" , ''
 $Produkt = Get-Variable -Name $OSName 
 $HV = (Get-WindowsFeature -Name Hyper-V).installed
-$DownloadFile = Join-path -Path $env:TEMP -ChildPath "$($Produkt.Value.Name).zip"
+$DownloadFile = Join-path -Path $Logdir -ChildPath "$($Produkt.Value.Name).zip"
 
 #region Download
 if (!$RemoteWinSXS) {
     try {
         Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Startig Download for $OSName" -SilentEventlog $true
         Start-BitsTransfer -Destination $DownloadFile -Source $Produkt.Value.Link
-        Expand-Archive -Path $DownloadFile -DestinationPath $env:TEMP
+        Expand-Archive -Path $DownloadFile -DestinationPath $Logdir
         Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Download and expanding complete" -SilentEventlog $true
     }
     catch {
@@ -183,7 +183,7 @@ if (!$RemoteWinSXS) {
 try {
     if (!$RemoteWINSXS) {
         Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Starting repair with Source: $env:TEMP\$($Produkt.Value.Name)" -SilentEventlog $false
-        $Repair = Repair-WindowsImage -Online -RestoreHealth -Source "C:\Windows\WinSxS","$env:TEMP\$($Produkt.Value.Name)" -LimitAccess
+        $Repair = Repair-WindowsImage -Online -RestoreHealth -Source "C:\Windows\WinSxS","$Logdir\$($Produkt.Value.Name)" -LimitAccess
     }else {
         Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Starting repair with Source: $RemoteWINSXS" -SilentEventlog $false
         $Repair = Repair-WindowsImage -Online -RestoreHealth -Source "C:\Windows\WinSxS",$RemoteWINSXS -LimitAccess
