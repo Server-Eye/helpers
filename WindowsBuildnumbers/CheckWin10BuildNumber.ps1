@@ -58,7 +58,7 @@ $Connectors = $containers | Where-Object {$_.subtype -eq 0}
 $Sensorhubs = $containers | Where-Object {$_.subtype -eq 2}
 
 foreach ($customer in $customers) {
-    $Customerhubs = $Sensorhubs | Where-Object {$_.customerId -eq $customer.id}
+    $Customerhubs = $Sensorhubs | Where-Object {($_.customerId -eq $customer.id) -and ($_.isServer -eq $false)}
     foreach($Sensorhub in $Customerhubs){
         #Get the right Release infomatuon
         $TMPHub = Get-SEAPIContainer -CId $Sensorhub.id -AuthToken $AuthToken
@@ -69,7 +69,9 @@ foreach ($customer in $customers) {
             Name = $TMPHub.Name
             "OCC-Connector" = ($Connectors| Where-Object {$_.id -eq $TMPHub.parentid}).name
             OSName = $TMPHub.OsName
-            Version = $myrelase.Version
+            Version = if ($myrelase.Version){$myrelase.Version}else {
+                ($TMPHub.osVersion).Remove(0,5)
+            }
             'Servicing option' = $myrelase.'Servicing option'
             "End of Service Home or Pro" = if ($myrelase.Default -eq "") {$myrelase.Mainstream}else {$myrelase.Default}
             "End of Service Enterprise/Extendent Support" = if ($myrelase.Enterprise -eq "") { $myrelase.Extended} else{$myrelase.Enterprise}
