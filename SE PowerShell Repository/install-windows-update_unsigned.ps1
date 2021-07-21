@@ -2,10 +2,10 @@
 #Requires -RunAsAdministrator
 <#
     .SYNOPSIS
-        Install Upgrade
+        Install Update
         
     .DESCRIPTION
-        Install newest Windows 10 Upgrade
+        Install newest Windows Update
         
     .NOTES
         Author  : Server-Eye
