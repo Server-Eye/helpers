@@ -103,7 +103,7 @@ function setNotificationofSensor {
     $authtoken
     )
     $noti = Set-SeApiAgentNotification -AuthToken $authtoken -AId $sensorId -NId $NotificationId -userId $userId -Email $SendEmail -Phone $SendTextmessage -Ticket $SendTicket -DeferId $deferid
-    formatSensorNotificationset -notiID $noti.nid -authoken $authtoken -sensorid $noti.aid
+    formatSensorNotificationset -notiID $noti.id -authoken $authtoken -sensorid $noti.parent_id
 }
 
 function formatSensorNotificationset($notiID, $authtoken, $SensorId){
@@ -168,7 +168,7 @@ function SetNotificationofContainer {
         $customerName = $sensorhub.Customer
     }
     
-    formatContainerNotificationSet -notiID $noti.nid -authoken $authtoken -SensorhubID $noti.cid
+    formatContainerNotificationSet -notiID $noti.id -authoken $authtoken -SensorhubID $noti.parent_id
 
 }
 
