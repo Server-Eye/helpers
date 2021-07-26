@@ -9,7 +9,7 @@
         Comment for the restart, default is "Neustart über die Aufgabenplanung".
 
     .PARAMETER reason 
-        Reason for the system restart, default "P".
+        Reason for the system restart, can either be "P" or "U", default "P".
 
     .PARAMETER major 
         Specifies the major reason number (a positive integer, less than 256), default is 0.
@@ -22,7 +22,7 @@
         
     .NOTES
         Author  : Server-Eye
-        Version : 1.0
+        Version : 1.1
 
     .Link
         https://docs.microsoft.com/de-de/windows-server/administration/windows-commands/shutdown
@@ -52,6 +52,8 @@ Param(
 )
  
 Begin {
+    $SELogPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\logs\"
+    $SEInstallLog = Join-Path -Path $SELogPath -ChildPath "ServerEye.Task.RestartShutdown.log"
     $FileToRunpath = "C:\WINDOWS\system32\shutdown.exe"
     Write-Host "Script started"
     $ExitCode = 0   
@@ -69,13 +71,12 @@ Begin {
  
 Process {
     try {
-        Write-Host "Trigger system restart with Arguments: $($startProcessParams.ArgumentList)"
+        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system restart with Arguments: $($startProcessParams.ArgumentList)" 
         Start-Process @startProcessParams
  
     }
     catch {
-        Write-Host "Something went wrong"
-        Write-Host $_ # This prints the actual error
+        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
         $ExitCode = 1 
         # if something goes wrong set the exitcode to something else then 0
         # this way we know that there was an error during execution
@@ -83,6 +84,6 @@ Process {
 }
  
 End {
-    Write-Host "Script ended"
+    Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
     exit $ExitCode
 }
