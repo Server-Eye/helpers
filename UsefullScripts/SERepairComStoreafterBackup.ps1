@@ -11,7 +11,7 @@
         Author  : Server-Eye
         Version : 1.0
 
-    .PARAMETER RemoteWinSXS 
+    .PARAMETER RemoteWindows 
     Path to a winsxs foulder, UNC Path possible.
 
     .Link
@@ -21,7 +21,7 @@
 [CmdletBinding()]
 Param(
     [Parameter(Mandatory = $false)]
-    [string]$RemoteWinSXS
+    [string[]]$RemoteWindows
 )
 
 #region Internal Variables
@@ -36,14 +36,7 @@ $script:_SilentEventlog = $true
 $script:_LogFilePath = Join-path -path $Logdir -childpath "\ServerEye.Repair.log"
 $CBSLog = "C:\windows\logs\cbs\CBS.log"
 
-$2016 = [PSCustomObject]@{
-    Name = "2016"
-    Link = "https://cloud.server-eye.de/s/DStdjDPNSEKCgyT/download"
-}
-$2019 = [PSCustomObject]@{
-    Name = "2019"
-    Link = "https://cloud.server-eye.de/s/DAXiymzATtEJf4d/download"
-}
+
 #endregionn Server-Eye Default
 
 #endregion Internal Variables
@@ -157,37 +150,12 @@ function Write-Log {
 }
 
 #endregion Internal Function
+$RemoteWindows += "C:\Windows"
 
 $exitcode = 0
-$OSName = (Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\" -Name ProductName).ProductName -replace "[^0-9]" , ''
-$Produkt = Get-Variable -Name $OSName 
-$HV = (Get-WindowsFeature -Name Hyper-V).installed
-$DownloadFile = Join-path -Path $Logdir -ChildPath "$($Produkt.Value.Name).zip"
-
-#region Download
-if (!$RemoteWinSXS) {
-    try {
-        Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Startig Download for $OSName" -SilentEventlog $true
-        Start-BitsTransfer -Destination $DownloadFile -Source $Produkt.Value.Link
-        Expand-Archive -Path $DownloadFile -DestinationPath $Logdir
-        Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Download and expanding complete" -SilentEventlog $true
-    }
-    catch {
-        Write-Log -Source $EventSourceName -EventID 3201 -EntryType Error -Message "Something went wrong with the Download or expanding: $_" -SilentEventlog $false
-        $exitcode = 1
-       
-    }  
-}
-#endregion Download
-
 try {
-    if (!$RemoteWINSXS) {
-        Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Starting repair with Source: $env:TEMP\$($Produkt.Value.Name)" -SilentEventlog $false
-        $Repair = Repair-WindowsImage -Online -RestoreHealth -Source "C:\Windows\WinSxS","$Logdir\$($Produkt.Value.Name)" -LimitAccess
-    }else {
-        Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "Starting repair with Source: $RemoteWINSXS" -SilentEventlog $false
-        $Repair = Repair-WindowsImage -Online -RestoreHealth -Source "C:\Windows\WinSxS",$RemoteWINSXS -LimitAccess
-    }
+
+    $Repair = Repair-WindowsImage -Online -RestoreHealth -Source $RemoteWindows -LimitAccess
 
 }
 catch {
