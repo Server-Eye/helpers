@@ -2,17 +2,29 @@
 
 <#
     .SYNOPSIS
-        User logoff
+        Check all Exchange Version
  
     .DESCRIPTION
-        User logoff
+        Checks all Server-Eye Exchange Health Agents for the Exchange Version and compares them to the given Versions.
  
-    .PARAMETER Username
-    Username of the user to be logged off
-         
+    .PARAMETER Build2019
+    2019 Build number (short format) 
+
+    .PARAMETER Build2016
+    2016 Build number (short format) 
+
+    .PARAMETER Build2013
+    2013 Build number (short format) 
+
+    .PARAMETER Build2010
+    2010 Build number (short format) 
+
     .NOTES
         Author  : Server-Eye
         Version : 1.0
+
+    .Link
+    https://docs.microsoft.com/en-us/exchange/new-features/build-numbers-and-release-dates?view=exchserver-2019
 #>
 
 [CmdletBinding()]
