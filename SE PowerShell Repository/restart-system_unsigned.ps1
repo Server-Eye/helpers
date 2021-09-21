@@ -53,7 +53,7 @@ Param(
  
 Begin {
     $SELogPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\logs\"
-    $SEInstallLog = Join-Path -Path $SELogPath -ChildPath "ServerEye.Task.RestartShutdown.log"
+    $SELog = Join-Path -Path $SELogPath -ChildPath "ServerEye.Task.RestartShutdown.log"
     $FileToRunpath = "C:\WINDOWS\system32\shutdown.exe"
     Write-Host "Script started"
     $ExitCode = 0   
@@ -71,12 +71,12 @@ Begin {
  
 Process {
     try {
-        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system restart with Arguments: $($startProcessParams.ArgumentList)" 
+        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system restart with Arguments: $($startProcessParams.ArgumentList)" 
         Start-Process @startProcessParams
  
     }
     catch {
-        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
+        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
         $ExitCode = 1 
         # if something goes wrong set the exitcode to something else then 0
         # this way we know that there was an error during execution
@@ -84,6 +84,6 @@ Process {
 }
  
 End {
-    Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
+    Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
     exit $ExitCode
 }
