@@ -37,6 +37,7 @@ function New-AuthCacheToken {
 
     begin {
         $AuthToken = Test-SEAuth -AuthToken $AuthToken
+        $base = "https://api-ms.server-eye.de/3"
     }
     Process {
         if (!$password -and !$privateKey) {
@@ -46,24 +47,30 @@ function New-AuthCacheToken {
             $BSTR = [System.Runtime.InteropServices.Marshal]::SecureStringToBSTR($password)
             $UnsecurePassword = [System.Runtime.InteropServices.Marshal]::PtrToStringAuto($BSTR)
         }
-        if ((Test-path $privatekey) -eq $true) {
+        elseif (((Test-path $privatekey) -eq $true)) {
             $privateKey = Get-content $privateKey
         }
         $reqBody = @{  
             'password'   = $UnsecurePassword
             'privateKey' = $privateKey
         }
-
-        $url = "https://api-ms.server-eye.de/3/auth/token"
-
-        $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
-        if ($Persist) {
-            $Global:ServerEyeAuthCacheToken = $Result.token   
+        $url = "$base/auth/token"
+        try {
+            $Result = Intern-PostJson -url $url -body $reqBody -authtoken $AuthToken
+            if ($Persist) {
+                $Global:ServerEyeAuthCacheToken = $Result.token   
+                Write-host 'Token saved to $Global:ServerEyeAuthCacheToken'
+            }
+            else {
+                Write-Output $result 
+            }
         }
-        Write-Output $result 
-        End {
-
+        catch {
+            Write-Output $_
+            break
         }
+    }        
+    End {
 
     }
 }
