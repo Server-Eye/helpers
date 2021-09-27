@@ -25,7 +25,8 @@ Begin {
  
 Process {
     Write-Host "Doing lot's of work here"
-    Remove-Item $tempfolders -force -recurse -ErrorAction SilentlyContinue
+    Write-host "Var = $tempfolders"
+    Remove-Item $tempfolders -force -recurse
 
 }
  

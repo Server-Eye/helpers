@@ -166,6 +166,8 @@ catch {
 
 if ($Repair) {
     Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "$Repair" -SilentEventlog $false
+    $sfc = Start-Process -FilePath "${env:Windir}\System32\SFC.EXE" -ArgumentList '/scannow' -Wait -PassThru -NoNewWindow
+    Write-Log -Source $EventSourceName -EventID 3200 -EntryType Information -Message "SFC ends with: $($sfc.ExitCode)" -SilentEventlog $false
 }
 
 exit $exitcode
