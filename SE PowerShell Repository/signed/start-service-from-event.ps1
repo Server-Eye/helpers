@@ -1,97 +1,215 @@
 <#
     .SYNOPSIS
-        Forces a system restart
+        Restart Service Event Action
  
     .DESCRIPTION
-        Execution of this script forces an system restart after 10 seconds.
+        Restart all Services based on the Event Actiondata
 
-    .PARAMETER Comment 
-        Comment for the restart, default is "Neustart über die Aufgabenplanung".
+    .PARAMETER EventID
+    ID of the Event, default is 1.
 
-    .PARAMETER reason 
-        Reason for the system restart, can either be "P" or "U", default "P".
+    .PARAMETER LogName
+    Name of the Eventlog that should be checked, default is Server-Eye Client History
 
-    .PARAMETER major 
-        Specifies the major reason number (a positive integer, less than 256), default is 0.
+    .PARAMETER ServerEyeID
+    ID of a Sensor or ID of a Sensor Type
 
-    .PARAMETER minor 
-        Specifies the minor reason number (a positive integer, less than 65536), default is 0.
-
-    .PARAMETER Time 
-        Time before the restart should occur, default is 10 seconds.
-        
     .NOTES
         Author  : Server-Eye
-        Version : 1.1
-
-    .Link
-        https://docs.microsoft.com/de-de/windows-server/administration/windows-commands/shutdown
-
-        Reasons, major and minor settings:
-        https://servereye.freshdesk.com/a/solutions/articles/14000128892
+        Version : 1.0
 #>
-
 [CmdletBinding()]
 Param(
-    [parameter(Mandatory = $false, HelpMessage = "Comment for the restart ")]
-    [string]
-    $Comment = "Neustart über die Aufgabenplanung",
-    [parameter(Mandatory = $false, HelpMessage = "Reason for the system restart")]
-    [ValidateSet("P", "U")]
-    [string]
-    $reason = "P",
-    [parameter(Mandatory = $false, HelpMessage = "Specifies the major reason number (a positive integer, less than 256)")]
-    [Int]
-    $major = 0,
-    [parameter(Mandatory = $false, HelpMessage = "Specifies the minor reason number (a positive integer, less than 65536)")]
-    [Int]
-    $minor = 0,
-    [parameter(Mandatory = $false, HelpMessage = "Time before the restart should occur, default 10 seconds.")]
-    [Int]
-    $Time = 10
+    [Parameter(Mandatory = $false, HelpMessage = "ID of the Event, default is 1.")] 
+    [int]$EventID = 1,
+    [Parameter(Mandatory = $false, HelpMessage = "Name of the Eventlog that should be checked, default is Server-Eye Client History")] 
+    [string]$LogName = "Server-Eye Client History",
+    [Parameter(Mandatory = $true, HelpMessage = "ID of a Sensor or ID of a Sensor Type")] 
+    [string]$ServerEyeID
 )
- 
-Begin {
-    $SELogPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\logs\"
-    $SELog = Join-Path -Path $SELogPath -ChildPath "ServerEye.Task.RestartShutdown.log"
-    $FileToRunpath = "C:\WINDOWS\system32\shutdown.exe"
-    Write-Host "Script started"
-    $ExitCode = 0   
-    $argument = '/r /t {0} /c "{1}" /d {2}:{3}:{4}' -f $Time, $Comment, $reason, $major, $minor
-    #region Arguments
-    $startProcessParams = @{
-        FilePath     = $FileToRunpath
-        ArgumentList = $argument       
-        NoNewWindow  = $true
+
+#region Internal
+$SEPath = "C:\Program Files (x86)\Server-Eye"
+$SEDataPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\"
+$SELogPath = Join-Path -Path $SEDataPath -ChildPath "logs\"
+$script:_LogFilePath = Join-Path -Path $SELogPath -ChildPath "ServerEye.Tasks.Event.log"
+$EventSourceName = "ServerEye-Custom"
+$script:_SilentOverride = $true
+
+try { New-EventLog -Source $EventSourceName -LogName $EventLogName -ErrorAction Stop | Out-Null }
+catch { }
+
+#region WriteLog
+function Write-Log {
+    <#
+            .SYNOPSIS
+                A swift logging function.
+            
+            .DESCRIPTION
+                A simple way to produce logs in various formats.
+                Log-Types:
+                - Eventlog (Application --> ServerEyeDeployment)
+                - LogFile (Includes timestamp, EntryType, EventID and Message)
+                - Screen (Includes only the message)
+            
+            .PARAMETER Message
+                The message to log.
+            
+            .PARAMETER Silent
+                Whether anything should be written to host. Is controlled by the closest scoped $_SilentOverride variable, unless specified.
+            
+            .PARAMETER ForegroundColor
+                In what color messages should be written to the host.
+                Ignored if silent is set to true.
+            
+            .PARAMETER NoNewLine
+                Prevents output to host to move on to the next line.
+                Ignored if silent is set to true.
+            
+            .PARAMETER EventID
+                ID of the event as logged to both the eventlog as well as the logfile.
+                Defaults to 1000
+            
+            .PARAMETER EntryType
+                The type of event that is written.
+                By default an information event is written.
+            
+            .PARAMETER LogFilePath
+                The path to the file (including filename) that is written to.
+                Is controlled by the closest scoped $_LogFilePath variable, unless specified.
+            
+            .EXAMPLE
+                PS C:\> Write-Log 'Test Message'
+        
+                Writes the string 'Test Message' with EventID 1000 as an information event into the application eventlog, into the logfile and to the screen.
+            
+            .NOTES
+                Supported Interfaces:
+                ------------------------
+                
+                Author:       Friedrich Weinmann
+                Company:      die netzwerker Computernetze GmbH
+                Created:      12.05.2016
+                LastChanged:  12.05.2016
+                Version:      1.0
+        
+                EventIDs:
+                1000 : All is well
+                4*   : Some kind of Error
+                666  : Terminal Error
+        
+                10   : Started Download
+                11   : Finished Download
+                12   : Started Installation
+                13   : Finished Installation
+                14   : Started Configuring Sensorhub
+                15   : Finished Configuriong Sensorhub
+                16   : Started Configuring OCC Connector
+                17   : Finished Configuring Sensorhub
+                
+        #>
+    [CmdletBinding()]
+    Param (
+        [Parameter(Position = 0)]
+        [string]
+        $Message,
+            
+        [bool]
+        $Silent = $_SilentOverride,
+            
+        [System.ConsoleColor]
+        $ForegroundColor,
+            
+        [switch]
+        $NoNewLine,
+            
+        [Parameter(Position = 1)]
+        [int]
+        $EventID = 1000,
+
+        [Parameter(Position = 1)]
+        [string]
+        $Source,
+
+            
+        [Parameter(Position = 3)]
+        [System.Diagnostics.EventLogEntryType]
+        $EntryType = ([System.Diagnostics.EventLogEntryType]::Information),
+            
+        [string]
+        $LogFilePath = $_LogFilePath
+    )
+        
+    # Log to Eventlog
+    try { Write-EventLog -Message $message -LogName 'Application' -Source $Source -Category 0 -EventId $EventID -EntryType $EntryType -ErrorAction Stop }
+    catch { }
+        
+    # Log to File
+
+    try { Add-Content -Path $LogFilePath -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") $EntryType  ServerEye.PowerShell.Logic.$EventID  $Message" -Encoding utf8}
+    catch { }
+        
+    # Write to screen
+    if (-not $Silent) {
+        $splat = @{ }
+        $splat['Object'] = $Message
+        if ($PSBoundParameters.ContainsKey('ForegroundColor')) { $splat['ForegroundColor'] = $ForegroundColor }
+        if ($PSBoundParameters.ContainsKey('NoNewLine')) { $splat['NoNewLine'] = $NoNewLine }
+            
+        Write-Host @splat
     }
-    # 0 = everything is ok
 }
+#endregion WriteLog
 
 
- 
-Process {
-    try {
-        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system restart with Arguments: $($startProcessParams.ArgumentList)" 
-        Start-Process @startProcessParams
- 
-    }
-    catch {
-        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
-        $ExitCode = 1 
-        # if something goes wrong set the exitcode to something else then 0
-        # this way we know that there was an error during execution
-    }
+
+#Endregion Internal
+
+$filter = @{
+    LogName = $LogName
+    Data    = $ServerEyeID
+    ID      = $EventID
 }
- 
-End {
-    Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
-    exit $ExitCode
+
+$Event = get-winevent -FilterHashtable $filter -MaxEvents 1
+
+$Eventdata = [PSCustomObject]@{
+    Message    = $Event.Properties[0].Value
+    agentid    = $Event.Properties[1].Value
+    agenttype  = $Event.Properties[2].Value
+    eventid    = $Event.Properties[3].Value
+    actiondata = $Event.Properties[4].Value
+}
+
+if ($NULL -ne $Eventdata.Message) {
+    $StringArray = ($Eventdata.message).Split("`n")
+    $StringArray = $StringArray[1..($StringArray.Length - 1)]
+    $result = @()
+    foreach ($String in $StringArray) {
+        $result += [PSCustomObject]@{
+            Name  = (((($string -replace "has a bad state\: \w{0,}") -replace ".*\(")) -replace "\)").Trim()
+            State = ($string -replace ".* has a bad state\:").Trim()
+        }
+    }
+
+    foreach ($Service in $result) {
+        if ($Service.Name -ne "") {
+            try {
+                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Service.Name)"
+                Start-Service -Name $Service.Name
+            }
+            catch {
+                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restart for Service: $($Service.Name) exited with Error: $_"
+            }
+
+        }
+    }
 }
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUL99ZPRkpuLgF80crL7T7p6FM
-# oh2ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOPzcWeui6GxCCEyKnOSkb6zp
+# zH+ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -262,29 +380,29 @@ End {
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFA0WAnjc7MUoMxX9R5fjdrFq
-# NAjxMA0GCSqGSIb3DQEBAQUABIIBAEo5GnK84xcohGtl1EuMW9RrXo4bv0T7GwO3
-# 899ZFabMWuXaHSHGnBok8diiK2wj+15S+4HJasXqpBcRAxjonwXBt1SPaEOp2mmJ
-# kwlXOg+ZPHdGIvg+DR+hkDjdSkVoFQeHkwDq1KDgF4aNtg21iTssreB4xauHqaOK
-# 4IcIQDfOdaE3/UDz7b7H2i9jEpDRbWQIyeQK7VbgtsAOkPWKnupOkhx3CBaYFGK8
-# 2KXwJL8iFrHET41j2xZE8hlW366B4t3nNwKkxX6Hj95eqwqz89vm3EmWDmi3bff/
-# gXn0xYqZrKVj4heI2YDDrdim5Yw2uOuDydVA9ZtNZtLXjywwHZehggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFKlPil+YiQcy8shraPz6+4Wg
+# lHqwMA0GCSqGSIb3DQEBAQUABIIBAKKuMOlWNrAYDXyQLDCia3f16Km+IkJY7Htl
+# BzZjuezQp+vZ18a5TeqttCBRTYsFP8qf8HC7IsE+HdTIi3CMDem0CXfX8BEUwWlb
+# W6cz9fbwAP1s7nnLdOPDr1hoXjVUndQTJJdE5UlDzlGiUQOW/BAIXNqdw06KDTva
+# L62c4S0kvLPAOzEsQp9JDLsLxrYhrwNtT9zvRpn4NupO0lo6Ci06XLiLzcyBfWmA
+# B2a7oXrRPfjuvvHvz7KavsdXgThd17xj07wSRPwoV4LwTpMWiNO2ipUBBPYc+luf
+# Vn4JO8pW+PzHSYh/NH+uQsowNYorqLVZzZx1sLADWTZw8MGpefGhggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDkyMTA5MDky
-# N1owPwYJKoZIhvcNAQkEMTIEMEbRn77f0krgyar7kKqUZwPa9DznUBN9N8NWzQ+4
-# cUKgjOxqB0uTORs10ZAUE/i/AzANBgkqhkiG9w0BAQEFAASCAgBisYCyGgedWd1t
-# E2igIiy5HH4rttAG8r9OFamiMS0bVDy1vEPpjyhAtghqE+8zh/I0estO7TkC9fWa
-# nWZg4Sn7B+qXgVCu3/tCoS7VMhcYy5LM/nwQIvUZ6+wAiGImcnbugGH4GGevbj3Z
-# PimaHyNfIX9I0WKkqgHBa7HP14VgG1ZlDXNfeNUimUMzVAhvQoxJWKce/l2pU+ey
-# 5I8rA0BgqMfe2Mwh71eQzOmkG/BsnY7SC7iQisCIlwYOtESbdl87uLN8nY3LgM+A
-# J2eLc+xeLN+4b3MyFWGJ5pWFjHWjqeg2vY8+acddsZ5zrBymmAZTjBVXIO67GSsd
-# l3hJEq8/GUwvjD3xkTwcDkXr8SLkbR+5OP9AHbDO+6+2aEU2IO+/L6VL+wM9T78q
-# yKLInuv+CNSDdCVH09mEPsu8VOYXdK10n/Iyul5qRCB9k+65kdO+zrdh9WiF8CHY
-# k1LetJvBwqbJv6HyubtfNaSJ4htoiSSLt8O5H9GrISZsb4P8RmR/cWjrmN2m2USY
-# aGnz3kPfcvmQ5u7PVduNv/XOT/cNaIktTYw2b3uCHLeqEJug7Au2a1KNHvOHMtqP
-# qjpnmYMXedfGHyZfQNq72YRhEzbZDh/lhHTPmNUkjKd/sN4aOy5HUQ2RyPDgG1HL
-# eTnD7I3t3nahbraPXqYYXS3dntcqgQ==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTAxNTEzMjky
+# NlowPwYJKoZIhvcNAQkEMTIEMChIMc4M/zZ6iKwJcCmBFjIq4ugcCUl7t0kYloYh
+# msBIH34nyp5EKgJKDGG2wfyVpzANBgkqhkiG9w0BAQEFAASCAgBLhHr70HUx5CUM
+# SeM95PijsSIeS6iX86RrF0JZCtZ+B9w5viQSTfktukYSDaqH0Y0KiE56fnnuNbBM
+# NrXl5bbmmHOxqijzbxenbzOVI8ZtzELxurv6yHSIKAcygtTXWIxhY+jR6lBZMa/L
+# EvC3TjNyXYef5eu1sjKFf9qmlgegyy15+WcmBm3HP9A7E7+oVamEeHwtegq5umdm
+# 92bfeJmDUKPMcZE4LfNvQixZwSxbZsPMrv8eBzT8ETYUhAF2tVl+yTsPeY0RhYFS
+# LJqvYeC8XmowEQqZuJE+HF2SYxuurTkC59T+EMxygbCE0AaYjOi5zOe38Nv2z/qi
+# hkjMUCSD4ttR7FC3gM7s7vEXreB3mkDorJXRzTcbDbgEVHCfToc5iKC4goOpFKbb
+# mjoEdHoFHO0gRP4Bb11dR1w5yLaH5M0UpNwZ1R9KyMYUPKE8lhhC4UW4iBoFgecB
+# sGT0mwCyW4x7NmO05QEZ5eQPXijcqmvkG0GT/7fmpoiEII9ZW41ksVq9JVxkuHiB
+# 175H0+sR1E3nGYk/J72oxVVofcAHciIofpn0v+RiLKsDeCFDwil2wKd5CWX7eYC8
+# jKg8kjiUZZur0qFFenwPoWd9nj1I+k+p7NLkZJ1d5wcumV9N26ib14VyjxPy2dR/
+# GrEmr16uZTQudV6DTugg5W3yDrXggw==
 # SIG # End signature block
