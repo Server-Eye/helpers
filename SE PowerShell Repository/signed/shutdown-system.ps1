@@ -22,7 +22,7 @@
         
     .NOTES
         Author  : Server-Eye
-        Version : 1.0
+        Version : 1.1
 
     .Link
         https://docs.microsoft.com/de-de/windows-server/administration/windows-commands/shutdown
@@ -52,6 +52,8 @@ Param(
 )
  
 Begin {
+    $SELogPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\logs\"
+    $SELog = Join-Path -Path $SELogPath -ChildPath "ServerEye.Task.RestartShutdown.log"
     $FileToRunpath = "C:\WINDOWS\system32\shutdown.exe"
     Write-Host "Script started"
     $ExitCode = 0   
@@ -69,12 +71,12 @@ Begin {
  
 Process {
     try {
-        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system shutdown with Arguments: $($startProcessParams.ArgumentList)" 
+        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Trigger system shutdown with Arguments: $($startProcessParams.ArgumentList)" 
         Start-Process @startProcessParams
  
     }
     catch {
-        Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
+        Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") ERROR  ServerEye.Task.Logic.PowerShell - Something went wrong: $_" # This prints the actual error
         $ExitCode = 1 
         # if something goes wrong set the exitcode to something else then 0
         # this way we know that there was an error during execution
@@ -82,14 +84,14 @@ Process {
 }
  
 End {
-    Add-Content -Path $SEInstallLog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
+    Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Script ended with $exitcode"
     exit $ExitCode
 }
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUZt7Fsw9SYyxkxaU+eAgHO6jt
-# Hi2ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6eivLJyQeGFwjoMYrhfI9itU
+# L0eggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -260,29 +262,29 @@ End {
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFOXqd1hxcFXYCfzWOinH43z6
-# u2SkMA0GCSqGSIb3DQEBAQUABIIBAOUG45YC2mvzvnQ12oEgV54EIgtmveLVWWER
-# jRFU8puiZ54rOU+jVf9+vACs85jdxWio2rSm2fb34t2EOFYyx8Ee7W/O4HyQ0VHr
-# C7FHXGx7/TZl6rFUO7+zBzAQn7TjaG9r50NuOeCGevU1GevPqeaNxaxIxAyDl2W5
-# LRgOZKK40D/EeOHtPltsXc1+6wTko0AOICGvmo7sGsC9AArpcEzMdQDeXB8iURRM
-# M4mhndhBEa98pG0m8DJS17XVC+RnENorG4Mjm17CLJtS1T0UkhfZhH5gQtkaTJVo
-# AXdMBCVVQp682K82xWfOuT1fIm8hGimvtEjhcCb4bAxQIXrEByWhggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFCZ3EmSN0Mk8VMS+S1AcVogI
+# y7djMA0GCSqGSIb3DQEBAQUABIIBADNP5V7OI8Fag+SUs11qTcAaPPRa3PfyVjT4
+# XXCYtByyHaXTtiTV5PMjYYTKZAV/545FhUEhU0lMEVeraQhWd5+PVwCnTJPdnDaw
+# prP6TfFvNUAujVWNTuiBJcbipl29PZqij+F6I3+WHBIuJb4av1cEO2FNbMB1mZkL
+# Eq1KW6xUQZGtLD0BKLTmwOSnKDzVz3ed/dcc7onJPO9VGnFJhkj/S3u+NeaEg49R
+# wJ7Qb2yLvxYP6fE7oIUjQSPM5HTtg908x0lazSK5qILzFLLCIcKFDAe+BQstLKFx
+# jrJjvRqJ8vzmVYCk56UW3+G+3QJ2uwPIv9B7/v4igc2EhAQRYjKhggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMDcyNjA3Mzk1
-# NlowPwYJKoZIhvcNAQkEMTIEMHlQwCOn1eMtHh4faSoiKR+Nuf3PHiZL/NOCyaNt
-# iEzdYYNa2BJAsWsOarxDvVRV7jANBgkqhkiG9w0BAQEFAASCAgAXEQVSJ0lbee2k
-# qAGCAetr5F09ZZHIG4erpRmBXOLzl5beDnELHzAD9mGnwFjUl3EdhWTmcki7ULnJ
-# 0bhMFyJKtFKQitptHkYnosbyAR9dNey4QwQ5X32plktAmdnZ7AzVA6cM+wB+vp7w
-# Z//75TfjKCP9axI9xbFYuXgy7Vs67k00G0zvXpfbvozg3hp9TGiNydOeNvDSnJqX
-# 21dcAXhy0BZ1rqrG0d75dr7e2TqrVNiT+70C6LUHAR+pLXtf2zdUbJdy5NAu+E5m
-# PGJ36Fz8O+lTjp55qQryHRCcX3WtjRPQlHTtQpzQUkVBRSNhNr9RV7W+xtX3svFc
-# nFI55AiLpBcWC9zK0zCN1yRiZemKFsdIc0sjAk8p1cRXSLWafhrUNa70phQ4uETD
-# au44jeF8mmOYTK3+g40MvIMCetN91zvbkW1LHDwQNwYM02svA8jnEZRgZ/el6vN7
-# ly7Eqd6R7DnGOM+din5CDIEqWD3ZXH4jgMrOX3UVIPh7OKz4dYYe5RskBCH8xgyV
-# h4cfnbcZknFRg8UXZ64GtxBx7oTvD50DPiOuVXqfnNx8lMY2zdoZUWicyg0ojt8t
-# K/WRPuF62VmGZI9gRXri3KDwqXwZM+ljbCorRmKp0cF4Na+Bmuy4Swbs5xLl+mxF
-# 4qDWoUt/4s+EakuFdbhNsmI3Gq0oSQ==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTAxNTEzNTgy
+# NlowPwYJKoZIhvcNAQkEMTIEMARYR25UGh2OJ2yKoId9tqUcI1+doJmRoYvV4wwp
+# WV/N1R1LBmBcR+SMKazUh4vWqTANBgkqhkiG9w0BAQEFAASCAgA/HCqqaGBPv2Ls
+# yt5Z7UfEWUmdQFaBQ2jZ210zxzTlGj9E5jffRY3FOGXZsxRNVDkM+LgELJjEPf7o
+# h25hvkIOV9oCivLGQrTlmpKXOPfLgN7+YDlDgyEBOWyZTHmc4TfQGvKnl1uaKq9I
+# xIU7dXckurpGBWF10xxUDLXWlCeS3MCb2qKABbh8w2daeDku80TapgHj3twm35RJ
+# zS1JURVjbwvqTn0NohZSI8s+uG7VV5iK7GPUsmgPCHRAaSfHeTeMFY4AqjtaJ6GW
+# fXvGXudvs1zD2huTXtF6FF//ORLwFWXIePOH/KuIINIxqzNR9jFBGPk9Xv36TFIz
+# 4Y1Rc9aOW+wNyeQ2Xc0JpeexalOVYJJBft90cV3IvIvLYX6CjODvedqpvBMBlR8U
+# GfMeKpUqi3/1bZ94UWVL4LyRC3jSPxys6smfDt6TPOQQykj5dRkUyfZz4rpcH0Or
+# 9ruO+bE55by+lNrDPU9Ml7h0VhCiGH7EC/ytsC8z64yUZdtRQkg9PhrbCV9AKzFY
+# 7mapzgTWNokyyKBEnpmSg1o+zXyPSLk2CGd4RO0v504FV9su7DEMuriDgwV+bjS7
+# Dyrl0pPV8Rosuxtz3uZuBjPS8QowaugquWJenWL6mROxdyOpGiqY2UmDWW4vNgVY
+# Njc61EOefe0g97XVN31jWGBOsMnAdg==
 # SIG # End signature block
