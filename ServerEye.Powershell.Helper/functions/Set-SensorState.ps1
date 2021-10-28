@@ -63,7 +63,7 @@ function Set-SensorState {
             HelpMessage = "The id of the agent.")]
         [ValidateNotNullOrEmpty()]
         [Alias("aid")]
-        [guid]
+        [string]
         $SensorId,
 
         [parameter(Mandatory = $true,
@@ -113,6 +113,7 @@ function Set-SensorState {
 
         [Parameter(Mandatory = $false,
             HelpMessage = "Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.")]
+        [string]
         $AuthToken
     )
 
