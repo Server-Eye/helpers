@@ -11,23 +11,29 @@
     .PARAMETER LogName
     Name of the Eventlog that should be checked, default is Server-Eye Client History
 
-    .PARAMETER ServerEyeID
-    ID of a Sensor or ID of a Sensor Type
+    .PARAMETER SensorID
+    ID of a Sensor
+
+    .PARAMETER Sensortype
+    ID of a Sensor Type
 
     .NOTES
         Author  : Server-Eye
-        Version : 1.0
+        Version : 1.1
 #>
+
 [CmdletBinding()]
 Param(
     [Parameter(Mandatory = $false, HelpMessage = "ID of the Event, default is 1.")] 
     [int]$EventID = 1,
     [Parameter(Mandatory = $false, HelpMessage = "Name of the Eventlog that should be checked, default is Server-Eye Client History")] 
     [string]$LogName = "Server-Eye Client History",
-    [Parameter(Mandatory = $true, HelpMessage = "ID of a Sensor or ID of a Sensor Type")] 
-    [string]$ServerEyeID
+    [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor")]
+    [string]$SensorID,
+    [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor Type")] 
+    [alias("ServerEyeID")]
+    [string]$Sensortype
 )
-
 #region Internal
 $SEPath = "C:\Program Files (x86)\Server-Eye"
 $SEDataPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\"
@@ -146,7 +152,7 @@ function Write-Log {
         
     # Log to File
 
-    try { Add-Content -Path $LogFilePath -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") $EntryType  ServerEye.PowerShell.Logic.$EventID  $Message" -Encoding utf8}
+    try { Add-Content -Path $LogFilePath -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") $EntryType  ServerEye.PowerShell.Logic.$EventID  $Message" -Encoding utf8 }
     catch { }
         
     # Write to screen
@@ -161,55 +167,45 @@ function Write-Log {
 }
 #endregion WriteLog
 
-
-
-#Endregion Internal
+if (!$SensorID -and !$Sensortype) {
+    Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
+    Exit
+}elseif ($SensorID) {
+    $data = "||agentID||$SensorID" 
+}elseif ($Sensortype) {
+    $data = "||agenttype||$Sensortype" 
+}
 
 $filter = @{
     LogName = $LogName
-    Data    = $ServerEyeID
+    Data    = $data
     ID      = $EventID
 }
 
 $Event = get-winevent -FilterHashtable $filter -MaxEvents 1
+#Endregion Internal
 
 $Eventdata = [PSCustomObject]@{
-    Message    = $Event.Properties[0].Value
-    agentid    = $Event.Properties[1].Value
-    agenttype  = $Event.Properties[2].Value
-    eventid    = $Event.Properties[3].Value
-    actiondata = $Event.Properties[4].Value
+    Message    = ($Event.Properties[0].Value).Replace("||message||", "")
+    agentid    = ($Event.Properties[1].Value).Replace("||agentid||", "")
+    agenttype  = ($Event.Properties[2].Value).Replace("||agenttype||", "")
+    eventid    = ($Event.Properties[3].Value).Replace("||eventid||", "")
+    actiondata = ($Event.Properties[4].Value).Replace("||actiondata||servicesNotRunning=", "").Split(",")
 }
 
-if ($NULL -ne $Eventdata.Message) {
-    $StringArray = ($Eventdata.message).Split("`n")
-    $StringArray = $StringArray[1..($StringArray.Length - 1)]
-    $result = @()
-    foreach ($String in $StringArray) {
-        $result += [PSCustomObject]@{
-            Name  = (((($string -replace "has a bad state\: \w{0,}") -replace ".*\(")) -replace "\)").Trim()
-            State = ($string -replace ".* has a bad state\:").Trim()
-        }
-    }
-
-    foreach ($Service in $result) {
-        if ($Service.Name -ne "") {
-            try {
-                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Service.Name)"
-                Start-Service -Name $Service.Name
-            }
-            catch {
-                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restart for Service: $($Service.Name) exited with Error: $_"
-            }
-
-        }
-    }
+try {
+    Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Eventdata.actiondata)"
+    Start-Service -Name $Eventdata.actiondata
 }
+catch {
+    Write-Log -Source $EventSourceName -EventID 101 -EntryType Error -Message "Restart for Service: $($Eventdata.actiondata) exited with Error: $_"
+}
+
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUOPzcWeui6GxCCEyKnOSkb6zp
-# zH+ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUYxg3m9U5HnbzYiBj2z9IJTXr
+# dGKggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -380,29 +376,29 @@ if ($NULL -ne $Eventdata.Message) {
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFKlPil+YiQcy8shraPz6+4Wg
-# lHqwMA0GCSqGSIb3DQEBAQUABIIBAKKuMOlWNrAYDXyQLDCia3f16Km+IkJY7Htl
-# BzZjuezQp+vZ18a5TeqttCBRTYsFP8qf8HC7IsE+HdTIi3CMDem0CXfX8BEUwWlb
-# W6cz9fbwAP1s7nnLdOPDr1hoXjVUndQTJJdE5UlDzlGiUQOW/BAIXNqdw06KDTva
-# L62c4S0kvLPAOzEsQp9JDLsLxrYhrwNtT9zvRpn4NupO0lo6Ci06XLiLzcyBfWmA
-# B2a7oXrRPfjuvvHvz7KavsdXgThd17xj07wSRPwoV4LwTpMWiNO2ipUBBPYc+luf
-# Vn4JO8pW+PzHSYh/NH+uQsowNYorqLVZzZx1sLADWTZw8MGpefGhggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFCG6F6JMnHzvoXaisL9LSdpm
+# uOwLMA0GCSqGSIb3DQEBAQUABIIBAOLnZOc3L4bqDZQP6JEj0aQtZ/x3a5g2ynj7
+# ZBj4tqrPxMaJwjXgJM9a0BF83mEIiqJnKqRjIiUtRlGfxaaB9a82IVfqvw8OyRtN
+# UXfr/eSJhNPPgdzBZDmB/me2L/jqYtlJ6hcv7FozQgI7xrnMDB9KnVsKqZTWctjk
+# GsrQXqpM0CQ/xBLeYYWqN9V3z8TIFFwat8cE8P6G6Lxyd1nWQVIU20JKH908dQGb
+# mGB6gfiS296Otz+ZsfTpd28wY2LbFwC94bO6nm8DidL540yM/y3hkM63MuS+fitQ
+# X1xsOxVi/npW+UGNFZjJ+gLcDkFN7eq7ryKH3KeetwFv28gmAR2hggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTAxNTEzMjky
-# NlowPwYJKoZIhvcNAQkEMTIEMChIMc4M/zZ6iKwJcCmBFjIq4ugcCUl7t0kYloYh
-# msBIH34nyp5EKgJKDGG2wfyVpzANBgkqhkiG9w0BAQEFAASCAgBLhHr70HUx5CUM
-# SeM95PijsSIeS6iX86RrF0JZCtZ+B9w5viQSTfktukYSDaqH0Y0KiE56fnnuNbBM
-# NrXl5bbmmHOxqijzbxenbzOVI8ZtzELxurv6yHSIKAcygtTXWIxhY+jR6lBZMa/L
-# EvC3TjNyXYef5eu1sjKFf9qmlgegyy15+WcmBm3HP9A7E7+oVamEeHwtegq5umdm
-# 92bfeJmDUKPMcZE4LfNvQixZwSxbZsPMrv8eBzT8ETYUhAF2tVl+yTsPeY0RhYFS
-# LJqvYeC8XmowEQqZuJE+HF2SYxuurTkC59T+EMxygbCE0AaYjOi5zOe38Nv2z/qi
-# hkjMUCSD4ttR7FC3gM7s7vEXreB3mkDorJXRzTcbDbgEVHCfToc5iKC4goOpFKbb
-# mjoEdHoFHO0gRP4Bb11dR1w5yLaH5M0UpNwZ1R9KyMYUPKE8lhhC4UW4iBoFgecB
-# sGT0mwCyW4x7NmO05QEZ5eQPXijcqmvkG0GT/7fmpoiEII9ZW41ksVq9JVxkuHiB
-# 175H0+sR1E3nGYk/J72oxVVofcAHciIofpn0v+RiLKsDeCFDwil2wKd5CWX7eYC8
-# jKg8kjiUZZur0qFFenwPoWd9nj1I+k+p7NLkZJ1d5wcumV9N26ib14VyjxPy2dR/
-# GrEmr16uZTQudV6DTugg5W3yDrXggw==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTEwMjA3MzUx
+# NlowPwYJKoZIhvcNAQkEMTIEMDM6ZYTfXpiXf38uKgGBoAIbkQY3x1Ud3LoLNstC
+# +Ab2GnN1CwXU2hSWrXpTriJ3gjANBgkqhkiG9w0BAQEFAASCAgA0HSBAl0uL3Gss
+# KwJ7PaJNkTMXd8VSCi5dmfh1rUzEIvvVEDHHiDTCrJ2x4aaST25zVRgWOuzGjhV/
+# 0WEuM5Nn16bdUzo7SIDMMNeZhdNroQeYhIcV+t45aEE/Eug9wDKZ1tazaMIP8Y50
+# T6GtJurGaVLy0mPyGPbHT626J7qENMHQlEqJY08vMhsAH+oDwX52kKI6IXbzCdHL
+# WDMBcIVs2Rk6Zm2olXXi7/Ps2Uy/1DBmRc6ogAHle/XcLPbeLp67yW3jox0NBrk8
+# atUXjZNPrsaxOaLRxPBWQY/umVfN5A0CJk7PbV8dXKF7B3y+4fyi3ak8wPjQUy49
+# TrVnNU3eYEkkZS34J8eh7GxUKZSq+lg6OpFuBFxk/Khch9dDfuWm6axstC9v9Mw4
+# arp/6+KIMpdlBqmSK7JRZ86HBjJiVwgp1YcKFYLyg7L/BrjFmMnxwo1RMrmazcdm
+# d62i/SZJY3+utQPytCs4Q3dfB/4VFw+fLsJvWWY8ImMF3PZ6o24LabmJotScPGuf
+# 784VRqct0G+/uMdbY2yRbodZ1qksino/okertkNsM4botqZRVK2aqMdTAJQryqb0
+# g5mFzxHXlsg1B4lPXIUdxNADn4l+vejwnQb84G+4XRkfKS5sWTJQf1xrll7slsDN
+# 4vy4uti8ETSQQlaEpEd48Wx6q6AahQ==
 # SIG # End signature block
