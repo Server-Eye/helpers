@@ -11,23 +11,29 @@
     .PARAMETER LogName
     Name of the Eventlog that should be checked, default is Server-Eye Client History
 
-    .PARAMETER ServerEyeID
-    ID of a Sensor or ID of a Sensor Type
+    .PARAMETER SensorID
+    ID of a Sensor
+
+    .PARAMETER Sensortype
+    ID of a Sensor Type
 
     .NOTES
         Author  : Server-Eye
-        Version : 1.0
+        Version : 1.1
 #>
+
 [CmdletBinding()]
 Param(
     [Parameter(Mandatory = $false, HelpMessage = "ID of the Event, default is 1.")] 
     [int]$EventID = 1,
     [Parameter(Mandatory = $false, HelpMessage = "Name of the Eventlog that should be checked, default is Server-Eye Client History")] 
     [string]$LogName = "Server-Eye Client History",
-    [Parameter(Mandatory = $true, HelpMessage = "ID of a Sensor or ID of a Sensor Type")] 
-    [string]$ServerEyeID
+    [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor")]
+    [string]$SensorID,
+    [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor Type")] 
+    [alias("ServerEyeID")]
+    [string]$Sensortype
 )
-
 #region Internal
 $SEPath = "C:\Program Files (x86)\Server-Eye"
 $SEDataPath = Join-Path -Path $env:ProgramData -ChildPath "\ServerEye3\"
@@ -146,7 +152,7 @@ function Write-Log {
         
     # Log to File
 
-    try { Add-Content -Path $LogFilePath -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") $EntryType  ServerEye.PowerShell.Logic.$EventID  $Message" -Encoding utf8}
+    try { Add-Content -Path $LogFilePath -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") $EntryType  ServerEye.PowerShell.Logic.$EventID  $Message" -Encoding utf8 }
     catch { }
         
     # Write to screen
@@ -161,47 +167,36 @@ function Write-Log {
 }
 #endregion WriteLog
 
-
-
-#Endregion Internal
+if (!$SensorID -and !$Sensortype) {
+    Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
+    Exit
+}elseif ($SensorID) {
+    $data = "||agentID||$SensorID" 
+}elseif ($Sensortype) {
+    $data = "||agenttype||$Sensortype" 
+}
 
 $filter = @{
     LogName = $LogName
-    Data    = $ServerEyeID
+    Data    = $data
     ID      = $EventID
 }
 
 $Event = get-winevent -FilterHashtable $filter -MaxEvents 1
+#Endregion Internal
 
 $Eventdata = [PSCustomObject]@{
-    Message    = $Event.Properties[0].Value
-    agentid    = $Event.Properties[1].Value
-    agenttype  = $Event.Properties[2].Value
-    eventid    = $Event.Properties[3].Value
-    actiondata = $Event.Properties[4].Value
+    Message    = ($Event.Properties[0].Value).Replace("||message||", "")
+    agentid    = ($Event.Properties[1].Value).Replace("||agentid||", "")
+    agenttype  = ($Event.Properties[2].Value).Replace("||agenttype||", "")
+    eventid    = ($Event.Properties[3].Value).Replace("||eventid||", "")
+    actiondata = ($Event.Properties[4].Value).Replace("||actiondata||servicesNotRunning=", "").Split(",")
 }
 
-if ($NULL -ne $Eventdata.Message) {
-    $StringArray = ($Eventdata.message).Split("`n")
-    $StringArray = $StringArray[1..($StringArray.Length - 1)]
-    $result = @()
-    foreach ($String in $StringArray) {
-        $result += [PSCustomObject]@{
-            Name  = (((($string -replace "has a bad state\: \w{0,}") -replace ".*\(")) -replace "\)").Trim()
-            State = ($string -replace ".* has a bad state\:").Trim()
-        }
-    }
-
-    foreach ($Service in $result) {
-        if ($Service.Name -ne "") {
-            try {
-                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Service.Name)"
-                Start-Service -Name $Service.Name
-            }
-            catch {
-                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restart for Service: $($Service.Name) exited with Error: $_"
-            }
-
-        }
-    }
+try {
+    Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Eventdata.actiondata)"
+    Start-Service -Name $Eventdata.actiondata
+}
+catch {
+    Write-Log -Source $EventSourceName -EventID 101 -EntryType Error -Message "Restart for Service: $($Eventdata.actiondata) exited with Error: $_"
 }
