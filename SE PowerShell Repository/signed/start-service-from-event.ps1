@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-        Restart Service Event Action
+    Restart Service Event Action
  
     .DESCRIPTION
-        Restart all Services based on the Event Actiondata
+    Restart all Services based on the Event Actiondata
 
     .PARAMETER EventID
     ID of the Event, default is 1.
@@ -18,8 +18,8 @@
     ID of a Sensor Type
 
     .NOTES
-        Author  : Server-Eye
-        Version : 1.1
+    Author  : Server-Eye
+    Version : 1.1
 #>
 
 [CmdletBinding()]
@@ -169,10 +169,12 @@ function Write-Log {
 
 if (!$SensorID -and !$Sensortype) {
     Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
-    Exit
-}elseif ($SensorID) {
+    Exit 2
+}
+elseif ($SensorID) {
     $data = "||agentID||$SensorID" 
-}elseif ($Sensortype) {
+}
+elseif ($Sensortype) {
     $data = "||agenttype||$Sensortype" 
 }
 
@@ -196,16 +198,18 @@ $Eventdata = [PSCustomObject]@{
 try {
     Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Eventdata.actiondata)"
     Start-Service -Name $Eventdata.actiondata
+    Exit 0
 }
 catch {
     Write-Log -Source $EventSourceName -EventID 101 -EntryType Error -Message "Restart for Service: $($Eventdata.actiondata) exited with Error: $_"
+    Exit 1
 }
 
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUYxg3m9U5HnbzYiBj2z9IJTXr
-# dGKggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQU6xiGiPSpOXbf2+UMI/W2yw1u
+# gXmggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -376,29 +380,29 @@ catch {
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFCG6F6JMnHzvoXaisL9LSdpm
-# uOwLMA0GCSqGSIb3DQEBAQUABIIBAOLnZOc3L4bqDZQP6JEj0aQtZ/x3a5g2ynj7
-# ZBj4tqrPxMaJwjXgJM9a0BF83mEIiqJnKqRjIiUtRlGfxaaB9a82IVfqvw8OyRtN
-# UXfr/eSJhNPPgdzBZDmB/me2L/jqYtlJ6hcv7FozQgI7xrnMDB9KnVsKqZTWctjk
-# GsrQXqpM0CQ/xBLeYYWqN9V3z8TIFFwat8cE8P6G6Lxyd1nWQVIU20JKH908dQGb
-# mGB6gfiS296Otz+ZsfTpd28wY2LbFwC94bO6nm8DidL540yM/y3hkM63MuS+fitQ
-# X1xsOxVi/npW+UGNFZjJ+gLcDkFN7eq7ryKH3KeetwFv28gmAR2hggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFJtFNZ78b0NFI2KtMamsUr0e
+# 2hhsMA0GCSqGSIb3DQEBAQUABIIBAHH/jVR4CWPP/wOU9KYqyHOskZG8P9Itj1Vi
+# D3Hp7S2KX0Z39Eo1xqDXN7b8ciL+Ux1X/JqCxbdPoN/AZ1f9Q6/f70/ERwcY2f4L
+# u/1xROG/GGnJiS0tU0Rx32zC4MUWxPqRBy/SJiCmsSLEehEOln6kLVy051u14UKA
+# ov60mN04bxWVvkd80z8ooFH8hD3ULB879QMzqHY+edbG2ZyJeD2q9UR33jHBTnUG
+# OlrmnXEtkemx3RGcuhSNRn+qbpH2CFfzc0Fo/1EmcFi3zzgDx7sb/p1sqyH8ObKt
+# CqCzsRjC/mEjParFDfXe0K5eZuoJ9huO8w8bQ284eRvue8Dq5F+hggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTEwMjA3MzUx
-# NlowPwYJKoZIhvcNAQkEMTIEMDM6ZYTfXpiXf38uKgGBoAIbkQY3x1Ud3LoLNstC
-# +Ab2GnN1CwXU2hSWrXpTriJ3gjANBgkqhkiG9w0BAQEFAASCAgA0HSBAl0uL3Gss
-# KwJ7PaJNkTMXd8VSCi5dmfh1rUzEIvvVEDHHiDTCrJ2x4aaST25zVRgWOuzGjhV/
-# 0WEuM5Nn16bdUzo7SIDMMNeZhdNroQeYhIcV+t45aEE/Eug9wDKZ1tazaMIP8Y50
-# T6GtJurGaVLy0mPyGPbHT626J7qENMHQlEqJY08vMhsAH+oDwX52kKI6IXbzCdHL
-# WDMBcIVs2Rk6Zm2olXXi7/Ps2Uy/1DBmRc6ogAHle/XcLPbeLp67yW3jox0NBrk8
-# atUXjZNPrsaxOaLRxPBWQY/umVfN5A0CJk7PbV8dXKF7B3y+4fyi3ak8wPjQUy49
-# TrVnNU3eYEkkZS34J8eh7GxUKZSq+lg6OpFuBFxk/Khch9dDfuWm6axstC9v9Mw4
-# arp/6+KIMpdlBqmSK7JRZ86HBjJiVwgp1YcKFYLyg7L/BrjFmMnxwo1RMrmazcdm
-# d62i/SZJY3+utQPytCs4Q3dfB/4VFw+fLsJvWWY8ImMF3PZ6o24LabmJotScPGuf
-# 784VRqct0G+/uMdbY2yRbodZ1qksino/okertkNsM4botqZRVK2aqMdTAJQryqb0
-# g5mFzxHXlsg1B4lPXIUdxNADn4l+vejwnQb84G+4XRkfKS5sWTJQf1xrll7slsDN
-# 4vy4uti8ETSQQlaEpEd48Wx6q6AahQ==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTEwNTA3MzMx
+# M1owPwYJKoZIhvcNAQkEMTIEMIv8QVzC+SwbzpTXVhfw9ZKIZvFGLBQMnunhJiQu
+# PwKmp9X9VFuOdxvzFo4JR6FsbjANBgkqhkiG9w0BAQEFAASCAgBAFiOkbWwh9SzG
+# MMVe3cvclvAAYLF30yS6+bwray2JASJu9xxO0KlElVu8uujz2EqlBN+2c7AvukQU
+# Tw1qkdOxV/gdaXGdQ/VEYfGc1UN2OfWbjA5U7Yw11Kl2vZARIP5po2G3AyJ4zJ/V
+# 5H+0HzXKvYX//rmWwbMNcmMbfT7XM7KL3qFvR15KzyTUaAcmAkkap1nrmlCCAjQN
+# /dUbMAWkrFM1JSBsXfSjPggx6J/uL6gm4JbM4j+RM1Xk3E6tgPvzTxrCxWTaovpj
+# Vz6DMzriCK1l0uqqnJDbSleUdTbT7q0XU0hL0xqcSZNBQ2R+y7rqkxXnwVGmeYQA
+# LS07iDq8IEBmDuXqMNAqWOHbdEDj1soP3escnP0NPRCoqq5I0JSuxu1IjGMtB55X
+# lkn7jjwpON2WXX04BvBm8GtZZjaHyDa+znPjD6rBALDwzZek3NO+qCXSfUIQm1f0
+# 28YjeZOotcvXCnp+9FKZKEWlA3CPj0JvcVkO0fJVbq/AxNSBkzYtkScQT+1VNsO3
+# 2u54nQH7KXB6Tbxt+IzjzHR81Icwqa5AFwTSeAZw/DEwwPnQsblV9m6uL+2bKZ4v
+# LxaJS8MW51vdn7RsLTe7nQRHHp8VVbEYl3vBB4OnC8bKUC+lFTQItd3CG+7jVo+W
+# RYd2OxpJh/C3BMmBUGBhF7oY16OPFw==
 # SIG # End signature block
