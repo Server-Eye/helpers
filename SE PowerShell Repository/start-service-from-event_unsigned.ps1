@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-        Restart Service Event Action
+    Restart Service Event Action
  
     .DESCRIPTION
-        Restart all Services based on the Event Actiondata
+    Restart all Services based on the Event Actiondata
 
     .PARAMETER EventID
     ID of the Event, default is 1.
@@ -18,8 +18,8 @@
     ID of a Sensor Type
 
     .NOTES
-        Author  : Server-Eye
-        Version : 1.1
+    Author  : Server-Eye
+    Version : 1.1
 #>
 
 [CmdletBinding()]
@@ -170,9 +170,11 @@ function Write-Log {
 if (!$SensorID -and !$Sensortype) {
     Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
     Exit
-}elseif ($SensorID) {
+}
+elseif ($SensorID) {
     $data = "||agentID||$SensorID" 
-}elseif ($Sensortype) {
+}
+elseif ($Sensortype) {
     $data = "||agenttype||$Sensortype" 
 }
 
@@ -196,7 +198,9 @@ $Eventdata = [PSCustomObject]@{
 try {
     Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Eventdata.actiondata)"
     Start-Service -Name $Eventdata.actiondata
+    Exit 0
 }
 catch {
     Write-Log -Source $EventSourceName -EventID 101 -EntryType Error -Message "Restart for Service: $($Eventdata.actiondata) exited with Error: $_"
+    Exit 1
 }
