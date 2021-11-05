@@ -169,7 +169,7 @@ function Write-Log {
 
 if (!$SensorID -and !$Sensortype) {
     Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
-    Exit
+    Exit 2
 }
 elseif ($SensorID) {
     $data = "||agentID||$SensorID" 
