@@ -1,30 +1,37 @@
 #Requires -Modules ServerEye.PowerShell.Helper
-#Requires -Modules importexcel
 <#
     .SYNOPSIS
-    Deletes a customer property.
+    Get Successfull Tasks
     
     .DESCRIPTION
-    Deletes a customer property.
+    Get the Histroy of every successfull run of all Tasks from a Customer in a Timespan.
     
     .PARAMETER CustomerID
     The id of the Customer.
 
-    .PARAMETER Key
-    The custom property that you want to delete.
+    .PARAMETER ExitCode
+    Exitcode for a successfull Tasks run, 0 is default
+
+    .PARAMETER TimeToAdd 
+    Time that should be added to the Date or subtracted. Example -1 would be back in time.
+
+    .PARAMETER TimeFrame 
+    Length of the frame set with TimetoAdd, Years, Months Days etc.
 
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE 
-    New-CustomerProperty -CustomerID "11113333-8888-aaaa-bbbb-cccccustomer" -Key "Test" -Value "1234"
+    Get-TaskSuccessHistory.ps1 -CustomerID "" -TimeToAdd -1 -TimeFrame AddMonths -AuthToken "" 
 
-    Name                       CustomerId                           Keyname Value
-    ----                       ----------                           ------- -----
-    Wortmann Demo (gesponsert) 11113333-8888-aaaa-bbbb-cccccustomer Test    1234 
+    Task                        Description                 Sensorhub Customer                   Execution Date
+    ----                        -----------                 --------- --------                   --------- ----
+    Restart Services from Event Restart Services from Event DATASRV   Wortmann Demo (gesponsert) Success   2 Nov 2021 15:14:20
+    Restart Services from Event Restart Services from Event DATASRV   Wortmann Demo (gesponsert) Success   28 Oct 2021 05:50:48
 
-    .LINK 
-    https://api.server-eye.de/docs/2/#/customer/post_customer_property
+    .NOTES
+    Author: Server-Eye
+    Version: 1.0
 #>
 
 [CmdletBinding()]
@@ -32,9 +39,9 @@ Param(
     [Parameter(Mandatory = $true)]
     $CustomerID,
     [Parameter(Mandatory = $false)]
-    $ExecutionCode = 0,
+    $ExitCode = 0,
     [Parameter(Mandatory = $true)]
-    [ValidateRange(-99,0)]
+    [ValidateRange(-99, 0)]
     [int]
     $TimeToAdd,
     [Parameter(Mandatory = $true)]
@@ -47,32 +54,32 @@ Param(
 
 $Frame = (Get-Date).($TimeFrame)($TimeToAdd)
 
-$data = Get-SeApiMyNodesList -Filter customer,agent,container -AuthToken $AuthToken -listType object
+$data = Get-SeApiMyNodesList -Filter customer, agent, container -AuthToken $AuthToken -listType object
 $customers = $Data.managedCustomers
 $customers += $Data.customer
 $containers = $data.container
-$Connectors = $containers | Where-Object {$_.subtype -eq 0}
-$Sensorhubs = $containers | Where-Object {$_.subtype -eq 2}
+$Connectors = $containers | Where-Object { $_.subtype -eq 0 }
+$Sensorhubs = $containers | Where-Object { $_.subtype -eq 2 }
 $Agents = $Data.agent
 
 $tasks = Get-SEScheduledTask -customerid $CustomerID -AuthToken $AuthToken
 
-$Eventtasks = $tasks | Where-Object {$_.triggers -like "<EventTrigger>*"}
+$Eventtasks = $tasks | Where-Object { $_.triggers -like "<EventTrigger>*" }
 
-foreach ($task in $Eventtasks){
-    $Sensorhub = $Sensorhubs | Where-Object {$_.id -eq $task.containerId}
-    $customer = $customers | Where-Object {$_.id -eq $task.customerid}
-    $history = $task.history | Where-Object {$_.executionCode -eq $ExecutionCode}
-    foreach ($entry in $history){
+foreach ($task in $Eventtasks) {
+    $Sensorhub = $Sensorhubs | Where-Object { $_.id -eq $task.containerId }
+    $customer = $customers | Where-Object { $_.id -eq $task.customerid }
+    $history = $task.history | Where-Object { $_.ExitCode -eq $ExitCode }
+    foreach ($entry in $history) {
         $entry.date = (([System.DateTimeOffset]::FromUnixTimeMilliseconds($entry.date)).DateTime)
         if ($entry.date -gt $frame) {
             [PSCustomObject]@{
-                Task = $task.Name
+                Task        = $task.Name
                 Description = $task.description
-                Sensorhub = $Sensorhub.name
-                Customer = $customer.name
-                Execution = "Success"
-                Date = $entry.date
+                Sensorhub   = $Sensorhub.name
+                Customer    = $customer.name
+                Execution   = "Success"
+                Date        = $entry.date
             }
         }
 
@@ -82,8 +89,8 @@ foreach ($task in $Eventtasks){
 # SIG # Begin signature block
 # MIIlMgYJKoZIhvcNAQcCoIIlIzCCJR8CAQExCzAJBgUrDgMCGgUAMGkGCisGAQQB
 # gjcCAQSgWzBZMDQGCisGAQQBgjcCAR4wJgIDAQAABBAfzDtgWUsITrck0sYpfvNR
-# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUfeWrEt2sgwFHSVp0+FXx79zQ
-# d2Gggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
+# AgEAAgEAAgEAAgEAAgEAMCEwCQYFKw4DAhoFAAQUHYrwp4jUHDNbvLEy+2D6XJI9
+# Bg6ggh8aMIIFQDCCBCigAwIBAgIQPoouYh6JSKCXNBstwZR1fDANBgkqhkiG9w0B
 # AQsFADB8MQswCQYDVQQGEwJHQjEbMBkGA1UECBMSR3JlYXRlciBNYW5jaGVzdGVy
 # MRAwDgYDVQQHEwdTYWxmb3JkMRgwFgYDVQQKEw9TZWN0aWdvIExpbWl0ZWQxJDAi
 # BgNVBAMTG1NlY3RpZ28gUlNBIENvZGUgU2lnbmluZyBDQTAeFw0yMTAzMTUwMDAw
@@ -254,29 +261,29 @@ foreach ($task in $Eventtasks){
 # aW1pdGVkMSQwIgYDVQQDExtTZWN0aWdvIFJTQSBDb2RlIFNpZ25pbmcgQ0ECED6K
 # LmIeiUiglzQbLcGUdXwwCQYFKw4DAhoFAKB4MBgGCisGAQQBgjcCAQwxCjAIoAKA
 # AKECgAAwGQYJKoZIhvcNAQkDMQwGCisGAQQBgjcCAQQwHAYKKwYBBAGCNwIBCzEO
-# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFIl4S3/JJANMGNH71afmsVPj
-# y4aZMA0GCSqGSIb3DQEBAQUABIIBAKVlEJ8pXmw/MpFxzbn8r2fD0nTsiLtDmjvR
-# 4QygxlVHs7KwCg4XZK+IaGDugDNcj+0fTlQN3RDZ0SWcp4g9SfIPaOZ2uqhZxRGj
-# C9/uR46VIoWLRFQGC29LedznsL1fPpiGApDHaJYa6VvsoahDhoeycMPzVw0JrIKv
-# PjElkEPizStFr0zgTS65F+X/ndEWwHMFGxlu+zIeLH9W1evdPK4+VKm5PMG96Pfn
-# fIFzrPisvTCumnmqNo267mVwEm5aNLZbacMzQk1uPqaxfZTv/bQ/qSODJFYlvMWg
-# gVveZEp2ItRlF9fgJ+4DkAXqSXnl7pxdFaDtwkLqTKzCEibLdJOhggNMMIIDSAYJ
+# MAwGCisGAQQBgjcCARUwIwYJKoZIhvcNAQkEMRYEFNpOH8piuvYS9fzB/Bh7ZYSD
+# dKQPMA0GCSqGSIb3DQEBAQUABIIBAFOoOQ8kEccZQtVIoY9whAjVuJQ+7nvELTNM
+# eqBlvo2OKDp9vBukm9TK9M5FLz2u6GnD8DmiTlwIL02wK0wsOK7SXgXQnlnhSgTD
+# XTWuMIcSCBhaD5BP89T5ZyaghEDLwGocFXhxTjRfcoAxU8uf+Pdoo9C/CKMPCQyE
+# ZBfHzTMXv+bSVlSY1QIYJLXewD1TNcBVgoNG27GJXjse9DrGCTFo7aA4zlfcGzd0
+# KSNQlznrrayEV1XoPLwjXU/iPdkWV5bEiT36BZYbLVQBb6vJKJEmTW/FjL8D0TZs
+# jceUiYI/E6j25H9TrCgyZW/9lJ29iPgWyNqE5GNZpfhCCbC+tKKhggNMMIIDSAYJ
 # KoZIhvcNAQkGMYIDOTCCAzUCAQEwgZIwfTELMAkGA1UEBhMCR0IxGzAZBgNVBAgT
 # EkdyZWF0ZXIgTWFuY2hlc3RlcjEQMA4GA1UEBxMHU2FsZm9yZDEYMBYGA1UEChMP
 # U2VjdGlnbyBMaW1pdGVkMSUwIwYDVQQDExxTZWN0aWdvIFJTQSBUaW1lIFN0YW1w
 # aW5nIENBAhEAjHegAI/00bDGPZ86SIONazANBglghkgBZQMEAgIFAKB5MBgGCSqG
-# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTEwNTA3NTkz
-# NFowPwYJKoZIhvcNAQkEMTIEMBe3OlJ3vGAvIUW+S0PFop+z281SGEbS+I2fjn9P
-# L9zGuJQjsdP8kZn6+geEdF5M6zANBgkqhkiG9w0BAQEFAASCAgAcPVf6bfinsCXU
-# O2ElalKgM+rLgzt8F3Q04qgjnezJEtzrtqVlbItmucfqtPuqz3727e6z4z66d1qk
-# u6GjsfgEs4yTvya9gy1CDc/9Cs1QqSAoTpw17h8Vq24a4hoETpnjFLjoQOybr1JR
-# LTfq0daVN1uY+IF063ozFQyJ7mFLwXRWY81uC83dYNxpIZ2oqFimN13RPkPp7/eH
-# 5klKlUzFuyjo4cqWqGUCqZNHAB2pMOZut7yI60DTzECLKzGp/kHJP5zZ2GfWCXdi
-# zmlw78/hpFY2Lo65FJ7wB/CEFbd83QKo+n5IcRYDON3sP+kHl/l6EETM77J/AJv6
-# XAC/4VVDvRTqEdMRGvsM5Zsphg5Aratljvv+q2BJUqSabKhhnq0lu0v5114Q3E83
-# urre8rrCBBzX/FkLBstVZO4KA+xzYFXX6/R80njoZVxiKBzyxTCbFYFT+fQvK97A
-# 9n/linm7EboGXqKDQeUVOH81fJK5YjYtN/bdQZuaSY/IWMeqrd7nFy7uZeDZb2+U
-# LR7FqS5yXHs/gszDJX08s8spJAFSdmdl+RSz51m7XUtag/q7KMMCA6YDdF4vHwRx
-# 96j5SVntZdyLCTPEhR6TmbPv/WUbYRIoqC8UDQ6IsJau+beFitB8Fxg65e4XC6GK
-# 3DKHvH31r7NFFaRzmGvaZyechkmMdQ==
+# SIb3DQEJAzELBgkqhkiG9w0BBwEwHAYJKoZIhvcNAQkFMQ8XDTIxMTEwNTA4MDEx
+# M1owPwYJKoZIhvcNAQkEMTIEME2bB6RhgTmQFcGPNkgH1Hyi787fQS9QpjBb+I/C
+# R1r3uOkgTLc2TCaqpI9FdjW7OjANBgkqhkiG9w0BAQEFAASCAgAD+/c+muGWt+mu
+# CeLANRvxZadyb4mV+32vuzW/Y2bvSPVQUeZuJaRyXhrWpMJ+7oDuPRNjJ0KLZPTZ
+# 7Xw37EaIrgIqcCqJ4OgdTx+gNqmkupI0uwvENlboTy3do8HvJBYDiHiMq0/3rgcy
+# 3RLN1c8LlNak+wj38VTfUdtWpI8TUKQfNtvZMa5fsypw90XHv71VFgPYuBs1doMC
+# jWWwz8DL7nr4owH3vg7rL55opPBWQo4G4yskmp8+aNIlx1HPe6BjAJZHad37WIP6
+# zwySHwmrAYzr4Qw4ibO4rN76SncsLpkoxQxXOsEWvp4wXzGqrmrH2/N5EyNGb3G6
+# 95pFjtaePFDOm2VBXIRY7hvAi0pwJq/U1LJZitINcEQfhLsQ2xYMr/+AoyzpSPuO
+# FRzYFFOxbj9iUitCXtIoh41QRFW1WDg/VFDIo93Ix65efcukAncmltIyOjIBdnC8
+# lVlam/anI4fHI13YwXUcFgAQD6BJGgJIt7nIdUDNFXjWkjKo5JbSreASDn4lFTCp
+# BsmFvnVih3bXDWtqr+lTx9ZhptNYCwvpIxiS/bnoWpOzJLDlpmXzRJmAMfXl7zNe
+# DIOhdjiBvjt3XIln2tiufFtxbyp3OiOpZtui1xCiq0tVQxFRwBo7rWCyQFTvzyzY
+# xP5hqkEVkz5z/I8943hKytpnVRA6yA==
 # SIG # End signature block
