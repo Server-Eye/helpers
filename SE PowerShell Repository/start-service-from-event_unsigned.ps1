@@ -11,15 +11,15 @@
     .PARAMETER LogName
     Name of the Eventlog that should be checked, default is Server-Eye Client History
 
-    .PARAMETER SensorID
+    .PARAMETER AgentID
     ID of a Sensor
 
-    .PARAMETER Sensortype
+    .PARAMETER AgentType
     ID of a Sensor Type
 
     .NOTES
     Author  : Server-Eye
-    Version : 1.1
+    Version : 2.0
 #>
 
 [CmdletBinding()]
@@ -29,10 +29,10 @@ Param(
     [Parameter(Mandatory = $false, HelpMessage = "Name of the Eventlog that should be checked, default is Server-Eye Client History")] 
     [string]$LogName = "Server-Eye Client History",
     [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor")]
-    [string]$SensorID,
+    [string]$AgentID,
     [Parameter(Mandatory = $false, HelpMessage = "ID of a Sensor Type")] 
     [alias("ServerEyeID")]
-    [string]$Sensortype
+    [string]$AgentType
 )
 #region Internal
 $SEPath = "C:\Program Files (x86)\Server-Eye"
@@ -167,15 +167,16 @@ function Write-Log {
 }
 #endregion WriteLog
 
-if (!$SensorID -and !$Sensortype) {
-    Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no SensorId or SensorType given."
+if (!$AgentID -and !$AgentType) {
+    Write-Log -Source $EventSourceName -EventID 100 -EntryType Error -Message "Check Parameters, no AgentID or AgentType given."
+    throw "Parameter AgentId or AgentType is missing"
     Exit 2
 }
-elseif ($SensorID) {
-    $data = "||agentID||$SensorID" 
+elseif ($AgentID) {
+    $data = "||agentid||$AgentID" 
 }
-elseif ($Sensortype) {
-    $data = "||agenttype||$Sensortype" 
+elseif ($AgentType) {
+    $data = "||agenttype||$AgentType" 
 }
 
 $filter = @{
@@ -196,11 +197,18 @@ $Eventdata = [PSCustomObject]@{
 }
 
 try {
-    Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($Eventdata.actiondata)"
-    Start-Service -Name $Eventdata.actiondata
-    Exit 0
-}
-catch {
+    foreach ($service in $Eventdata.actiondata) {
+        if ($service -ne "") {
+            try {
+                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restarting Service: $($service)"
+                Start-Service -Name "$service"
+            }
+            catch {
+                Write-Log -Source $EventSourceName -EventID 100 -EntryType Information -Message "Restart for Service: $($service) exited with Error: $_"
+            }
+        }
+    }
+}catch {
     Write-Log -Source $EventSourceName -EventID 101 -EntryType Error -Message "Restart for Service: $($Eventdata.actiondata) exited with Error: $_"
     Exit 1
 }
