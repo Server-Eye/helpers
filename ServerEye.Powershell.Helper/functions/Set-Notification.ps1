@@ -44,7 +44,7 @@ function Set-Notification {
         $NotificationId,
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensorhub')]
         [Parameter(ValueFromPipelineByPropertyName,Mandatory=$false,ParameterSetName='ofSensor')]
-        $userId,
+        $UserId,
         [Parameter(Mandatory=$false,ParameterSetName='ofSensorhub')]
         [Parameter(Mandatory=$false,ParameterSetName='ofSensor')]
         [switch]$SendEmail,
@@ -168,11 +168,11 @@ function SetNotificationofContainer {
         $customerName = $sensorhub.Customer
     }
     
-    formatContainerNotificationSet -notiID $noti.id -authoken $authtoken -SensorhubID $noti.parent_id
+    formatContainerNotificationSet -notiID $noti.id -authoken $authtoken -SensorhubID $noti.parent_id -sensorhubName $sensorhubName -connectorName $connectorName -customerName $customerName
 
 }
 
-function formatContainerNotificationSet($notiID, $authoken, $SensorhubID){
+function formatContainerNotificationSet($notiID, $authoken, $SensorhubID, $sensorhubName, $connectorName, $customerName){
     $n = Get-SENotification -SensorhubId $SensorhubId -authoken $authtoken | Where-Object {$_.NotificationId -eq $notiID}
     [PSCustomObject]@{
         Name = $n.Name
