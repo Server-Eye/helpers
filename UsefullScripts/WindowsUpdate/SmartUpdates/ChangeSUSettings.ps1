@@ -1,22 +1,22 @@
 #Requires -Module ServerEye.PowerShell.helper
- <#
+<#
     .SYNOPSIS
-    Setzt die Einstellungen fÃ¼r die VerzÃ¶gerung und die Installation Tage im Smart Updates
+    Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
     
     .DESCRIPTION
-     Setzt die Einstellungen fÃ¼r die VerzÃ¶gerung und die Installation Tage im Smart Updates
+     Setzt die Einstellungen für die Verzögerung und die Installation Tage im Smart Updates
 
     .PARAMETER CustomerId
-    ID des Kunden bei dem die Einstellungen geÃ¤ndert werden sollen.
+    ID des Kunden bei dem die Einstellungen geändert werden sollen.
 
     .PARAMETER ViewfilterName
-    Name der Gruppe die geÃ¤ndert werden soll
+    Name der Gruppe die geändert werden soll
 
     .PARAMETER UpdateDelay
-    Tage fÃ¼r die Update VerzÃ¶gerung.
+    Tage für die Update Verzögerung.
 
     .PARAMETER installDelay
-    Tage fÃ¼r die Installation
+    Tage für die Installation
 
     .PARAMETER categories
     Kategorie die in einer Gruppe enthalten sein soll
@@ -25,24 +25,25 @@
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 
     .EXAMPLE 
-    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage fÃ¼r die VerzÃ¶gerung" -installDelay "Tage fÃ¼r die Installation"
-
-    .EXAMPLE 
-    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage fÃ¼r die VerzÃ¶gerung" -installDelay "Tage fÃ¼r die Installation" -categories MICROSOFT
-
-    .EXAMPLE 
-    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage fÃ¼r die VerzÃ¶gerung" -installDelay "Tage fÃ¼r die Installation" -ViewfilterName "Name einer Gruppe"
-
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation"
+    
+    .EXAMPLE
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation" -categories MICROSOFT
+    
+    .EXAMPLE
+    .\ChangeSUSettings.ps1 -AuthToken "ApiKey" -CustomerId "ID des Kunden" -UpdateDelay "Tage für die Verzögerung" -installDelay "Tage für die Installation" -ViewfilterName "Name einer Gruppe"
+    
     .EXAMPLE 
     Get-SECustomer -AuthToken $authtoken| %{.\ChangeSUSettings.ps1 -AuthToken $authtoken -CustomerId $_.CustomerID -ViewfilterName "ThirdParty Server" -UpdateDelay 30 -installDelay 7}
-
-
 #>
+
+
+
 Param ( 
     [Parameter(Mandatory = $true)]
     [alias("ApiKey", "Session")]
     $AuthToken,
-    [parameter(ValueFromPipelineByPropertyName,Mandatory = $true)]
+    [parameter(ValueFromPipelineByPropertyName, Mandatory = $true)]
     $CustomerId,
     [Parameter(Mandatory = $false)]
     $ViewfilterName,
@@ -53,7 +54,17 @@ Param (
     [ValidateRange(1, 60)]
     $installDelay,
     [Parameter(Mandatory = $false)]
-    [ValidateSet("DOT_NET_FRAMEWORK_3_5","DOT_NET_FRAMEWORK_4_0","DOT_NET_FRAMEWORK_4_5","DOT_NET_FRAMEWORK_4_6","DOT_NET_FRAMEWORK_4_7","ADOBE_AIR","ADOBE_FLASH_PLAYER","ADOBE_READER","ADOBE_SHOCKWAVE_PLAYER","CD_BURNER_XP","GOOGLE_CHROME","GPL_GHOSTSCRIPT","INTERNET_EXPLORER","IPHONE_CONFIGURATION_UTILITY","ITUNES","KEEPASS","LIBREOFFICE","MOZILLA_FIREFOX","MOZILLA_THUNDERBIRD","NOTEPAD_PLUS_PLUS","OFFICE_VIEWER","OPEN_OFFICE","OPERA","PDF_ARCHITECT","QUICKTIME","SILVER_LIGHT","SKYPE","VIRTUALBOX","VISUAL_C_PLUS_PLUS_REDISTRIBUTABLE","VLC","VMWARE_VSPHERE_CLIENT","WINDOWS_AIK","WINRAR","WINSCP","FILEZILLA","MICROSOFT","MICROSOFT_PRODUCT")]
+    [ArgumentCompleter(
+            {
+                Get-SESUCategories 
+            }
+        )]
+    [ValidateScript(
+            {
+                $categories = Get-SESUCategories
+                $_ -in $categories
+            }
+        )]
     $categories
 )
 
@@ -63,25 +74,25 @@ function Get-SEViewFilters {
         $CustomerID
     )
     $CustomerViewFilterURL = "https://pm.server-eye.de/patch/$($CustomerID)/viewFilters"
-
+                    
     if ($authtoken -is [string]) {
         try {
-            $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -Headers @{"x-api-key" = $authtoken } | Where-Object {$_.vfId -ne "all"}
-            $ViewFilters = $ViewFilters | Where-Object {$_.vfId -ne "all"}
+            $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -Headers @{"x-api-key" = $authtoken } | Where-Object { $_.vfId -ne "all" }
+            $ViewFilters = $ViewFilters | Where-Object { $_.vfId -ne "all" }
             return $ViewFilters 
         }
         catch {
             Write-Error "$_"
         }
-
+                        
     }
     else {
         try {
             $ViewFilters = Invoke-RestMethod -Uri $CustomerViewFilterURL -Method Get -WebSession $authtoken
-            $ViewFilters = $ViewFilters | Where-Object {$_.vfId -ne "all"}
+            $ViewFilters = $ViewFilters | Where-Object { $_.vfId -ne "all" }
             return $ViewFilters 
-
-
+                            
+                            
         }
         catch {
             Write-Error "$_"
@@ -127,12 +138,14 @@ function Set-SEViewFilterSetting {
     )
     if ($installDelay) {
         $ViewFilterSetting.installWindowInDays = $installDelay
-    }else {
+    }
+    else {
         $ViewFilterSetting.installWindowInDays = $ViewFilterSetting.installWindowInDays
     }
     if ($UpdateDelay) {
         $ViewFilterSetting.delayInstallByDays = $UpdateDelay
-    }else {
+    }
+    else {
         $ViewFilterSetting.delayInstallByDays = $ViewFilterSetting.delayInstallByDays
     }
     $body = $ViewFilterSetting | Select-Object -Property installWindowInDays, delayInstallByDays, categories, downloadStrategy, maxScanAgeInDays, enableRebootNotify, maxRebootNotifyIntervalInHours | ConvertTo-Json
@@ -159,12 +172,12 @@ function Set-SEViewFilterSetting {
     }
 }
 
-
 $AuthToken = Test-SEAuth -AuthToken $AuthToken
 
 if ($ViewfilterName) {
-    $Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID | Where-Object {$_.name -eq $ViewfilterName}
-}else {
+    $Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID | Where-Object { $_.name -eq $ViewfilterName }
+}
+else {
     $Groups = Get-SEViewFilters -AuthToken $AuthToken -CustomerID $CustomerID
 }
 
@@ -172,12 +185,13 @@ if ($ViewfilterName) {
 foreach ($Group in $Groups) {
     Write-Debug "$categories before If"
     if ($categories) {
-    Write-Debug "$categories in IF"
-    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group | Where-Object {$_.categories.ID -contains $categories}
-    Write-Debug "$GroupSettings categories"
-    }else {
-    $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group
-    Write-Debug "$GroupSettings not categories"
+        Write-Debug "$categories in IF"
+        $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group | Where-Object { $_.categories.ID -contains $categories }
+        Write-Debug "$GroupSettings categories"
+    }
+    else {
+        $GroupSettings = Get-SEViewFilterSettings -AuthToken $AuthToken -CustomerID $CustomerID -ViewFilter $Group
+        Write-Debug "$GroupSettings not categories"
     }
     
     foreach ($GroupSetting in $GroupSettings) {
