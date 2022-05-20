@@ -35,7 +35,13 @@ function Get-Sensor {
         [Parameter(Mandatory = $false, ParameterSetName = "bySensor")]
         [Parameter(Mandatory = $false, ParameterSetName = "bySensorhub")]
         [parameter(Mandatory = $false, ValueFromPipelineByPropertyName, ParameterSetName = "bySensorType")]
-        $AuthToken
+        $AuthToken,
+        [parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
+        [Alias("LineFilter")]
+        [string[]]$script:MsgLineFilter,
+        [parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
+        [Alias("SpaceFilter")]
+        [string[]]$script:MsgSpaceFilter
     )
 
     Begin {
@@ -81,8 +87,6 @@ function getSensorBySensorhub ($sensorhubId, $filter, $auth) {
             formatSensor -sensor $sensor -auth $auth -sensorhub $sensorhub -agentList $agentList
         }
     }
-
-
 }
 function getSensorById ($sensorId, $auth) {
     $sensor = Get-CachedAgent -AgentID $sensorId -AuthToken $auth
@@ -106,7 +110,7 @@ function formatSensor($sensor, $sensorhub, $agentlist, $auth) {
         Sensorhub       = $sensorhub.name
         'OCC-Connector' = $MAC.Name
         Customer        = $customer.Companyname
-        Message         = $notification.message
+        Message         = filterMSG($notification.message)
     }
     if ($ShowFree) {
         Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
@@ -129,10 +133,41 @@ function formatSensorByType($auth, $agent) {
         Sensorhub       = $sensorhub.name
         'OCC-Connector' = $MAC.Name
         Customer        = $customer.Companyname
-        Message         = $agent.message
+        Message         = filterMSG($agent.message)
     }
     if ($ShowFree) {
         Add-Member -MemberType NoteProperty -Name forFree -Value $type.forFree -InputObject $SESensor
     }
     Return $SESensor
+}
+
+function filterMSG($message){
+    $result = "";
+    if(($script:MsgLineFilter) -and ($script:MsgSpaceFilter)){
+        Write-Error "Only one message filter type can be used at a time."
+    } elseif ($script:MsgLineFilter){
+        foreach ($line in $($message -split "`n"))
+            {
+                foreach ($lineFilter in $script:MsgLineFilter){
+                    if($line -match [regex]::escape($lineFilter)){
+                        $result += $line +"`n";
+                        break;
+                    }
+                }
+            }
+        return $result
+    } elseif ($script:MsgSpaceFilter){
+        if($script:MsgSpaceFilter.count -ne 2){
+            Write-Error "The space filter type only accepts two strings.(-MsgSpaceFilter `"Filter Start`", `"Filter End`")"
+        }else{
+            $expression = '^' + $script:MsgSpaceFilter[0] + '.$([\s\S]*?)^' + $script:MsgSpaceFilter[1] + '.$'
+            
+            $matches = [Regex]::Matches($message, $expression, "Multiline");
+            if($matches.groups.count -ge 1){
+                return $matches.groups[1].value
+            }
+        }
+    } else{
+        return $message
+    }
 }
