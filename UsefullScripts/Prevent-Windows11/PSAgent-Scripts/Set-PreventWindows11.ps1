@@ -5,7 +5,7 @@
 
 <# 
 .SYNOPSIS
-    Will set a few registry keys to prevent Windows 11 from installing
+    Will set a few registry keys to prevent Windows 11 from installing - !For use with PowerShell Script Agent!
 
 .DESCRIPTION
     Will set the following registry keys to prevent Windows 11 from installing: 
@@ -106,7 +106,7 @@ if($set){
 }else{
     if($check -eq $true){
         $msg.AppendLine("Nothing changed! ")
-        $msg.AppendLine("Registry Keys not set, please rerun the script with parameter -set ")
+        $msg.AppendLine("Registry Keys not set, please run the script again with parameter -set ")
     }
 }
 

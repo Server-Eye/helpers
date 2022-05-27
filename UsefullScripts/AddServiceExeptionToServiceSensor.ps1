@@ -166,7 +166,7 @@ foreach ($sensorhub in $sensorhubsToUpdate) {
         $newClientPaths = $currentPaths
 
         if ([string]::IsNullOrEmpty($currentPaths)) {
-            $newClientPaths = [string]::Join('|,|', $pathsInput.ToArray())
+            $newClientPaths = [string]::Join('|,|', $pathsInput)
         }
         else {
 
