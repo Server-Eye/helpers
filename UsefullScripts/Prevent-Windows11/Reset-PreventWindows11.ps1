@@ -1,9 +1,37 @@
-#
-# Will backup registry entries and delete or reset them in the second step
-#
-#
+<# 
+.SYNOPSIS
+    Will set a few registry keys to prevent Windows 11 from installing - !For use with PowerShell Script Agent!
+
+.DESCRIPTION
+    Will set the following registry keys to prevent Windows 11 from installing: 
+    Registry-Path: HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate
+    Keys:   TargetReleaseVersionInfo as String for TargetVersion (see https://docs.microsoft.com/en-us/windows/release-health/release-information)            
+            TargetReleaseVersion as DWord, if set to 1 it activates the target release version
+            ProductVersion optional as String, set to Windows 10
+    IMPORTANT NOTE: Microsoft will override this setting after end of life of this version!
+    IMPORTANT: You will have to change the TargetReleaseVersionInfo to the next version if a new half-annual update is released
+    
+
+.PARAMETER targetVersion
+    Release-Version, find more here: https://docs.microsoft.com/en-us/windows/release-health/release-information
+
+.PARAMETER WindowsVersionString
+    Windows Version String, should be "Windows 10", set by default
+
+.PARAMETER set
+    Will set the registry keys
+
+.Example
+    Set-PreventWindows11.ps -set
+    Set-PreventWindows11.ps -set -targetVersion "23H2"    # Please see https://docs.microsoft.com/en-us/windows/release-health/release-information
+
+#>
 #Requires -RunAsAdministrator
-Write-Host "Will delete windows 11 prevent key in registry"
+Param(
+    [switch]$backup
+)
+
+Write-Output "Will delete windows 11 prevent key in registry"
 
 $title = "Reset Key or delete it?" 
 $message = "You have the choice to delete the new set registry keys or to set TargetReleaseVersion=0"
@@ -30,18 +58,18 @@ if("False" -eq $fileExists){
     try{       
 
         $backupContent | Out-File -Path $pathForBackup
-        Write-Host "Registry entries backupped to $($pathForBackup)" -ForegroundColor Green
+        Write-Output "Registry entries backupped to $($pathForBackup)" -ForegroundColor Green
 
     }catch{
-        Write-Host "Could not backup files" -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Output "Could not backup files" -ForegroundColor Red
+        Write-Output $_.Exception.Message -ForegroundColor Red
         pause
         exit
     }
 }
 else        
 {
-    Write-Host "Could not backup files, file $($pathForBackup) already exists, please remove first" -ForegroundColor Red
+    Write-Output "Could not backup files, file $($pathForBackup) already exists, please remove first" -ForegroundColor Red
     pause
     exit
 }
@@ -62,8 +90,8 @@ if($choice -eq 0 ){
             Write-Host "Keys successfully removed" -ForegroundColor Green
 
     }catch{
-        Write-Host "Error: " -BackgroundColor Red -ForegroundColor Black
-        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Output "Error: " -BackgroundColor Red -ForegroundColor Black
+        Write-Output $_.Exception.Message -ForegroundColor Red
     
     
     }
@@ -76,19 +104,19 @@ elseif($choice -eq 1 ){
     try{
 
         Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate" -Name TargetReleaseVersion -Value 0 -ErrorAction SilentlyContinue
-        Write-Host "Key successfully reset" -ForegroundColor Green
+        Write-Output "Key successfully reset" -ForegroundColor Green
 
     }catch{
 
-        Write-Host "Could not reset keys " -BackgroundColor Red -ForegroundColor Black
-        Write-Host $_.Exception.Message -ForegroundColor Red
+        Write-Output "Could not reset keys " -BackgroundColor Red -ForegroundColor Black
+        Write-Output $_.Exception.Message -ForegroundColor Red
         pause
         exit
     }
 
 
 }else{
-    Write-Host "Nothing selected! " -BackgroundColor Red -ForegroundColor Black
+    Write-Output "Nothing selected! " -BackgroundColor Red -ForegroundColor Black
     pause
     exit
 }

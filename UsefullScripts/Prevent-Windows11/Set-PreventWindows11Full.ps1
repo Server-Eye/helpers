@@ -15,28 +15,50 @@
 .PARAMETER targetVersion
     Release-Version, find more here: https://docs.microsoft.com/en-us/windows/release-health/release-information
 
+.PARAMETER WindowsVersionString
+    Windows Version String, should be "Windows 10", set by default
+
+.PARAMETER set
+    Will set the registry keys
+
+.Example
+    Set-PreventWindows11.ps -set
+    Set-PreventWindows11.ps -set -targetVersion "23H2"    # Please see https://docs.microsoft.com/en-us/windows/release-health/release-information
+
 #>
 #Requires -RunAsAdministrator
 
 Param(
-    [string]$targetVersion = "22H1" #set a future version, you can find it here: https://docs.microsoft.com/en-us/windows/release-health/release-information
+    [string]$targetVersion = "22H1", #set a future version, you can find it here: https://docs.microsoft.com/en-us/windows/release-health/release-information
+    [string]$WindowsVersionString = "Windows 10",
+    [switch]$set, 
+    [switch]$silent
 )
 
 $registryPath = "HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate"
+$check = false
 
-$title = "Windows 11 prevent script?" 
-$message = "This script will set three registry keys to prevent Windows 11 from installing. Do you want to set the registry keys?"
-$set = New-Object System.Management.Automation.Host.ChoiceDescription "&Yes", "Set the registry keys to avoid Windows 11"    # 0
-$abort = New-Object System.Management.Automation.Host.ChoiceDescription "&No", "Abort" # 1
-$options = [System.Management.Automation.Host.ChoiceDescription[]]($set, $abort)
-$choice=$host.ui.PromptForChoice($title, $message, $options, 1)
+if((Get-ItemProperty -Path $registryPath -Name TargetReleaseVersion).TargetReleaseVersion -ne 1){   # Should be 1
+    Write-Output "Key TargetReleaseVersion not set."
+    $check = $true
+}  
 
-if($choice -eq 0 ){
+if((Get-ItemProperty -Path $registryPath -Name TargetReleaseVersionInfo).TargetReleaseVersionInfo -ne $targetVersion){ # Should be 22H1
+    Write-Output "Key TargetReleaseVersionInfo not set."
+    $check = $true
+}
+
+if ((Get-ItemProperty -Path $registryPath -Name ProductVersion).ProductVersion -ne $WindowsVersionString){  # Should be Windows 10 after using script
+    Write-Output "Key ProductVersion not set. "
+    $check = $true
+}
+
+if($set){
     try{
         try{
             New-ItemProperty -Path $registryPath -Name TargetReleaseVersionInfo -PropertyType String -Value $targetVersion -ErrorAction Stop
         }catch{
-            Write-Host "Key already exists, changing target version. "
+            Write-Output "Key already exists, changing target version."
             Set-ItemProperty -Path $registryPath -Name TargetReleaseVersionInfo -Value $targetVersion
         }
 
@@ -51,22 +73,18 @@ if($choice -eq 0 ){
         
         }
 
-        New-ItemProperty -Path $registryPath -Name ProductVersion -PropertyType String -Value "Windows 10" -ErrorAction SilentlyContinue # not so important
-        Write-Host "Script finished, keys set. " -ForegroundColor Green
-        Write-Host "Please restart your computer to activate the changes. " -ForegroundColor Green
-        pause
-        exit
+        New-ItemProperty -Path $registryPath -Name ProductVersion -PropertyType String -Value $WindowsVersionString -ErrorAction SilentlyContinue # not so important
+        Write-Output "Script finished, keys set. "
+        Write-Output "Please restart your computer to activate the changes. "
 
-    }catch{
-        Write-Host "Could not set keys. Reason: " -ForegroundColor Red
-        Write-Host $_.Exception.Message -ForegroundColor Red
-        pause
-        exit
+    }catch{        
+        Write-Output "Could not set keys. Reason: "
+        Write-Output $_.Exception.Message
+
     }
-
 }else{
-    Write-Host "Nothing changed, script aborted " -ForegroundColor Green
-    pause
-    exit
-
+    if($check -eq $true){
+        Write-Output "Nothing changed! "
+        Write-Output "Registry Keys not set, please run the script again with parameter -set "
+    }
 }
