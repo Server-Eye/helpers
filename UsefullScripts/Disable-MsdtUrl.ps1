@@ -11,12 +11,11 @@
 
 .PARAMETER backup
     Will backup registry HKEY_CLASSES_ROOT\ms-msdt
-    NOT YET TESTED
 
 .Example
     Disable-MsdtUrl.ps1 # Checks if there is a key
     Disable-MsdtUrl.ps1 -deleteKey # Will delete key HKEY_CLASSES_ROOT\ms-msdt
-    Disable-MsdtUrl.ps1 -deleteKey -backup # Will backup keys and delete key HKEY_CLASSES_ROOT\ms-msdt NOT YET TESTED
+    Disable-MsdtUrl.ps1 -deleteKey -backup # Will backup keys and delete key HKEY_CLASSES_ROOT\ms-msdt
 
 #>
 #Requires -RunAsAdministrator
