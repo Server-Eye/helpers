@@ -26,42 +26,42 @@ Param(
 )
 
 if ((Test-Path REGISTRY::HKEY_CLASSES_ROOT\ms-msdt) -eq $true) {
-    Write-Output "Key found!"
+    Write-Host "Key found!"
     if($deleteKey -eq $true){
-        Write-Output "Try to delete key... "
+        Write-Host "Try to delete key... "
         $backupSuccess = $true
         if($backup -eq $true){
             try{
-                Write-Output "Creating Backup... "
+                Write-Host "Creating Backup... "
                 $pathForBackup = $env:ProgramData + "\\ServerEye3"
                 $pathForBackup = Join-Path -Path $pathForBackup -ChildPath "ms-msdt-backup.reg"   
 
                 Invoke-Command {reg export 'HKEY_CLASSES_ROOT\ms-msdt' $pathForBackup}
 
-                Write-Output "Backup created in " $pathForBackup
+                Write-Host "Backup created in " $pathForBackup
 
             }catch{
-                Write-Output "Could not backup Key."
-                Write-Output $_
+                Write-Error "Could not backup Key."
+                Write-Error $_
                 $backupSuccess = $false
             }
         }
         try{
             if($backupSuccess -eq $true){
                 Remove-Item REGISTRY::HKEY_CLASSES_ROOT\ms-msdt -Recurse -Force
-                Write-Output "Key deleted."
+                Write-Host "Key deleted."
             }else{
-                Write-Output "Key not deleted - backup wasn't successful."
+                Write-Error "Key not deleted - backup wasn't successful."
             }
         }catch{
-            Write-Output "Could not delete Key."
-            Write-Output $_
+            Write-Error "Could not delete Key."
+            Write-Error $_
         }
 
         
     }else{
-        Write-Output "Critical ms-msdt-Key found, no action performed"
+        Write-Host "Critical ms-msdt-Key found, no action performed" -ForegroundColor red
     }
 } else {
-    Write-Output "System clean, no ms-msdt keys found"
+    Write-Host "System clean, no ms-msdt keys found" -ForegroundColor green
 }
