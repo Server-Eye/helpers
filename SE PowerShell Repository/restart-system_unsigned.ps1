@@ -81,7 +81,7 @@ Process {
                     [string]$gpoScript = $subGpo.GetValue("Script")
 
                     if($gpoScript.Contains("triggerPatchRun.cmd")){
-						Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO  ServerEye.Task.Logic.PowerShell - Write "force" parameter to gpo registry"
+						Add-Content -Path $SELog -Value "$(Get-Date -Format "yy.MM.dd hh:mm:ss") INFO ServerEye.Task.Logic.PowerShell - Write force parameter to gpo registry"
 						Set-Itemproperty -path $subGpo.PSPath -Name 'Parameters' -value 'force'
                     }
             }
