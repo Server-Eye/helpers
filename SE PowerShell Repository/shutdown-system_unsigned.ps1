@@ -22,7 +22,7 @@
         
     .NOTES
         Author  : Server-Eye
-        Version : 1.3
+        Version : 1.4
  
     .Link
         https://docs.microsoft.com/de-de/windows-server/administration/windows-commands/shutdown
