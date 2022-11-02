@@ -12,7 +12,7 @@
     RootModule             = 'ServerEye.Powershell.Helper.psm1'
     
     # Version number of this module.
-    ModuleVersion          = '2.18.0'
+    ModuleVersion          = '2.19.0'
     
     # Supported PSEditions
     # CompatiblePSEditions = @()
@@ -21,7 +21,7 @@
     GUID                   = 'cb03da1f-dd3e-4fa5-812d-1cc9fa5c1180'
     
     # Author of this module
-    Author                 = 'Andreas Behr (Server-Eye)'
+    Author                 = 'Andreas Behr (Server-Eye), Stefanie Sander (Server-Eye)'
     
     # Company or vendor of this module
     CompanyName            = 'Kraemer IT Solutions GmbH'
