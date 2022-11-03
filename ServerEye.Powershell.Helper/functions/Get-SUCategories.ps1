@@ -8,7 +8,7 @@
     .PARAMETER AuthToken
     Either a session or an API key. If no AuthToken is provided the global Server-Eye session will be used if available.
 #>
-function Get-SESUCategories {
+function Get-SUCategories {
     [CmdletBinding()]
     Param(
         [parameter(Mandatory = $false, ValueFromPipelineByPropertyName)]
@@ -37,4 +37,3 @@ function Get-SESUCategories {
 
     }
 }
-
