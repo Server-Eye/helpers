@@ -1,3 +1,6 @@
+
+# THIS REPO IS DEPRECATED AND ARCHIVED. 
+
 # Server-Eye/helpers
 
 This is the Server-Eye Powershell repository. 
